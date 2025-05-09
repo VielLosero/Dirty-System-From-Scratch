@@ -1,0 +1,35 @@
+--- /pkg/repository/dirty-0.1/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh	2025-03-03 11:22:10.380052018 +0000
++++ /pkg/repository/dirty-0.1/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh.new	2025-03-06 06:02:07.742945019 +0000
+@@ -172,7 +172,7 @@
+ # get start build date epoch 
+ start_build_date=$(date +"%s")
+ # make temp trap dir for all tmp files on build.
+-TMP_BUILD_DIR=$(mktemp -d /tmp/make.buildpkg-tmp-build-XXXXXX)
++TMP_BUILD_DIR=$(mktemp -d $ROOT/tmp/make.buildpkg-tmp-build-XXXXXX)
+ 
+ SKIP_CHECK_COMPILATION_TOOLS=0
+ if [ $SKIP_CHECK_COMPILATION_TOOLS -eq 1 ] ; then echo "Skipping check compilation tools." ; else
+@@ -349,7 +349,7 @@
+   LOGFILE="$LOGDIR/make.buildpkg.log"
+   PKG_DB="$INSTALLDIR/pkg/installed"
+   PKG_DIR="$PKG_DB/$pkg_name" 
+-  TMP_PKG_DIR=$(mktemp -d /tmp/make.buildpkg-tmp-pkg-XXXXXX)
++  TMP_PKG_DIR=$(mktemp -d $ROOT/tmp/make.buildpkg-tmp-pkg-XXXXXX)
+   # pkg installed files
+   PKG_INDEX_FILE="$PKG_DIR/index"
+   # pkg shared libs
+@@ -427,12 +427,12 @@
+     # remove pkg 
+     rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+   fi
+-  trap "rm -rf $TMP_PKG_DIR" EXIT
++  rm -rf $TMP_PKG_DIR"
+   
+   #echo ""
+ EOF_OUTPKG
+ 
+-trap "rm -rf $TMP_BUILD_DIR" EXIT
++rm -rf $TMP_BUILD_DIR
+   
+   echo "Created: $OUTPKG"
+ fi

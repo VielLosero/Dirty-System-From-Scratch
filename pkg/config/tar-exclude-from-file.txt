@@ -1,0 +1,3 @@
+# tar exclude-from file
+#
+# ex: usr/share/locale/pl/LC_MESSAGES/acl.mo

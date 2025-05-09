@@ -1,0 +1,13 @@
+--- /pkg/repository/dirty-0.1/makers/a/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh	2025-02-21 02:12:46.333484534 +0000
++++ /pkg/repository/dirty-0.1/makers/a/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh.new	2025-02-22 22:21:48.892997406 +0000
+@@ -19,6 +19,10 @@
+ #  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ #  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++#
++#  Copyright for portions of this script are held by Gerard Beekmans 1999-2025 
++#  as part of project Linux From Scratch and are provided under the MIT license.
++#
+ # --- END LICENSE ---
+ 
+ #:Maintainer: Viel Losero <viel.losero@gmail.com>

@@ -1,0 +1,34 @@
+#order list for update and build packages.
+# cat ordered.txt | grep -v "#" | while read line ; do ls /pkg/repository/*/*/*/*$line ; done
+# _LFSCHROOT_
+.make_buildpkg_dirty_package_manager-[0-9]*_LFSCHROOT_*
+.filesystem_hierarchy-[0-9]*_LFSCHROOT_*
+.binutils-pass1-[0-9]*_LFSCHROOT_*
+.gcc-pass1-[0-9]*_LFSCHROOT_*
+.linux-headers-[0-9]*_LFSCHROOT_*
+.glibc-[0-9]*_LFSCHROOT_*
+.gcc-libstdc++-[0-9]*_LFSCHROOT_*
+.m4-[0-9]*_LFSCHROOT_*
+.ncurses-[0-9]*_LFSCHROOT_*
+.bash-[0-9]*_LFSCHROOT_*
+.coreutils-[0-9]*_LFSCHROOT_*
+.diffutils-[0-9]*_LFSCHROOT_*
+.file-[0-9]*_LFSCHROOT_*
+.findutils-[0-9]*_LFSCHROOT_*
+.gawk-[0-9]*_LFSCHROOT_*
+.grep-[0-9]*_LFSCHROOT_*
+.gzip-[0-9]*_LFSCHROOT_*
+.make-[0-9]*_LFSCHROOT_*
+.patch-[0-9]*_LFSCHROOT_*
+.sed-[0-9]*_LFSCHROOT_*
+.tar-[0-9]*_LFSCHROOT_*
+.xz-[0-9]*_LFSCHROOT_*
+.binutils-pass2-[0-9]*_LFSCHROOT_*
+.gcc-pass2-[0-9]*_LFSCHROOT_*
+.lfschroot-[0-9]*_LFSCHROOT_*
+.gettext-[0-9]*_LFSCHROOT_*
+.bison-[0-9]*_LFSCHROOT_*
+.perl-[0-9]*_LFSCHROOT_*
+.Python-[0-9]*_LFSCHROOT_*
+.texinfo-[0-9]*_LFSCHROOT_*
+.util-linux-[0-9]*_LFSCHROOT_*

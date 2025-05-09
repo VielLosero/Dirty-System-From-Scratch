@@ -1,0 +1,11 @@
+--- /pkg/repository/dirty-0.1/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh	2025-03-03 09:12:18.256838942 +0000
++++ /pkg/repository/dirty-0.1/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh.new	2025-03-03 09:22:54.911281872 +0000
+@@ -401,7 +401,7 @@
+     echo "$compresed_tar_xz_pkg_b64" 
+   elif [[ $LISTSHARED -eq 1 ]] ; then
+     echo "Listing needed shared libs for this pkg."
+-    echo $shared_libs_b64 | base64 -d 
++    echo "$shared_libs_b64" | base64 -d 
+   elif [[ $REMOVE -eq 1 ]] ; then
+     # All needed files are all installed files + noremove - pkg_installed
+     # to find files that are in other packages and can't remove.

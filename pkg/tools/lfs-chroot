@@ -1,0 +1,69 @@
+#!/bin/bash
+export LFS=${LFS:-/mnt/lfs}
+
+MOUNT=0
+UMOUNT=0
+CHROOT=0
+
+case $1 in
+	mount) MOUNT=1
+		;;
+	umount) UMOUNT=1
+		;;
+	login) LOGIN=1
+		;;
+	*) CHROOT=1
+		;;	
+esac
+if [[ $UMOUNT -eq 1 ]] ; then
+	mountpoint -q $LFS/dev/shm && umount $LFS/dev/shm
+	umount $LFS/dev/pts
+	umount $LFS/{sys,proc,run,dev}
+fi
+if [[ $MOUNT -eq 1 ]] ; then
+	if ! mount  | grep $LFS/dev ; then mount -v --bind /dev $LFS/dev ; fi
+	if ! mount  | grep $LFS/dev/pts ; then mount -vt devpts devpts -o gid=5,mode=0620 $LFS/dev/pts ; fi
+	if ! mount  | grep $LFS/proc ; then mount -vt proc proc $LFS/proc ; fi
+	if ! mount  | grep $LFS/sys ; then mount -vt sysfs sysfs $LFS/sys ; fi
+	if ! mount  | grep $LFS/run ; then mount -vt tmpfs tmpfs $LFS/run ; fi
+	if ! mount  | grep $LFS.*dev/shm ; then
+	  if [ -h $LFS/dev/shm ]; then
+	    install -v -d -m 1777 $LFS$(realpath /dev/shm)
+	  else
+	    mount -vt tmpfs -o nosuid,nodev tmpfs $LFS/dev/shm
+	  fi
+  fi
+fi
+if [[ $LOGIN -eq 1 ]] ; then
+	if ! mount  | grep $LFS/dev ; then echo " Check dev mountpoint." && exit 1 ; fi
+	if ! mount  | grep $LFS/dev/pts ; then echo " Check dev/pts mountpoint." && exit 1 ; fi
+	if ! mount  | grep $LFS/proc ; then echo " Check proc mountpoint." && exit 1 ; fi
+	if ! mount  | grep $LFS/sys ; then echo " Check sys mountpoint." && exit 1 ; fi
+	if ! mount  | grep $LFS/run ; then echo " Check run mountpoint." && exit 1 ; fi
+	if ! mount  | grep $LFS.*dev/shm ; then echo " Check dev/shm mountpoint." && exit 1 ; fi
+	chroot "$LFS" /usr/bin/env -i   \
+	    HOME=/root                  \
+	    TERM="$TERM"                \
+	    PS1='(lfs chroot) \u:\w\$ ' \
+	    PATH=/usr/bin:/usr/sbin     \
+	    MAKEFLAGS="-j$(nproc)"      \
+	    TESTSUITEFLAGS="-j$(nproc)" \
+	    /bin/bash --login
+fi
+if [[ $CHROOT -eq 1 ]] ; then
+	if ! mount  | grep $LFS/dev ; then echo " Check dev mountpoint." && exit 1 ; fi
+	if ! mount  | grep $LFS/dev/pts ; then echo " Check dev/pts mountpoint." && exit 1 ; fi
+	if ! mount  | grep $LFS/proc ; then echo " Check proc mountpoint." && exit 1 ; fi
+	if ! mount  | grep $LFS/sys ; then echo " Check sys mountpoint." && exit 1 ; fi
+	if ! mount  | grep $LFS/run ; then echo " Check run mountpoint." && exit 1 ; fi
+	if ! mount  | grep $LFS.*dev/shm ; then echo " Check dev/shm mountpoint." && exit 1 ; fi
+	echo "LFS CHROOT ++++++++++++++++++++++++++++++++++++++"
+	chroot "$LFS" /usr/bin/env -i   \
+	    HOME=/root                  \
+	    TERM="$TERM"                \
+	    PS1='(lfs chroot) \u:\w\$ ' \
+	    PATH=/usr/bin:/usr/sbin     \
+	    MAKEFLAGS="-j$(nproc)"      \
+	    TESTSUITEFLAGS="-j$(nproc)" \
+	    "$@"
+fi

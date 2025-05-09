@@ -1,0 +1,69 @@
+#!/bin/bash
+
+for file in $(ls -1 /pkg/repository/dirty-0.1/makers/*/*) ; do
+	echo $file
+ 
+	sed -i -e 's%$file1" | $sum -c ; then true ; else%$file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else%g' \
+	-e 's%$file2" | $sum -c ; then true ; else%$file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else%g' \
+	-e 's%$file3" | $sum -c ; then true ; else%$file3" | $sum -c ; then ln -v $SOURCESDIR/$file3 $SOURCESPPDIR/ ; else%g' \
+	-e 's%$file4" | $sum -c ; then true ; else%$file4" | $sum -c ; then ln -v $SOURCESDIR/$file4 $SOURCESPPDIR/ ; else%g' \
+	-e 's%$file5" | $sum -c ; then true ; else%$file5" | $sum -c ; then ln -v $SOURCESDIR/$file5 $SOURCESPPDIR/ ; else%g' \
+	-e 's%$file6" | $sum -c ; then true ; else%$file6" | $sum -c ; then ln -v $SOURCESDIR/$file6 $SOURCESPPDIR/ ; else%g' \
+	-e 's%$file7" | $sum -c ; then true ; else%$file7" | $sum -c ; then ln -v $SOURCESDIR/$file7 $SOURCESPPDIR/ ; else%g'  $file
+	#sed -i 's%$file1" | $sum -c ; then true ; else%$file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else%g'  $file
+
+
+done
+
+
+
+
+
+
+
+
+
+
+##  --- /pkg/repository/dirty-0.1/makers/a/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh	2025-02-24 04:54:32.780349679 +0000
+##  +++ /pkg/repository/dirty-0.1/makers/a/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh.new	2025-02-24 12:34:37.630864033 +0000
+##  @@ -54,7 +54,8 @@
+##   ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
+##   REPODIR=${REPODIR:-/pkg/repository}
+##   DIST=${DIST:-dirty} ; DISTVER=${DISTVER:-0.1}
+##  -SOURCESDIR=${SOURCESDIR:-$TMP/$DIST-$DISTVER/sources/$name-$ver}
+##  +SOURCESDIR=${SOURCESDIR:-$TMP/$DIST-$DISTVER/sources-all}
+##  +SOURCESPPDIR=${SOURCESDIR:-$TMP/$DIST-$DISTVER/sources-per-package/$name-$ver}
+##   BUILDDIR=${BUILDDIR:-$TMP/$DIST-$DISTVER/build/$pkg_name}
+##   PKGDIR=${PKGDIR:-$TMP/$DIST-$DISTVER/pkgfiles/$pkg_name}
+##   OUTBUILD=${OUTBUILD:-$REPODIR/$DIST-$DISTVER/builders/$first_pkg_char/${build_pkg_name}.sh}
+##  @@ -68,6 +69,7 @@
+##   
+##   [ -d $TMP ] || mkdir -p $TMP
+##   [ -d $SOURCESDIR ] || mkdir -p $SOURCESDIR
+##  +[ -d $SOURCESPPDIR ] || mkdir -p $SOURCESPPDIR
+##   [ -d ${OUTBUILD%/*} ] || mkdir -p ${OUTBUILD%/*}
+##   
+##   # Check for new releases.
+##  @@ -96,11 +98,11 @@
+##   file1=$name-$ver.tar.xz
+##   file1_sum=590765dee95907dbc3c856f7255bd669
+##   [ ! -e $file1 ] && wget -c https://download.savannah.nongnu.org/releases/acl/$file1
+##  -[ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then true ; else $sum $file1 ; exit 1 ; fi
+##  +[ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
+##   file2=${file1}.sig
+##   file2_sum=cb1a8da8d801c2d430062add8e5949b7
+##   [ ! -e $file2 ] && wget -c https://download.savannah.nongnu.org/releases/acl/$file2 
+##  -[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then true ; else $sum $file2 ; exit 1 ; fi
+##  +[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
+##   
+##   # Check signaure if needed
+##   gpg --receive-keys B902B5271325F892AC251AD441633B9FE837F581
+##  @@ -108,7 +110,7 @@
+##   
+##   # Prepare sources or patches.
+##   echo "Preparing sources."
+##  -cd $SOURCESDIR || exit 1
+##  +cd $SOURCESPPDIR || exit 1
+##   # Do something if needed.
+##   
+##   # Making Buildpkg.sh $OUTBUILD

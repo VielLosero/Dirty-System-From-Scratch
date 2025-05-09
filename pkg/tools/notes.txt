@@ -1,0 +1,66 @@
+#When starts a new dirty vm.
+
+# at start we need to load the keyboard.
+loadkeys es
+
+# make a new cert for ssh 
+ssh-keygen -A
+
+# remove bad config from etc/sysconfig/ifconfig.eth0
+# done when rebuild the package.
+
+# set LANG on /etc/profile due a bad config on package
+# solved when rebuild the package
+
+# Load the modules by hand, because eudev not udev from systemd, need to see
+the startup scripts. Need the sound to alert when build is finished.
+modprobe pcnet32 --> net
+modprobe virtio -->
+modprobe virtio-snd --> sound
+modprobe virtio-gpu --> video
+modprobe bochs --> video too use lspci -vk and dmesg pci 00:03:0
+modprobe psmouse 
+
+# Generate certificates for https etc.
+make-ca -g
+
+# locales from glibc
+
+# log dmesg
+dmesg --follow > /var/log/dmesg.log
+
+# check lib32 build create missed link
+ ln -s /usr/lib32/ld-linux.so.2 /lib/ld-linux.so.2
+
+
+# recreate The Info documentation system uses a plain text file to hold its list of menu entries. The file is located at /usr/share/info/dir. Unfortunately, due to occasional problems in the Makefiles of various packages, it can sometimes get out of sync with the info pages installed on the system. If the /usr/share/info/dir file ever needs to be recreated, the following optional commands will accomplish the task.
+pushd /usr/share/info
+  rm -v dir
+  for f in *
+    do install-info $f dir 2>/dev/null
+  done
+popd
+
+# make link to udevadm to load udev at start, this will be done on the pkg.
+ln -s /usr/sbin/udevadm /bin/
+
+# start desired services
+chmod +x /etc/rc.d/init.d/network
+chmod +x /etc/rc.d/init.d/sshd
+
+# cp the repository from backup to system.
+
+# cp root/.tmux.cfg an set color 14
+
+# cp root/.vimrc 
+
+# install some fonts
+
+
+# todo:
+Remove LFS License part from packages.
+Add TAGS in a more standard way.
+Revise automake release version if script exist ... lot of scripts ... manually best?
+Add a Changelog.
+Redo updates
+--> done v1 on installpkg Check needed libs --> external libs and pkg libs

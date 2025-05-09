@@ -1,0 +1,133 @@
+# rsync
+rsync -avn -e ssh pkg root@10.10.10.21:/
+#rsync -avn --delete -e ssh  root@10.10.10.18:/pkg/repository pkg/
+rsync -av --delete --exclude installed --exclude blacklist -e ssh  root@10.10.10.21:/pkg .
+
+
+# Use of package echo to list package files
+bash /pkg/repository/dirty-0.1/packages/r/rsync-3.4.1-x86_64-1_BLFS_r12.2_multilib.sh echo | tail -n +5 | base64 -d | tar -Jtf -
+# Use of package echo to list only a file
+bash /pkg/repository/dirty-0.1/packages/r/rsync-3.4.1-x86_64-1_BLFS_r12.2_multilib.sh echo | tail -n +5 | base64 -d | tar -Jtf - usr/bin/rsync
+# Use of package echo to extract a file to md5sum or hexdump
+bash /pkg/repository/dirty-0.1/packages/r/rsync-3.4.1-x86_64-1_BLFS_r12.2_multilib.sh echo | tail -n +5 | base64 -d | tar -Jxf - usr/bin/rsync -O | md5sum
+bash /pkg/repository/dirty-0.1/packages/r/rsync-3.4.1-x86_64-1_BLFS_r12.2_multilib.sh echo | tail -n +5 | base64 -d | tar -Jxf - usr/bin/rsync -O | hexdump -C
+
+
+
+
+# get all needed libs for a pkg 
+cat /pkg/gcc-14.2.0-x86_64-1_LFS_r12.2_880_multilib/needed-libs | cut -d':' -f2 | tr ',' '\n' | sort -u
+(lfs chroot) root:/# cat /pkg/*/needed-libs | cut -d':' -f2 | sed 's/,/\n/g' | sort -u
+
+# get all needed external libs, not in pkg
+bash-5.2# cat /pkg/installed/acl-2.3.2-x86_64-1_LFS_r12.2_multilib/needed-libs | cut -d':' -f2 | tr ',' '\n' | sort -u | while read line ; do if grep "$line$" /pkg/installed/acl-2.3.2-x86_64-1_LFS_r12.2_multilib/index >/dev/null ; then true ; else echo $line ; fi   ; done
+
+# find pkgs dep of ... libpam
+(lfs chroot) root:/# grep "ld-linux-x86-64.so.2" /pkg/installed/*/needed-libs | cut -d':' -f1 | sort -u
+bash-5.2# grep "libpam" /pkg/installed/*/needed-libs | cut -d':' -f1 | sort -u
+
+
+
+#find packages not dep of libc
+find /pkg/installed/ -name "needed-libs" -exec grep -L "libc.so" {} \; | cut -d'/' -f4
+
+
+ls -1 */make.buildpkg.linux-[0-9].[0-9]*.sh
+
+# check package md5sum
+cat /pkg/installed/zstd-1.5.7-x86_64-1_LFS_r12.2_multilib/md5sum | tail -n +6 | md5sum -c --quiet
+
+# check all files that have md5sum
+find /pkg/installed/ -name md5sum -exec sh -c 'echo {} ; cat {} | tail -n +6 | md5sum -c --quiet'  \;
+# https://bbs.archlinux.org/viewtopic.php?id=55268
+# /usr/share/info will change with each package.
+
+
+
+# compare the make order list with the packages in repo a=0 ... a=a a=b a=c a=d .... a=z 
+a=a ; cat /pkg/repository/dirty-0.1/tools/make-order.txt | grep -v "#" | while read line ; do ls /pkg/repository/dirty-0.1/makers/$a/*$line 2>/dev/null ; done | sort ;echo ----------- ; ls -1 /pkg/repository/dirty-0.1/makers/$a/*
+
+
+#patch
+find /pkg/repository/dirty-0.1/makers/ -type f -exec patch --dry-run {} -i /pkg/repository/dirty-0.1/tools/patches/patch_license  \;
+find /pkg/repository/dirty-0.1/makers/ -type f -exec patch --fuzz=20 --dry-run {} -i patch1  \;
+
+# see sha256sum and files inside buildpkg files
+grep sha256sum /pkg/repository/dirty-0.1/builders/s/sed/buildpkg.sed-4.9-x86_64-1_LFS_r12.2_multilib.sh
+# all
+ls -1 /pkg/repository/dirty-0.1/builders/*/*/* | while read line ; do echo $line ; grep "sha256sum -c" $line ; done
+
+# use local repo to make qemu disk
+REPODIR=/home/data/git-repos/vielLosero/make.buildpkg/pkg/repository bash  /home/data/git-repos/vielLosero/make.buildpkg/pkg/repository/dirty-0.1/tools/scripts/make_dirty_0.0.1.raw.disk.for.qemu.sh
+
+# find orphan builders that not have packages because they are old.
+ls -1 /pkg/repository/dirty-0.1/builders/*/*/* | while read line ; do file=$(echo $line | sed 's/builders/packages/' | sed 's/buildpkg.//' ) ; ls $file  ; done
+
+# list pkg files in repo 
+bash /pkg/repository/dirty-0.1/tools/scripts/list.pkg.sh | while read line ; do echo $line ; find /pkg/repository/dirty-0.1/ -name "*.${line}-[0-9]*" -o -name "$line-[0-9]*" ; echo ----------------- ; done
+
+# new repo wit package name after leter
+bash-5.2# find /pkg/repository/dirty-0.1/packages/*/* -maxdepth 0 -type d | sort -u 
+bash-5.2# find /pkg/repository/dirty-0.1/builders/*/* -maxdepth 0 -type d | sort -u 
+bash-5.2# find /pkg/repository/dirty-0.1/makers/*/* -maxdepth 0 -type d | sort -u | wc -l
+117
+
+# list package files
+ls -1 /pkg/repository/dirty-0.1/*/*/acl/*
+# list all packages files on a dir
+ls -1 /pkg/repository/dirty-0.1/*/a/*/*
+# list packages ...
+ls -1 /pkg/repository/dirty-0.1/packages/a/*/*
+
+
+
+# find if a package have all M B P make build package then todo:  I S installed and skipped
+ls -1 /pkg/repository/dirty-0.1/*/l/linux-mainline/*linux-mainline-6.14_rc4-x86_64-1_LFS_r12.2_multilib.sh
+
+# run as user lfs an script that have/need source ~/.bashrc 
+su -c "ROOT=/mnt/lfs REPODIR=/mnt/lfs/pkg/repository bash /pkg/repository/dirty-0.1/builders/g/glibc/buildpkg.glibc-2.41-x86_64-1_LFSCHROOT_r12.2_multilib_m32.sh " lfs
+
+# make checksum 
+find . -type f -exec md5sum {} + > CHECKSUMS.md5
+
+# remove between
+sed -n '/NEEDED_LIBS:/,/FILE LIST:/{//!p;}
+
+
+# builder links to update
+for file in  $(bash /pkg/tools/scripts/repo-status.sh | grep " M B         V - " | grep -v LFSCHROOT | sed 's/ M B         V - //' ) ; do ln -s /pkg/repository/dirty-0.1/builders/*/*/buildpkg.${file}.sh /tmp/updates/builders ; done
+
+
+# Decode sources we have when changed maker name 
+for list in $(cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#" ) ; do bash /pkg/tools/scripts/repo-status.sh $list | grep " V " | grep " M   " | cut -c 18- | sed 's/-x86_64.*//' | while read line ; do SKIP=1 DECODE=0 bash /pkg/repository/dirty-0.1/builders/*/*/buildpkg.$line* ; done ; done
+
+# make linsk to rebuild 
+cat /pkg/tools/lists_of_packages/dirty-0.1_core_list.txt | grep -v "^#" | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh $pkg | grep " V " | grep " M B " | cut -c 18-  ; done | while read line ; do ln -s /pkg/repository/dirty-0.1/builders/*/*/buildpkg.$line.sh /tmp/remake/ && ls /tmp/remake/buildpkg.$line.sh ; done
+
+# remake from links below
+for file in $( cat /pkg/tools/lists_of_packages/dirty-0.1_core_list.txt | grep -v "^#"  | while read pkg ; do ls -1 /tmp/remake/*$pkg 2>/dev/null ; done) ; do  if [ -h $file ] ; then bash $file ; if [ $? -eq 0 ] ; then i=${file##*/} ; bash /pkg/repository/dirty-0.1/packages/*/*/${i/buildpkg.} install || break ; bash /pkg/tools/tone &&  rm $file ; else break ; fi ; fi  ; done && bash /pkg/tools/alarm-continous
+
+# check rest of links
+bash-5.2# for file in $(cat /pkg/tools/lists_of_packages/dirty-0.1_core_list.txt | grep -v "^#" | while read line ; do ls -1 /tmp/remake/*$line 2>/dev/null ; done ) ; do echo $file ; done | less
+
+# sort packages like buildtime
+grep -rwn /pkg/metadata/ -e "Sources build time:"  | sort --debug -t: -k 4n
+grep -rwn /pkg/metadata/ -e "Sources build time:"  | sort -t: -k 4nr | less
+
+# sort packages files 
+find /pkg/installed/ -name index -exec sh -c ' num=$(cat {} | wc -l) ; echo "$num {} " ' \; | sort -hr
+
+# dry run uninstall old pkg.
+bash /pkg/tools/scripts/repo-status.sh | grep " I " | grep "_LFS_" | cut -c 18- | while read line ; do DRY_RUN=0 bash /pkg/tools/scripts/removepkg.sh $line   ; done
+
+
+# find all system files
+cat /pkg/installed/*/index | sort -u | sed 's%^%/%' > /tmp/1
+find $(cat /pkg/installed/*/index | grep "/$" | sort -u | sed 's%^%/%' ) -type f | sort -u > /tmp/2
+comm -13 /tmp/1 /tmp/2
+bash-5.2# comm -13 /tmp/1 /tmp/2 | grep -v linux | grep -v modules | grep -v "mnt/lfs" | grep -v "/tmp" | grep -v "/sys" | grep -v "/proc/"
+# dont work found linked files in other dirs ... 
+
+
+
+

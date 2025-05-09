@@ -1,0 +1,11 @@
+--- /pkg/repository/dirty-0.1/makers/a/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh	2025-02-27 18:54:13.330406954 +0000
++++ /pkg/repository/dirty-0.1/makers/a/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh.new	2025-02-27 19:01:05.024632027 +0000
+@@ -244,7 +244,7 @@
+   
+   # extract /pkg shared-libs dir to temp file, to cat in base64 when contruct the pkg script.
+   echo "Find ELF files and extract needed shared libs"
+-  TMP_PKG_SHAREDLIBS_FILE=$(mktemp /tmp/make.buildpkg-sharedlibs-file-XXXXXX || exit 1)
++  TMP_PKG_SHAREDLIBS_FILE=$TMP_BUILD_DIR/tmp.sharedlibs.$pkg_name
+   trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
+   cd $PKGDIR
+   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; |\

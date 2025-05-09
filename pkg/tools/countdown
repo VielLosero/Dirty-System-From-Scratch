@@ -1,0 +1,8 @@
+#!/bin/bash
+read -p "Enter time in seconds: " seconds
+while [ $seconds -gt 0 ]; do
+    echo "$seconds"
+    sleep 1
+    seconds=$((seconds - 1))
+done
+echo "Time's up!"

@@ -1,0 +1,17 @@
+Decoding sources time: 3
+Checks time: 0
+Extract time: 1
+Patch time: 0
+Sources config time: 30
+Sources build time: 331
+Sources install time: 16
+Post compilation tasks time: 0
+Sources config32 time: 0
+Sources build32 time: 0
+Sources install32 time: 0
+Post compilation 32bits tasks time: 0
+Sources strip time: 7
+Find shared time: 1
+Checksum pkg files time: 13
+Package time: 42
+Builder time: 444

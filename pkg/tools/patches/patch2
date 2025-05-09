@@ -1,0 +1,10 @@
+--- /pkg/repository/dirty-0.1/makers/s/make.buildpkg.sysvinit-3.14-x86_64-1_LFS_r12.2_multilib.sh	2025-02-27 06:59:17.014289240 +0000
++++ /pkg/repository/dirty-0.1/makers/s/make.buildpkg.sysvinit-3.14-x86_64-1_LFS_r12.2_multilib.sh.new	2025-02-27 16:58:45.488416626 +0000
+@@ -303,7 +303,6 @@
+ # get end build date epoch
+ end_build_date=$(date +"%s")
+ echo "START:$start_build_date END:$end_build_date"
+-#build_time=$(echo "($end_build_date - $start_build_date)/60" | bc -l)
+ build_time=$(($end_build_date - $start_build_date))
+ echo "Sources build time: $build_time seconds" 
+ # build time in seconds

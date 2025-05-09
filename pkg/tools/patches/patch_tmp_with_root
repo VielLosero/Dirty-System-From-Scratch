@@ -1,0 +1,22 @@
+#!/bin/bash
+
+for file in $(ls -1 /pkg/repository/dirty-0.1/makers/*/*) ; do
+	echo $file
+ 
+	#sed -i  's%TMP=/tmp%ROOT=${ROOT:-} ; TMP="$ROOT/tmp"%g'  $file
+
+	#sed -i 's%# prevent empty var.*%# prevent empty var%g' $file
+
+	#sed -i 's%# remove working dirs or comment it as needed.%%g' $file
+	#sed -i 's%#if [ -d ${SOURCESDIR} ] ; then rm -rf.*%%g' $file
+	#sed -i 's%#if [ -d ${BUILDDIR} ] ; then rm -rf.*%%g' $file
+	#sed -i 's%#if [ -d ${PKGDIR} ] ; then rm -rf.*%%g' $file
+
+	# remove working dirs or comment it as needed.
+	#if [ -d ${SOURCESDIR} ] ; then rm -rf ${SOURCESDIR}/* && rmdir ${SOURCESDIR} ; fi
+	#if [ -d ${BUILDDIR} ] ; then rm -rf ${BUILDDIR}/* && rmdir ${BUILDDIR} ; fi
+	#if [ -d ${PKGDIR} ] ; then rm -rf ${PKGDIR}/* && rmdir ${PKGDIR} ; fi
+	
+
+
+done

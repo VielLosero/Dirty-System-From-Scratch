@@ -1,0 +1,13 @@
+--- /pkg/repository/dirty-0.1/makers/a/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh	2025-02-28 01:54:32.550051975 +0000
++++ /pkg/repository/dirty-0.1/makers/a/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh.new	2025-02-28 02:13:22.261416107 +0000
+@@ -58,8 +58,8 @@
+ SOURCESPPDIR=${SOURCESPPDIR:-$TMP/$DIST-$DISTVER/sources-per-package/$name-$ver}
+ BUILDDIR=${BUILDDIR:-$TMP/$DIST-$DISTVER/build/$pkg_name}
+ PKGDIR=${PKGDIR:-$TMP/$DIST-$DISTVER/pkgfiles/$pkg_name}
+-OUTBUILD=${OUTBUILD:-$REPODIR/$DIST-$DISTVER/builders/$first_pkg_char/${build_pkg_name}.sh}
+-OUTPKG=${OUTPKG:-$REPODIR/$DIST-$DISTVER/packages/$first_pkg_char/${pkg_name}.sh}
++OUTBUILD=${OUTBUILD:-$REPODIR/$DIST-$DISTVER/builders/$first_pkg_char/${name}/${build_pkg_name}.sh}
++OUTPKG=${OUTPKG:-$REPODIR/$DIST-$DISTVER/packages/$first_pkg_char/${name}/${pkg_name}.sh}
+ 
+ # Other need vars for example to change the default INSTALLDIR=$LFS.
+ LFS=/mnt/lfs

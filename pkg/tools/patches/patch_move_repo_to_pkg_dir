@@ -1,0 +1,46 @@
+#!/bin/bash
+
+
+find /pkg/repository/dirty-0.1/makers/ -type f | while read line ;do 
+
+unset ROOT
+unset REPODIR
+unset DIST
+unset OUTMAKE
+unset OUTBUILD
+unset OUTPKG
+
+#echo $line
+full_file_name="$line" ; file_name_no_path=${line##*/} 
+make_pkg_name="${file_name_no_path%.*}" ; build_pkg_name="${make_pkg_name/make./}" 
+pkg_name=${build_pkg_name/buildpkg./} ; name="${pkg_name%-*-*-*}" 
+pkg_ver="${pkg_name%-*-*}" ; ver="${pkg_ver/$name-/}"
+pkg_arch="${pkg_name%-*}" ; arch=${pkg_arch/$name-$ver-/}
+rel=${pkg_name/$name-$ver-$arch-/}
+first_pkg_char=$(printf %.1s ${name,})
+echo "  Package name: $name"
+echo "  Version: $ver"
+echo "  Arch: $arch"
+echo "  Release: $rel"
+
+ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
+REPODIR=${REPODIR:-/pkg/repository}
+DIST=${DIST:-dirty} ; DISTVER=${DISTVER:-0.1}
+OUTMAKE=${OUTMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/${make_pkg_name}.sh}
+OUTBUILD=${OUTBUILD:-$REPODIR/$DIST-$DISTVER/builders/$first_pkg_char/${name}/${build_pkg_name}.sh}
+OUTPKG=${OUTPKG:-$REPODIR/$DIST-$DISTVER/packages/$first_pkg_char/${name}/${pkg_name}.sh}
+#echo $OUTMAKE
+#echo $OUTBUILD
+#echo $OUTPKG
+
+mkdir -vp ${OUTMAKE%/*}
+mkdir -vp ${OUTBUILD%/*}
+mkdir -vp ${OUTPKG%/*}
+
+mv -v $line $OUTMAKE
+mv -v $REPODIR/$DIST-$DISTVER/builders/$first_pkg_char/${build_pkg_name}.sh $OUTBUILD
+mv -v $REPODIR/$DIST-$DISTVER/packages/$first_pkg_char/${pkg_name}.sh $OUTPKG
+
+done
+
+

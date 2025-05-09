@@ -1,0 +1,65 @@
+#!/bin/bash
+
+LFS=/mnt/lfs
+
+if cat /etc/group | grep lfs ; then true ; else groupadd lfs ; fi
+if cat /etc/passwd | grep lfs ; then true ; else
+useradd -s /bin/bash -g lfs -m -k /dev/null lfs
+#passwd lfs
+#passwd -d lfs # delete pass
+#echo "RandoM-pass.2871" | passwd -s lfs
+fi
+if ls -la /mnt/lfs | grep "lfs  root" >/dev/null ; then true ; else
+chown -v lfs $LFS/{usr{,/*},var,etc,tools,pkg,tmp}
+case $(uname -m) in
+  x86_64) chown -v lfs $LFS/lib64 ;;
+esac
+
+chown -v lfs $LFS/lib32
+fi
+
+if [ -e /home/lfs/.bash_profile ] ; then true ; else
+cat > /home/lfs/.bash_profile << "EOF"
+exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' /bin/bash
+EOF
+fi
+
+if [ -e /home/lfs/.bashrc ] ; then true ; else
+cat > /home/lfs/.bashrc << "EOF"
+set +h
+umask 022
+LFS=/mnt/lfs
+LC_ALL=POSIX
+LFS_TGT=x86_64-lfs-linux-gnu
+LFS_TGT32=i686-lfs-linux-gnu
+LFS_TGTX32=x86_64-lfs-linux-gnux32
+PATH=/usr/bin
+if [ ! -L /bin ]; then PATH=/bin:$PATH; fi
+PATH=$LFS/tools/bin:$PATH
+CONFIG_SITE=$LFS/usr/share/config.site
+export LFS LC_ALL LFS_TGT LFS_TGT32 LFS_TGTX32 PATH
+export MAKEFLAGS=-j$(nproc)
+EOF
+fi
+
+su -c "if [ ! -d /mnt/lfs/pkg/repository ] ; then mkdir /mnt/lfs/pkg/repository ; fi ;" lfs
+su -c "ROOT=/mnt/lfs REPODIR=/mnt/lfs/pkg/repository bash $1" lfs
+#mv /mnt/lfs/tmp/dirty-0.1/builder/
+#mv /mnt/lfs/tmp/dirty-0.1/package/
+
+
+#su -c ". /home/lfs/.bashrc ;
+#	cd /mnt/lfs/ ;
+#	if [ ! -d /mnt/lfs/tmp ] ; then mkdir /mnt/lfs/tmp ; fi ;
+#	ls /mnt/lfs/tmp ;
+#	cp $1 /mnt/lfs/tmp ;
+#	if [ ! -d /mnt/lfs/pkg/repository ] ; then mkdir /mnt/lfs/pkg/repository ; fi ;
+#	ROOT=/mnt/lfs REPODIR=/mnt/lfs/pkg/repository bash $1
+#	" lfs
+#su -c ". /home/lfs/.bashrc ; id ; printenv ; $@" lfs
+#for run in "$@" ; do 
+#su -c ". /home/lfs/.bashrc ; bash -c '$run' " lfs
+#done
+
+
+

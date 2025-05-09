@@ -1,0 +1,12 @@
+#order list for update and build packages.
+# cat ordered.txt | grep -v "#" | while read line ; do ls /pkg/repository/*/*/*/*$line ; done
+# _MLFSCHROOT_
+#
+# 7. Entering Chroot and Building Additional Temporary Tools
+.lfschroot-[0-9]*_LFSCHROOT_*
+.gettext-[0-9]*_LFSCHROOT_*
+.bison-[0-9]*_LFSCHROOT_*
+.perl-[0-9]*_LFSCHROOT_*
+.Python-[0-9]*_LFSCHROOT_*
+.texinfo-[0-9]*_LFSCHROOT_*
+.util-linux-[0-9]*_LFSCHROOT_*

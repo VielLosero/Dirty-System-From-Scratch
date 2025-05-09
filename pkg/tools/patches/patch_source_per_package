@@ -1,0 +1,29 @@
+--- /pkg/repository/dirty-0.1/makers/a/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh	2025-02-24 04:54:32.780349679 +0000
++++ /pkg/repository/dirty-0.1/makers/a/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh.new	2025-02-24 12:34:37.630864033 +0000
+@@ -54,7 +54,8 @@
+ ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
+ REPODIR=${REPODIR:-/pkg/repository}
+ DIST=${DIST:-dirty} ; DISTVER=${DISTVER:-0.1}
+-SOURCESDIR=${SOURCESDIR:-$TMP/$DIST-$DISTVER/sources/$name-$ver}
++SOURCESDIR=${SOURCESDIR:-$TMP/$DIST-$DISTVER/sources-all}
++SOURCESPPDIR=${SOURCESPPDIR:-$TMP/$DIST-$DISTVER/sources-per-package/$name-$ver}
+ BUILDDIR=${BUILDDIR:-$TMP/$DIST-$DISTVER/build/$pkg_name}
+ PKGDIR=${PKGDIR:-$TMP/$DIST-$DISTVER/pkgfiles/$pkg_name}
+ OUTBUILD=${OUTBUILD:-$REPODIR/$DIST-$DISTVER/builders/$first_pkg_char/${build_pkg_name}.sh}
+@@ -68,6 +69,7 @@
+ 
+ [ -d $TMP ] || mkdir -p $TMP
+ [ -d $SOURCESDIR ] || mkdir -p $SOURCESDIR
++[ -d $SOURCESPPDIR ] || mkdir -p $SOURCESPPDIR
+ [ -d ${OUTBUILD%/*} ] || mkdir -p ${OUTBUILD%/*}
+ 
+ # Check for new releases.
+@@ -108,7 +110,7 @@
+ 
+ # Prepare sources or patches.
+ echo "Preparing sources."
+-cd $SOURCESDIR || exit 1
++cd $SOURCESPPDIR || exit 1
+ # Do something if needed.
+ 
+ # Making Buildpkg.sh $OUTBUILD

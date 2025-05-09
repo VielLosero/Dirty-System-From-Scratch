@@ -1,0 +1,7 @@
+#!/bin/bash
+
+for pkg in $(ls -1 ./*.sh) ; do 
+  echo $pkg
+  #gpg2 --default-key 7235B67C --armor --sign --detach-sig --yes
+done
+

@@ -1,0 +1,18 @@
+--- /pkg/repository/dirty-0.1/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh	2025-03-06 06:04:57.866382055 +0000
++++ /pkg/repository/dirty-0.1/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh.new	2025-03-06 06:10:25.749860079 +0000
+@@ -173,6 +173,7 @@
+ start_build_date=$(date +"%s")
+ # make temp trap dir for all tmp files on build.
+ TMP_BUILD_DIR=$(mktemp -d $ROOT/tmp/make.buildpkg-tmp-build-XXXXXX)
++trap "rm -rf $TMP_BUILD_DIR" EXIT
+ 
+ SKIP_CHECK_COMPILATION_TOOLS=0
+ if [ $SKIP_CHECK_COMPILATION_TOOLS -eq 1 ] ; then echo "Skipping check compilation tools." ; else
+@@ -350,6 +351,7 @@
+   PKG_DB="$INSTALLDIR/pkg/installed"
+   PKG_DIR="$PKG_DB/$pkg_name" 
+   TMP_PKG_DIR=$(mktemp -d $ROOT/tmp/make.buildpkg-tmp-pkg-XXXXXX)
++  trap "rm -rf $TMP_PKG_DIR" EXIT
+   # pkg installed files
+   PKG_INDEX_FILE="$PKG_DIR/index"
+   # pkg shared libs

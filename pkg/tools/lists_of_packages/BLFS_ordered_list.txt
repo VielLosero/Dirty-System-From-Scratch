@@ -1,0 +1,40 @@
+#order list for update and build packages.
+# cat ordered.txt | grep -v "#" | while read line ; do ls /pkg/repository/*/*/*/*$line ; done
+# BLFS
+.blfs-bootscripts-[0-9]*_BLFS_*
+.linux-pam-[0-9]*_BLFS_*
+.shadow-[0-9]*_BLFS_*
+.popt-[0-9]*_BLFS_*
+.efivar-[0-9]*_BLFS_*
+.efibootmgr-[0-9]*_BLFS_*
+.grub-efi-[0-9]*_BLFS_*
+.dhcpcd-[0-9]*_BLFS_*
+.libtasn1-[0-9]*_BLFS_*
+.p11-kit-[0-9]*_BLFS_*
+.make-ca-[0-9]*_BLFS_*
+.wget-[0-9]*_BLFS_*
+.npth-[0-9]*_BLFS_*
+.libgpg-error-[0-9]*_BLFS_*
+.libksba-[0-9]*_BLFS_*
+.libgcrypt-[0-9]*_BLFS_*
+.libassuan-[0-9]*_BLFS_*
+.gnupg-[0-9]*_BLFS_*
+.nettle-[0-9]*_BLFS_*
+.libunistring-[0-9]*_BLFS_*
+.gnutls-[0-9]*_BLFS_*
+.openssh-[0-9]*_BLFS_*
+.curl-[0-9]*_BLFS_*
+.rsync-[0-9]*_BLFS_*
+#.llvm-[0-9]*_BLFS_* # new linker faster
+.net-tools-[0-9]*_BLFS_*
+.libpcap-[0-9]*_BLFS_*
+.tcpdump-[0-9]*_BLFS_*
+.iptables-[0-9]*_BLFS_*
+.libevent-[0-9]*_BLFS_*
+.tmux-[0-9]*_BLFS_*
+.lynx-[0-9]*_BLFS_*
+.alsa-libs-[0-9]*_BLFS_*
+.alsa-utils-[0-9]*_BLFS_*
+.libxml2-[0-9]*_BLFS_*
+.wayland-[0-9]*_BLFS_*
+.wayland-protocols-[0-9]*_BLFS_*

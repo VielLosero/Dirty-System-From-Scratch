@@ -1,0 +1,15 @@
+--- /pkg/repository/dirty-0.1/makers/a/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh	2025-02-27 06:59:16.565709341 +0000
++++ /pkg/repository/dirty-0.1/makers/a/make.buildpkg.acl-2.3.2-x86_64-1_LFS_r12.2_multilib.sh.new	2025-02-27 16:36:51.361465253 +0000
+@@ -271,9 +271,9 @@
+ # get end build date epoch
+ end_build_date=$(date +"%s")
+ echo "START:$start_build_date END:$end_build_date"
+-build_time=$(echo "($end_build_date - $start_build_date)/60" | bc -l)
+-echo "Sources build time: $build_time minutes" 
+-# build time in minutes
++build_time=$(($end_build_date - $start_build_date))
++echo "Sources build time: $build_time seconds" 
++# build time in seconds
+ TMP_PKG_BUILDTIME_FILE=$(mktemp /tmp/make.buildpkg-buildtime-file-XXXXXX || exit 1)
+ trap "rm -f $TMP_PKG_BUILDTIME_FILE" EXIT
+ echo "Sources build time: $build_time" > $TMP_PKG_BUILDTIME_FILE

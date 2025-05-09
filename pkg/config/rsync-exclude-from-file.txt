@@ -1,0 +1,6 @@
+# rsync exclude-from file to avoid synchronizing files.
+# example excluding one file.
+# make.buildpkg.acl-2.3.2-x86_64-1_MLFS_current_Viel.0.0.3.sh
+# example excluding maker, buidler and package from their dir.
+# acl/*
+# 

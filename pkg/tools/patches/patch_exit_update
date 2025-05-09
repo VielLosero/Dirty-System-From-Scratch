@@ -1,0 +1,15 @@
+#!/bin/bash
+
+for file in $(ls -1 /pkg/repository/dirty-0.1/makers/*/*) ; do
+	echo $file
+ 
+	sed -i -e 's/exit 0/exit 1/' \
+	-e 's/echo "Version check: Failed."/echo "Version check: Failed." ; exit 1/' \
+	-e 's/echo "Version check: No new versions found."/echo "Version check: No new versions found." ; exit 0/' \
+	-e 's/echo "Version check: $version_url"/echo "Version check: $version_url" ; exit 2/' $file
+
+#sed  '/echo "Version check: Failed."/a \    \exit 2' $file
+#sed  '/echo "Version check: No new versions found."/a \    \exit 0' $file
+#sed  '/echo "Version check: $version_url"/a \    \exit 1' $file
+
+done
