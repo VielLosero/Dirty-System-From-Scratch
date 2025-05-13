@@ -1,32 +1,38 @@
 #order list for update and build packages.
 # cat ordered.txt | grep -v "#" | while read line ; do ls /pkg/repository/*/*/*/*$line ; done
-# _LFSCHROOT_
+# _MLFSCHROOT_
 #
 # 5. Compiling a Cross-Toolchain 
-#.make_buildpkg_dirty_package_manager-[0-9]*_LFSCHROOT_*
-#.filesystem_hierarchy-[0-9]*_LFSCHROOT_*
-lfschroot-[0-9]*_LFSCHROOT_*
-.binutils-pass1-[0-9]*_LFSCHROOT_*
-.gcc-pass1-[0-9]*_LFSCHROOT_*
-.linux-headers-[0-9]*_LFSCHROOT_*
-.glibc-[0-9]*_LFSCHROOT_*
-.gcc-libstdc++-[0-9]*_LFSCHROOT_*
+#.make_buildpkg_dirty_package_manager-[0-9]*_MLFSCHROOT_*
+#.filesystem_hierarchy-[0-9]*_MLFSCHROOT_*
+#.lfschroot-[0-9]*_MLFSCHROOT_*
+.binutils-pass1-[0-9]*_MLFSCHROOT_*
+.gcc-pass1-[0-9]*_MLFSCHROOT_*
+.linux-headers-[0-9]*_MLFSCHROOT_*
+.glibc-[0-9]*_MLFSCHROOT_*
+.gcc-libstdc++-[0-9]*_MLFSCHROOT_*
 #
 # 6. Cross Compiling Temporary Tools
-.m4-[0-9]*_LFSCHROOT_*
-.ncurses-[0-9]*_LFSCHROOT_*
-.bash-[0-9]*_LFSCHROOT_*
-.coreutils-[0-9]*_LFSCHROOT_*
-.diffutils-[0-9]*_LFSCHROOT_*
-.file-[0-9]*_LFSCHROOT_*
-.findutils-[0-9]*_LFSCHROOT_*
-.gawk-[0-9]*_LFSCHROOT_*
-.grep-[0-9]*_LFSCHROOT_*
-.gzip-[0-9]*_LFSCHROOT_*
-.make-[0-9]*_LFSCHROOT_*
-.patch-[0-9]*_LFSCHROOT_*
-.sed-[0-9]*_LFSCHROOT_*
-.tar-[0-9]*_LFSCHROOT_*
-.xz-[0-9]*_LFSCHROOT_*
-.binutils-pass2-[0-9]*_LFSCHROOT_*
-.gcc-pass2-[0-9]*_LFSCHROOT_*
+.m4-[0-9]*_MLFSCHROOT_*
+.ncurses-[0-9]*_MLFSCHROOT_*
+.bash-[0-9]*_MLFSCHROOT_*
+.coreutils-[0-9]*_MLFSCHROOT_*
+.diffutils-[0-9]*_MLFSCHROOT_*
+.file-[0-9]*_MLFSCHROOT_*
+.findutils-[0-9]*_MLFSCHROOT_*
+.gawk-[0-9]*_MLFSCHROOT_*
+.grep-[0-9]*_MLFSCHROOT_*
+.gzip-[0-9]*_MLFSCHROOT_*
+.make-[0-9]*_MLFSCHROOT_*
+.patch-[0-9]*_MLFSCHROOT_*
+.sed-[0-9]*_MLFSCHROOT_*
+.tar-[0-9]*_MLFSCHROOT_*
+.xz-[0-9]*_MLFSCHROOT_*
+# Need zlib because binutils-pass2 seems don't ship internal and get
+# libz.so.1: cannot open shared object file: No such file or directory on dummy.log when test glib
+# echo 'int main(){}' | gcc -x c - -v -Wl,--verbose &> dummy.log
+# readelf -l a.out | grep ': /lib'
+# after instaling binutils-pass2 and gcc-pass2
+.zlib-[0-9]*_MLFSCHROOT_*
+.binutils-pass2-[0-9]*_MLFSCHROOT_*
+.gcc-pass2-[0-9]*_MLFSCHROOT_*

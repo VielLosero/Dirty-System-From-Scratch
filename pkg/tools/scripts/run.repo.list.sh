@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# make a ordered list with repo-staus like:
+# make a ordered list with repo-status.sh like:
 # cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  ; done | grep " V " > /tmp/run.repo.list
 # sh-5.2# cat /tmp/run.repo.list | head -10
 #  M B P I     V L make_buildpkg_dirty_package_manager-0.0.1-all-1_DIRTY_current_Viel.0.0.3
@@ -26,7 +26,8 @@
 
 RUN_REPO_LIST=/tmp/run.repo.list
 ROOT=${ROOT:-/pkg}
-REPODIR=$ROOT/repository/dirty-0.0
+REPO=dirty-0.0
+REPODIR=$ROOT/pkg/repository/dirty-0.0
 INSTALLED_DIR="$ROOT/installed"
 BLACKLISTED_DIR="$ROOT/blacklisted"
 

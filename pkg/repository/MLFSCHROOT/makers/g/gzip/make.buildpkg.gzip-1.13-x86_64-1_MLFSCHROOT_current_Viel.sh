@@ -21,14 +21,15 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #  Copyright for portions of this script are held by Gerard Beekmans 1999-2025 
-#  as part of project Linux From Scratch and are provided under the MIT license.
+#  and The GLFS Development Team 2024-2025 as part of project Linux From Scratch
+#  and derivates like MLFS and are provided under the MIT license.
 #
 # --- END LICENSE ---
 
 #:Maintainer: Viel Losero <viel.losero@gmail.com>
 #:Contributor: -
 
-#:Version:0.0.3
+#:Version:0.0.5
 
 # Get Application init data from filename.
 cd $(dirname $0) ; SWD=$(pwd) # script work directory
@@ -39,6 +40,10 @@ pkg_ver="${pkg_name%-*-*}" ; ver="${pkg_ver/$name-/}"
 pkg_arch="${pkg_name%-*}" ; arch=${pkg_arch/$name-$ver-/}
 rel=${pkg_name/$name-$ver-$arch-/}
 first_pkg_char=$(printf %.1s ${name,})
+rel_build=${rel%%_*} ; rel_helper1=${rel/${rel_build}_}
+rel_tag1=${rel_helper1/_*} ; rel_helper2=${rel/${rel_build}_${rel_tag1}_}
+rel_tag2=${rel_helper2/_*} ; rel_helper3=${rel/${rel_build}_${rel_tag1}_${rel_tag2}_}
+rel_tag3=${rel_helper3/_*}
 echo "  Package name: $name"
 echo "  Version: $ver"
 echo "  Arch: $arch"
@@ -52,15 +57,15 @@ if [ -z $pkg_name ] ; then exit 1 ; fi
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
-REPODIR=${REPODIR:-/pkg/repository}
-METADATADIR="${METADATADIR:-/pkg/metadata/$first_pkg_char/${name}/${pkg_name}}"
-DIST=${DIST:-dirty} ; DISTVER=${DISTVER:-0.1}
-SOURCESDIR=${SOURCESDIR:-$TMP/$DIST-$DISTVER/sources-all}
-SOURCESPPDIR=${SOURCESPPDIR:-$TMP/$DIST-$DISTVER/sources-per-package/$name-$ver}
-BUILDDIR=${BUILDDIR:-$TMP/$DIST-$DISTVER/build/$pkg_name}
-PKGDIR=${PKGDIR:-$TMP/$DIST-$DISTVER/pkgfiles/$pkg_name}
-OUTBUILD=${OUTBUILD:-$REPODIR/$DIST-$DISTVER/builders/$first_pkg_char/${name}/${build_pkg_name}.sh}
-OUTPKG=${OUTPKG:-$REPODIR/$DIST-$DISTVER/packages/$first_pkg_char/${name}/${pkg_name}.sh}
+REPO=${REPO:-$rel_tag1}
+REPODIR=${REPODIR:-$ROOT/pkg/repository/$REPO}
+METADATADIR="${METADATADIR:-$ROOT/pkg/metadata/$REPO/${pkg_name}}"
+SOURCESDIR=${SOURCESDIR:-$TMP/sources-all}
+SOURCESPPDIR=${SOURCESPPDIR:-$TMP/$REPO/sources-per-package/$name-$ver}
+BUILDDIR=${BUILDDIR:-$TMP/$REPO/build/$pkg_name}
+PKGDIR=${PKGDIR:-$TMP/$REPO/pkgfiles/$pkg_name}
+OUTBUILD=${OUTBUILD:-$REPODIR/builders/$first_pkg_char/${name}/${build_pkg_name}.sh}
+OUTPKG=${OUTPKG:-$REPODIR/packages/$first_pkg_char/${name}/${pkg_name}.sh}
 
 # Other need vars for example to change the default INSTALLDIR=$LFS.
 LFS=/mnt/lfs
@@ -98,7 +103,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: No new versions found." ; exit 0
     else
       if [ $NEW = 0 ] ; then
-        NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
+        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
         if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
@@ -472,8 +477,9 @@ EOF_OUTPKG
   cd $PKGDIR
   # Tar and compress files in current dir and copy it in b64 to package script.
   # Thanks to https://reproducible-builds.org/docs/archives/ 
+  # and https://www.gnu.org/software/tar/manual/html_node/Reproducibility.html
   # requires GNU Tar 1.28+
-  echo "compresed_tar_xz_pkg_b64='$(tar --sort=name \
+  echo "compresed_tar_xz_pkg_b64='$( LC_ALL=POSIX tar --sort=name \
       --mtime="@${SOURCE_DATE_EPOCH}" \
       --owner=0 --group=0 --numeric-owner \
       --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
@@ -505,7 +511,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
   # pkg checksums
   PKG_CHECKSUMS_FILE="$PKG_DIR/checksums"
   # Tar exclude-from file.
-  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-/pkg/config}
+  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-/pkg/config/tar-exclude-from-file.txt}
   
   if [[ $INSTALL -eq 1 ]] ; then 
     [ -d $PKG_DIR ] || mkdir -p $PKG_DIR 
@@ -517,13 +523,13 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
     # echo sharedlibs  to package db.
     echo "$shared_libs_b64" | base64 -d > $PKG_SHAREDLIBS_FILE
     # update pkg index
-    echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jtf - | sort > $PKG_INDEX_FILE
+    echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jtf - | LC_ALL=POSIX sort > $PKG_INDEX_FILE
     echo "Installing files in $INSTALLDIR"
     echo "Decoding b64 package files."
       # --keep-directory-symlink Don't replace existing symlinks to directories when extracting.
       # tested tar (GNU tar) 1.35 || exit
       echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
-    echo "$(date) Installed $pkg_name in $INSTALLDIR" >> $LOGFILE 
+    echo "$(date +"%a %b %d %T %Z %Y") Installed $pkg_name in $INSTALLDIR" >> $LOGFILE 
   elif [[ $COMPARE -eq 1 ]] ; then
     echo "Comparing pkg with files in $INSTALLDIR"
     # Compare tar with filesystem (only files, dirs and links not work)

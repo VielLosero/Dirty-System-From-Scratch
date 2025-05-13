@@ -285,7 +285,6 @@ fi
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
   start_config_date=$(date +"%s")
-  start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
@@ -415,6 +414,7 @@ fi
 if [ $STRIP -eq 1 ] ; then echo "Skipping STRIP elf." ; else 
   # strip ELF
   start_strip_date=$(date +"%s")
+  echo "Stripping ELF files."
   find $PKGDIR | xargs file | grep "ELF.*executable" | cut -f 1 -d : \
                | xargs strip --strip-unneeded 2> /dev/null
   end_strip_date=$(date +"%s")
@@ -428,7 +428,7 @@ if [ $SHARED -eq 1 ] ; then echo "Skipping find SHARED libs." ; else
   start_shared_date=$(date +"%s")
   echo "Find ELF files and extract needed shared libs"
   trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
-  cd $PKGDIR
+  cd $PKGDIR || exit 1
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; |\
     grep NEEDED | sed 's/ *NEEDED *\(l.*\)/\1/' | LC_ALL=POSIX sort -u > $TMP_PKG_SHAREDLIBS_FILE
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; | grep -E "^./|NEEDED" |\

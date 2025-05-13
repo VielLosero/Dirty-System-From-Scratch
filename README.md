@@ -1,9 +1,9 @@
 
 ## The Dirty system from scratch
-This is the history about a the Make.Buildpkg concept and the Dirty system from scratch, and how I update my LFS system, and how to automate it.
+This is the history about a the Make.Buildpkg concept and the Dirty system from scratch, and how I update and automate my LFS.
 As a learning experience I started building a simple package manager for LFS. As I built it, I was thinking about how to make it more useful, easy and simple. Will it end up being a distribution? To know how it ends you need to continue reading.
 
-## The concept of the chain make --> build --> package.
+## The concept beneath the chain make --> build --> package.
 I am glad to present you: The maker, the builder and the package.
 The concept was easy, make a builder that build a package that can be installed.
 
@@ -18,10 +18,12 @@ Becasue not all people want to have the sources. Some people only need the packa
 Wait, wait, sources inside? Yes.
 
 ### The maker script (make.buildpkg.pkg-ver-arch-rel.sh).
-The maker is the script that download the sources and make an other script, the (buildpkg.pkg-ver-arch-rel.sh) with the sources inside.
+A maker script start with maker.buildpkg.
+The maker is the script that download the sources and check for updates.
+The maker make an other scripts, like new makers from new versions and builder scripts.
 This maker script have all in one place: download the sources, check it, and make the builder script that build the package.
 If you delete the builder and the package you can recreate it with the maker.
-The headers of the maker take the script name as reference to set the variables to work, so updating only the name of the script will update the variables inside and download the according version of the new sources files. We only need to verify/update the checksum and signature of the sources downloaded, read Changelog and audit the sources if we  want of course.
+The headers of the maker take the script name as reference to set the variables to work, so updating only the name of the script will update the variables inside and download the according version of the new sources files. We only need to verify/update the checksum and signature of the sources downloaded.
 ```
 # Get init data from filename.
 cd $(dirname $0) ; SWD=$(pwd) # script work directory
@@ -203,6 +205,7 @@ In the early of the make.buildpkg I used a home dir to store makers builders and
 Shit, I want remove all that dirty. It's all under /pkg.
 
 ### Visual /pkg structure.
+```
 .
 └── pkg
     ├── blacklist
@@ -217,6 +220,7 @@ Shit, I want remove all that dirty. It's all under /pkg.
         ├── lists_of_packages
         ├── patches
         └── scripts
+```
 
 ### The /pkg/blacklist dir
 This directory serve to make soft links (aka:simlinks) to the files that we want to freeze.
@@ -538,9 +542,9 @@ find /pkg/installed/ -name md5sum -exec sh -c 'echo {} ; cat {} | tail -n +6 | m
 
 ## Thanks to:
 
-LFS For their job.
+LFS BLFS MLFS GLFS For their job.
 
-The F.O.S.S comunity. Try hard guys.
+The F.O.S.S comunity. Try hard.
 
 The readers, if you have arrived here.
 
@@ -555,8 +559,6 @@ bc1q6d245chm8t5sdkqjugwg3ce2c92m276ee4ksv4
 ## The Author
 
 * **Viel Losero** - *Initial work* - [Viel Losero](https://github.com/VielLosero)
-
-<a href="#" class="back">back</a>
 
 References:
 

@@ -132,6 +132,7 @@ if [ -e $file1 ] ; then rm $file1 ; fi
 TMP_BUILDFILESYSTEM_HIERARCHY_DIR=$(mktemp -d /tmp/make.buildpkg-filesystem-hierarchy-XXXXXX)
 trap "rm -rf $TMP_BUILDFILESYSTEM_HIERARCHY_DIR" EXIT
 cd $TMP_BUILDFILESYSTEM_HIERARCHY_DIR || exit 1
+  #4.2. Creating a Limited Directory Layout in the LFS Filesystem
   #mkdir {bin,boot,dev,etc,home,lib,lib64,media,mnt,opt,root,run,sbin,srv,tmp,usr,var}
   #mkdir -pv home
   mkdir -pv {etc,var,tmp}

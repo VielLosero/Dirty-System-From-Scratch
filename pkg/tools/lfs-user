@@ -1,7 +1,33 @@
 #!/bin/bash
 
+#echo "2.6.Setting.The.LFS.Variable.sh"
 LFS=/mnt/lfs
+#echo $LFS
 
+# function to create lfs user.
+create(){
+echo "Creating LFS user and environment"
+echo "2.7 Mounting the New Partition"
+[ -d $LFS ] || mkdir -pv $LFS
+#mount -v -t ext4 /dev/<xxx> $LFS
+
+echo "4.2. Creating a Limited Directory Layout in the LFS Filesystem"
+chown root:root $LFS
+chmod 755 $LFS
+  mkdir -pv $LFS/{etc,var}
+  mkdir -pv $LFS/usr/{bin,lib,sbin}
+
+  for i in bin lib sbin; do
+    ln -sv usr/$i $LFS/$i
+  done
+  case $(uname -m) in
+    x86_64) mkdir -pv $LFS/lib64 ;;
+  esac
+  mkdir -pv $LFS/usr/lib32
+  ln -sv usr/lib32 $LFS/lib32
+  mkdir -pv $LFS/tools
+
+echo "4.3 Adding LFS user"
 if cat /etc/group | grep lfs ; then true ; else groupadd lfs ; fi
 if cat /etc/passwd | grep lfs ; then true ; else
 useradd -s /bin/bash -g lfs -m -k /dev/null lfs
@@ -9,21 +35,31 @@ useradd -s /bin/bash -g lfs -m -k /dev/null lfs
 #passwd -d lfs # delete pass
 #echo "RandoM-pass.2871" | passwd -s lfs
 fi
-if ls -la /mnt/lfs | grep "lfs  root" >/dev/null ; then true ; else
-chown -v lfs $LFS/{usr{,/*},var,etc,tools,pkg,tmp}
+chown -v lfs $LFS/{usr{,/*},var,etc,tools}
 case $(uname -m) in
   x86_64) chown -v lfs $LFS/lib64 ;;
 esac
+chown -v lfs $LFS/lib32
 
+echo "Add custom dirs nnd perms needed to work."
+mkdir -pv $LFS/{tmp,pkg}
+# change perms /mnt/lfs/* to lfs user.
+if ls -l /mnt/lfs/ | grep "root root" >/dev/null ; then
+chown -v lfs $LFS/{usr{,/*},lib,var,etc,bin,sbin,tools}
+chown -v lfs $LFS/pkg
+case $(uname -m) in
+  x86_64) chown -v lfs $LFS/lib64 ;;
+esac
 chown -v lfs $LFS/lib32
 fi
+chmod -v 1777 $LFS/tmp
 
+echo "4.4. Setting Up the Environment"
 if [ -e /home/lfs/.bash_profile ] ; then true ; else
 cat > /home/lfs/.bash_profile << "EOF"
 exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' /bin/bash
 EOF
 fi
-
 if [ -e /home/lfs/.bashrc ] ; then true ; else
 cat > /home/lfs/.bashrc << "EOF"
 set +h
@@ -41,25 +77,27 @@ export LFS LC_ALL LFS_TGT LFS_TGT32 LFS_TGTX32 PATH
 export MAKEFLAGS=-j$(nproc)
 EOF
 fi
+chmod 1777 /$LFS/tmp
+}
 
-su -c "if [ ! -d /mnt/lfs/pkg/repository ] ; then mkdir /mnt/lfs/pkg/repository ; fi ;" lfs
-su -c "ROOT=/mnt/lfs REPODIR=/mnt/lfs/pkg/repository bash $1" lfs
-#mv /mnt/lfs/tmp/dirty-0.1/builder/
-#mv /mnt/lfs/tmp/dirty-0.1/package/
-
-
-#su -c ". /home/lfs/.bashrc ;
-#	cd /mnt/lfs/ ;
-#	if [ ! -d /mnt/lfs/tmp ] ; then mkdir /mnt/lfs/tmp ; fi ;
-#	ls /mnt/lfs/tmp ;
-#	cp $1 /mnt/lfs/tmp ;
-#	if [ ! -d /mnt/lfs/pkg/repository ] ; then mkdir /mnt/lfs/pkg/repository ; fi ;
-#	ROOT=/mnt/lfs REPODIR=/mnt/lfs/pkg/repository bash $1
-#	" lfs
-#su -c ". /home/lfs/.bashrc ; id ; printenv ; $@" lfs
-#for run in "$@" ; do 
-#su -c ". /home/lfs/.bashrc ; bash -c '$run' " lfs
-#done
-
-
+if [ $# -eq 0 ] ; then 
+  # login as lfs
+  su - lfs || create
+else
+  case $1 in 
+    create) # create user and files
+        create
+      ;;
+    delete) # delete lfs user
+      echo "Removing lfs user ... TODO"
+      ls -1 /home/lfs/
+      ;;
+    *)
+      # exec maker builer package with ROOT= REPODIR=
+      su -c "if [ ! -d /mnt/lfs/pkg/repository ] ; then mkdir /mnt/lfs/pkg/repository ; fi ;" lfs
+      #su -c "METADATADIR=/mnt/lfs/pkg/metadata ROOT=/mnt/lfs REPODIR=/mnt/lfs/pkg/repository bash $1" lfs
+      su -c "ROOT=/mnt/lfs bash $1" lfs
+      ;;
+  esac
+fi
 

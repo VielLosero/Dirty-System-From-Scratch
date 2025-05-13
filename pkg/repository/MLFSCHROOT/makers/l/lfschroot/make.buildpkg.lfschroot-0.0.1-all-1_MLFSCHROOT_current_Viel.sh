@@ -21,14 +21,15 @@
 #  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #  Copyright for portions of this script are held by Gerard Beekmans 1999-2025 
-#  as part of project Linux From Scratch and are provided under the MIT license.
+#  and The GLFS Development Team 2024-2025 as part of project Linux From Scratch
+#  and derivates like MLFS and are provided under the MIT license.
 #
 # --- END LICENSE ---
 
 #:Maintainer: Viel Losero <viel.losero@gmail.com>
 #:Contributor: -
 
-#:Version:0.0.3
+#:Version:0.0.5
 
 # Get Application init data from filename.
 cd $(dirname $0) ; SWD=$(pwd) # script work directory
@@ -39,6 +40,10 @@ pkg_ver="${pkg_name%-*-*}" ; ver="${pkg_ver/$name-/}"
 pkg_arch="${pkg_name%-*}" ; arch=${pkg_arch/$name-$ver-/}
 rel=${pkg_name/$name-$ver-$arch-/}
 first_pkg_char=$(printf %.1s ${name,})
+rel_build=${rel%%_*} ; rel_helper1=${rel/${rel_build}_}
+rel_tag1=${rel_helper1/_*} ; rel_helper2=${rel/${rel_build}_${rel_tag1}_}
+rel_tag2=${rel_helper2/_*} ; rel_helper3=${rel/${rel_build}_${rel_tag1}_${rel_tag2}_}
+rel_tag3=${rel_helper3/_*}
 echo "  Package name: $name"
 echo "  Version: $ver"
 echo "  Arch: $arch"
@@ -52,15 +57,15 @@ if [ -z $pkg_name ] ; then exit 1 ; fi
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
-REPODIR=${REPODIR:-/pkg/repository}
-METADATADIR="${METADATADIR:-/pkg/metadata/$first_pkg_char/${name}/${pkg_name}}"
-DIST=${DIST:-dirty} ; DISTVER=${DISTVER:-0.1}
-SOURCESDIR=${SOURCESDIR:-$TMP/$DIST-$DISTVER/sources-all}
-SOURCESPPDIR=${SOURCESPPDIR:-$TMP/$DIST-$DISTVER/sources-per-package/$name-$ver}
-BUILDDIR=${BUILDDIR:-$TMP/$DIST-$DISTVER/build/$pkg_name}
-PKGDIR=${PKGDIR:-$TMP/$DIST-$DISTVER/pkgfiles/$pkg_name}
-OUTBUILD=${OUTBUILD:-$REPODIR/$DIST-$DISTVER/builders/$first_pkg_char/${name}/${build_pkg_name}.sh}
-OUTPKG=${OUTPKG:-$REPODIR/$DIST-$DISTVER/packages/$first_pkg_char/${name}/${pkg_name}.sh}
+REPO=${REPO:-$rel_tag1}
+REPODIR=${REPODIR:-$ROOT/pkg/repository/$REPO}
+METADATADIR="${METADATADIR:-$ROOT/pkg/metadata/$REPO/${pkg_name}}"
+SOURCESDIR=${SOURCESDIR:-$TMP/sources-all}
+SOURCESPPDIR=${SOURCESPPDIR:-$TMP/$REPO/sources-per-package/$name-$ver}
+BUILDDIR=${BUILDDIR:-$TMP/$REPO/build/$pkg_name}
+PKGDIR=${PKGDIR:-$TMP/$REPO/pkgfiles/$pkg_name}
+OUTBUILD=${OUTBUILD:-$REPODIR/builders/$first_pkg_char/${name}/${build_pkg_name}.sh}
+OUTPKG=${OUTPKG:-$REPODIR/packages/$first_pkg_char/${name}/${pkg_name}.sh}
 
 # Other need vars for example to change the default INSTALLDIR=$LFS.
 LFS=/mnt/lfs
@@ -89,7 +94,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: No new versions found." ; exit 0
     else
       if [ $NEW = 0 ] ; then
-        NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
+        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
         if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
@@ -126,11 +131,13 @@ file1=$name-$ver.tar.xz
 
 # Prepare sources or patches.
 echo "Preparing sources."
+cd $SOURCESPPDIR || exit 1
 
 if [ -e $file1 ] ; then rm $file1 ; fi
 TMP_BUILD_LFSCHROOT_DIR=$(mktemp -d /tmp/make.buildpkg-lfschroot-XXXXXX)
 trap "rm -rf $TMP_BUILD_LFSCHROOT_DIR" EXIT
 cd $TMP_BUILD_LFSCHROOT_DIR || exit 1
+echo "Working on $(pwd)"
   #mkdir {bin,boot,dev,etc,home,lib,lib64,media,mnt,opt,root,run,sbin,srv,tmp,usr,var}
   # 7.3. Preparing Virtual Kernel File Systems
   mkdir -pv {dev,proc,sys,run}
@@ -205,44 +212,44 @@ chgrp -v utmp var/log/lastlog
 chmod -v 664  var/log/lastlog
 chmod -v 600  var/log/btmp
 
-  echo "Creating LFS auto script."
-cat << 'EOF' > tmp/LFS_autoconfig_chroot.sh 
-echo "7.2. Changing Ownership "
-chown --from lfs -R root:root $LFS/{usr,lib,var,etc,bin,sbin,tools}
-case $(uname -m) in
-  x86_64) chown --from lfs -R root:root $LFS/lib64 ;;
-esac
-chown -R root:root $LFS/lib32
-echo "7.3.1. Mounting and Populating /dev"
-mount -v --bind /dev $LFS/dev
-echo "7.3.2. Mounting Virtual Kernel File Systems"
-mount -vt devpts devpts -o gid=5,mode=0620 $LFS/dev/pts
-mount -vt proc proc $LFS/proc
-mount -vt sysfs sysfs $LFS/sys
-mount -vt tmpfs tmpfs $LFS/run
-if [ -h $LFS/dev/shm ]; then
-  install -v -d -m 1777 $LFS$(realpath /dev/shm)
-else
-  mount -vt tmpfs -o nosuid,nodev tmpfs $LFS/dev/shm
-fi
-echo "7.6. Creating Essential Files and Symlinks"
-chroot "$LFS" /usr/bin/env -i   \
-    HOME=/root                  \
-    TERM="$TERM"                \
-    PS1='(lfs chroot) \u:\w\$ ' \
-    PATH=/usr/bin:/usr/sbin     \
-    localedef -i C -f UTF-8 C.UTF-8
-echo "7.4. Entering the Chroot Environment"
-chroot "$LFS" /usr/bin/env -i   \
-    HOME=/root                  \
-    TERM="$TERM"                \
-    PS1='(lfs chroot) \u:\w\$ ' \
-    PATH=/usr/bin:/usr/sbin     \
-    MAKEFLAGS="-j$(nproc)"      \
-    TESTSUITEFLAGS="-j$(nproc)" \
-    /bin/bash --login
-
-EOF
+##  echo "Creating LFS auto script."
+##cat << 'EOF' > tmp/LFS_autoconfig_chroot.sh 
+##echo "7.2. Changing Ownership "
+##chown --from lfs -R root:root $LFS/{usr,lib,var,etc,bin,sbin,tools}
+##case $(uname -m) in
+##  x86_64) chown --from lfs -R root:root $LFS/lib64 ;;
+##esac
+##chown -R root:root $LFS/lib32
+##echo "7.3.1. Mounting and Populating /dev"
+##mount -v --bind /dev $LFS/dev
+##echo "7.3.2. Mounting Virtual Kernel File Systems"
+##mount -vt devpts devpts -o gid=5,mode=0620 $LFS/dev/pts
+##mount -vt proc proc $LFS/proc
+##mount -vt sysfs sysfs $LFS/sys
+##mount -vt tmpfs tmpfs $LFS/run
+##if [ -h $LFS/dev/shm ]; then
+##  install -v -d -m 1777 $LFS$(realpath /dev/shm)
+##else
+##  mount -vt tmpfs -o nosuid,nodev tmpfs $LFS/dev/shm
+##fi
+##echo "7.6. Creating Essential Files and Symlinks"
+##chroot "$LFS" /usr/bin/env -i   \
+##    HOME=/root                  \
+##    TERM="$TERM"                \
+##    PS1='(lfs chroot) \u:\w\$ ' \
+##    PATH=/usr/bin:/usr/sbin     \
+##    localedef -i C -f UTF-8 C.UTF-8
+##echo "7.4. Entering the Chroot Environment"
+##chroot "$LFS" /usr/bin/env -i   \
+##    HOME=/root                  \
+##    TERM="$TERM"                \
+##    PS1='(lfs chroot) \u:\w\$ ' \
+##    PATH=/usr/bin:/usr/sbin     \
+##    MAKEFLAGS="-j$(nproc)"      \
+##    TESTSUITEFLAGS="-j$(nproc)" \
+##    /bin/bash --login
+##
+##EOF
 
   tar -Jcf $SOURCESDIR/$file1 *
   #rmdir home
@@ -295,14 +302,6 @@ STRIP=${STRIP:-0} SHARED=${SHARED:-0} CHECKSUM=${CHECKSUM:-0} PACKAGE=${PACKAGE:
 
 EOF_OUTBUILD
 # The coding base64 part.
-  end_build_date=$(date +"%s")
-  build_time=$(($end_build_date - $start_build_date))
-  echo "Sources build time: $build_time" >> $TMP_PKG_TIMINGS_FILE
-  echo "Sources build time: $build_time seconds"
-fi
-
-if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else 
-  start_install_date=$(date +"%s")
 # echo dirs to builder.
 echo "Coding dirs to builder."
 cat << 'EOF_OUTBUILD' >> $OUTBUILD
@@ -350,71 +349,176 @@ cat << 'EOF_OUTBUILD' >> $OUTBUILD
 fi
 EOF_OUTBUILD
 
-# Build sources part.
+# Cat to builder the build sources part.
 cat << 'EOF_OUTBUILD' >> $OUTBUILD
 # Build part
-
-
-# get start build date epoch 
-start_build_date=$(date +"%s")
-# make temp trap dir for all tmp files on build.
-TMP_BUILD_DIR=$(mktemp -d $ROOT/tmp/make.buildpkg-tmp-build-XXXXXX)
-trap "rm -rf $TMP_BUILD_DIR" EXIT
-
-# make temp trap dir for all tmp files on build.
-TMP_BUILD_DIR=$(mktemp -d /tmp/make.buildpkg-tmp-build-XXXXXX)
-
-SKIP_CHECK_COMPILATION_TOOLS=1
-if [ $SKIP_CHECK_COMPILATION_TOOLS -eq 1 ] ; then echo "Skipping check compilation tools." ; else 
-
-  # Check for needed tools to build the pkg
-  echo "Checking for needed tools."
-  # ex: mkdir cp find grep tar ...
+if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
+  # Check tasks needed to build.
+  start_checks_date=$(date +"%s")
+  #echo "Checking needs to build."
+  # Check if needed packages are installed.
+  # --- LFS_CMD_CHECKS ---
+  # --- END_LFS_CMD_CHECKS ---
+  end_checks_date=$(date +"%s")
+  checks_time=$(($end_checks_date - $start_checks_date))
+  echo "Checks time: $checks_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Checks time: $checks_time seconds" 
 fi
-SKIP_EXTRACTING_SOURCES=0
-if [ $SKIP_EXTRACTING_SOURCES -eq 1 ] ; then echo "Skipping extracting sources." ; else 
-  echo "Extracting/Preparing sources."
+
+if [ $EXTRACT -eq 1 ] ; then echo "Skipping EXTRACT sources." ; else
+  # Extracting sources.
+  start_extract_date=$(date +"%s")
+  echo "Preparing sources."
   cd $BUILDDIR || exit 1
-  # Clean build dir.
-  if [ -d $BUILDDIR ] ; then rm -rf $BUILDDIR/* ; fi || exit 1
+  # deleting source dirs if exist.
+  if [ -d $name-$ver ] ; then rm -rf $name-$ver ; fi
+  if [ -d $PKGDIR ] ; then rm -rf $PKGDIR && mkdir $PKGDIR ; fi
 EOF_OUTBUILD
-echo '  tar xvf $SOURCESDIR'/$file1' || exit 1' >> $OUTBUILD 
-cat << 'EOF_OUTBUILD' >> $OUTBUILD
+  echo '  tar xf $SOURCESDIR'/$file1 >> $OUTBUILD 
+  cat << 'EOF_OUTBUILD' >> $OUTBUILD
+  # --- LFS_CMD_EXTRACT ---
+  # --- END_LFS_CMD_EXTRACT ---
+  end_extract_date=$(date +"%s")
+  extract_time=$(($end_extract_date - $start_extract_date))
+  echo "Extract time: $extract_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Extract time: $extract_time seconds" 
 fi
-SKIP_CONFIG=1
-if [ $SKIP_CONFIG -eq 1 ] ; then echo "Skipping configure sources." ; else 
+
+if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else 
   # Apply patches here.
+  start_patch_date=$(date +"%s")
   echo "Applying patches."
-
-  #echo "Configuring sources."
-
-fi  
-SKIP_BUILD=1
-if [ $SKIP_BUILD -eq 1 ] ; then echo "Skipping build sources." ; else 
-  echo "Compiling sources."
-
+  cd $BUILDDIR || exit 1
+  # --- LFS_CMD_PATCH ---
+  # --- END_LFS_CMD_PATCH ---
+  end_patch_date=$(date +"%s")
+  patch_time=$(($end_patch_date - $start_patch_date))
+  echo "Patch time: $patch_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Patch time: $patch_time seconds" 
 fi
-SKIP_INSTALL_SOURCES=0
-if [ $SKIP_INSTALL_SOURCES -eq 1 ] ; then echo "Skipping installing sources." ; else 
-  echo "Installing sources on pkg dir."
+  
+if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
+  # ./configure here.
+  start_config_date=$(date +"%s")
+  start_config_date=$(date +"%s")
+  echo "Configuring sources."
+  cd $BUILDDIR || exit 1
+  # --- LFS_CMD_CONFIG ---
+  # --- END_LFS_CMD_CONFIG ---
+  end_config_date=$(date +"%s")
+  config_time=$(($end_config_date - $start_config_date))
+  echo "Sources config time: $config_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Sources config time: $config_time seconds"
+fi
+
+if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else 
+  start_build_date=$(date +"%s")
+  echo "Compiling sources."
+  cd $BUILDDIR || exit 1
+  # --- LFS_CMD_BUILD ---
+  # --- END_LFS_CMD_BUILD ---
+  end_build_date=$(date +"%s")
+  build_time=$(($end_build_date - $start_build_date))
+  echo "Sources build time: $build_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Sources build time: $build_time seconds"
+fi
+
+if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else 
+  start_install_date=$(date +"%s")
+  #Installing sources.
+  echo "Installing sources."
+  cd $BUILDDIR || exit 1
   echo "  Cleaning $PKGDIR"
   if [ -d $PKGDIR ] ; then rm -rf $PKGDIR/* ; fi || exit 1
-  cd $BUILDDIR
   cp -rv * $PKGDIR
-  cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
   cd $PKGDIR
+  # --- LFS_CMD_INSTALL ---
+  # --- END_LFS_CMD_INSTALL ---
+  end_install_date=$(date +"%s")
+  install_time=$(($end_install_date - $start_install_date))
+  echo "Sources install time: $install_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Sources install time: $install_time seconds"
+fi  
 
+if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else 
   # Post compilation
-  #echo "Post compilation tasks."
-
-  # strip ELF
-  #find $PKGDIR | xargs file | grep "ELF.*executable" | cut -f 1 -d : \
-  #             | xargs strip --strip-unneeded 2> /dev/null
+  start_post_date=$(date +"%s")
+  echo "Post compilation tasks."
+  cd $BUILDDIR || exit 1
+  # --- LFS_CMD_POST ---
+  # --- END_LFS_CMD_POST ---
+  end_post_date=$(date +"%s")
+  post_time=$(($end_post_date - $start_post_date))
+  echo "Post compilation tasks time: $post_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Post compilation tasks time: $post_time seconds"
+fi
   
-  # extract /pkg shared-libs dir to temp file, and cat in base64 when contruct the pkg script.
+if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else 
+  # ./configure here.
+  start_config32_date=$(date +"%s")
+  echo "Configuring 32bits sources."
+  cd $BUILDDIR || exit 1
+  # --- LFS_CMD_CONFIG32 ---
+  # --- END_LFS_CMD_CONFIG32 ---
+  end_config32_date=$(date +"%s")
+  config32_time=$(($end_config32_date - $start_config32_date))
+  echo "Sources config32 time: $config32_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Sources config32 time: $config32_time seconds"
+fi
+
+if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else 
+  start_build32_date=$(date +"%s")
+  echo "Compiling 32bits sources."
+  cd $BUILDDIR || exit 1
+  # --- LFS_CMD_BUILD32 ---
+  # --- END_LFS_CMD_BUILD32 ---
+  end_build32_date=$(date +"%s")
+  build32_time=$(($end_build32_date - $start_build32_date))
+  echo "Sources build32 time: $build32_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Sources build32 time: $build32_time seconds"
+fi
+
+if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else 
+  #Installing sources.
+  start_install32_date=$(date +"%s")
+  echo "Installing 32bits sources."
+  cd $BUILDDIR || exit 1
+  # --- LFS_CMD_INSTALL32 ---
+  # --- END_LFS_CMD_INSTALL32 ---
+  end_install32_date=$(date +"%s")
+  install32_time=$(($end_install32_date - $start_install32_date))
+  echo "Sources install32 time: $install32_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Sources install32 time: $install32_time seconds"
+fi
+
+if [ $POST32 -eq 1 ] ; then echo "Skipping POST32 bits compilation tasks." ; else 
+  # Post compilation 32bits
+  start_post32_date=$(date +"%s")
+  echo "Post compilation 32bits tasks."
+  cd $BUILDDIR || exit 1
+  # --- LFS_CMD_POST32 ---
+  # --- END_LFS_CMD_POST32 ---
+  end_post32_date=$(date +"%s")
+  post32_time=$(($end_post32_date - $start_post32_date))
+  echo "Post compilation 32bits tasks time: $post32_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Post compilation 32bits tasks time: $post32_time seconds"
+fi
+
+if [ $STRIP -eq 1 ] ; then echo "Skipping STRIP elf." ; else 
+  # strip ELF
+  start_strip_date=$(date +"%s")
+  find $PKGDIR | xargs file | grep "ELF.*executable" | cut -f 1 -d : \
+               | xargs strip --strip-unneeded 2> /dev/null
+  end_strip_date=$(date +"%s")
+  strip_time=$(($end_strip_date - $start_strip_date))
+  echo "Sources strip time: $strip_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Sources strip time: $strip_time seconds"
+fi
+  
+if [ $SHARED -eq 1 ] ; then echo "Skipping find SHARED libs." ; else 
+  # extract /pkg shared-libs dir to temp file, to cat in base64 when contruct the pkg script.
+  start_shared_date=$(date +"%s")
   echo "Find ELF files and extract needed shared libs"
-  TMP_PKG_SHAREDLIBS_FILE=$TMP_BUILD_DIR/tmp.sharedlibs.$pkg_name
   trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
   cd $PKGDIR
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; | grep -E "^./|NEEDED" |\
@@ -432,27 +536,39 @@ if [ $SKIP_INSTALL_SOURCES -eq 1 ] ; then echo "Skipping installing sources." ; 
     sed 's/\.\//\n.\//g' |\
     # remove first black line and add \n at end
     awk 'NF' |\
-    sort -u > $TMP_PKG_SHAREDLIBS_FILE
-
-  # inspect where the pkg installed
-  #cd $PKGDIR
-  #ls -la .
+    LC_ALL=POSIX sort -u > $TMP_PKG_SHAREDLIBS_FILE
+  end_shared_date=$(date +"%s")
+  shared_time=$(($end_shared_date - $start_shared_date))
+  echo "Find shared time: $shared_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Find shared time: $shared_time seconds"
 fi
-# get end build date epoch
-end_build_date=$(date +"%s")
-echo "START:$start_build_date END:$end_build_date"
-build_time=$(($end_build_date - $start_build_date))
-echo "Sources build time: $build_time seconds" 
-TMP_PKG_BUILDTIME_FILE=$TMP_BUILD_DIR/tmp.buildtime.$pkg_name
-echo "Sources build time: $build_time" > $TMP_PKG_BUILDTIME_FILE
+
+if [ $CHECKSUM -eq 1 ] ; then echo "Skipping CHECKSUM files." ; else 
+  # Get CHECKSUM of all files in $PKGDIR.
+  # WARNING: Dont put files with timestamps that can broke the checksum.
+  start_checksum_date=$(date +"%s")
+  cd $PKGDIR || exit 1
+  #ls -la .
+  if locale -a | grep POSIX >/dev/null ; then
+    find . -type f -exec md5sum {} \; | LC_ALL=POSIX sort > $TMP_PKG_CHECKSUMS_FILE
+    # Master md5
+    echo "Master MD5:  $(md5sum $TMP_PKG_CHECKSUMS_FILE) "
+  else
+    echo "Locale POSIX not found" && exit 1
+  fi
+  end_checksum_date=$(date +"%s")
+  checksum_time=$(($end_checksum_date - $start_checksum_date))
+  echo "Checksum pkg files time: $checksum_time" >> $TMP_PKG_TIMINGS_FILE
+  echo "Checksum pkg files time: $checksum_time seconds"
+fi
+
 EOF_OUTBUILD
 
-# Building pkg.sh. $OUTPKG
+# Cat to Builder the package pkg.sh. $OUTPKG part.
 cat << 'EOF_OUTBUILD' >> $OUTBUILD
-echo ""
-SKIP_PACKAGING=0
-if [ $SKIP_PACKAGING -eq 1 ] ; then echo "Skipping the packaging." ; else
+if [ $PACKAGE -eq 1 ] ; then echo "Skipping PACKAGE." ; else
   #Packaging.
+  start_package_date=$(date +"%s")
   echo "Packaging"
   # Start build pkg_name.sh
   echo "#!/bin/bash" > $OUTPKG
@@ -504,8 +620,9 @@ EOF_OUTPKG
   cd $PKGDIR
   # Tar and compress files in current dir and copy it in b64 to package script.
   # Thanks to https://reproducible-builds.org/docs/archives/ 
+  # and https://www.gnu.org/software/tar/manual/html_node/Reproducibility.html
   # requires GNU Tar 1.28+
-  echo "compresed_tar_xz_pkg_b64='$(tar --sort=name \
+  echo "compresed_tar_xz_pkg_b64='$( LC_ALL=POSIX tar --sort=name \
       --mtime="@${SOURCE_DATE_EPOCH}" \
       --owner=0 --group=0 --numeric-owner \
       --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
@@ -524,10 +641,10 @@ EOF_OUTPKG
 cat << 'EOF_OUTPKG' >> $OUTPKG
   INSTALLDIR=${INSTALLDIR:-/}
   cd $INSTALLDIR || exit 1
-  LOGDIR="$INSTALLDIR/var/log"
+  LOGDIR="$INSTALLDIR/var/log" 
   LOGFILE="$LOGDIR/make.buildpkg.log"
   PKG_DB="$INSTALLDIR/pkg/installed"
-  PKG_DIR="$PKG_DB/$pkg_name"
+  PKG_DIR="$PKG_DB/$pkg_name" 
   TMP_PKG_DIR=$(mktemp -d $ROOT/tmp/make.buildpkg-tmp-pkg-XXXXXX)
   trap "rm -rf $TMP_PKG_DIR" EXIT
   # pkg installed files
@@ -537,7 +654,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
   # pkg checksums
   PKG_CHECKSUMS_FILE="$PKG_DIR/checksums"
   # Tar exclude-from file.
-  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-/pkg/config}
+  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-/pkg/config/tar-exclude-from-file.txt}
   
   if [[ $INSTALL -eq 1 ]] ; then 
     [ -d $PKG_DIR ] || mkdir -p $PKG_DIR 
@@ -549,13 +666,13 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
     # echo sharedlibs  to package db.
     echo "$shared_libs_b64" | base64 -d > $PKG_SHAREDLIBS_FILE
     # update pkg index
-    echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jtf - | sort > $PKG_INDEX_FILE
+    echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jtf - | LC_ALL=POSIX sort > $PKG_INDEX_FILE
     echo "Installing files in $INSTALLDIR"
     echo "Decoding b64 package files."
       # --keep-directory-symlink Don't replace existing symlinks to directories when extracting.
       # tested tar (GNU tar) 1.35 || exit
       echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
-    echo "$(date) Installed $pkg_name in $INSTALLDIR" >> $LOGFILE 
+    echo "$(date +"%a %b %d %T %Z %Y") Installed $pkg_name in $INSTALLDIR" >> $LOGFILE 
   elif [[ $COMPARE -eq 1 ]] ; then
     echo "Comparing pkg with files in $INSTALLDIR"
     # Compare tar with filesystem (only files, dirs and links not work)

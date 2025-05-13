@@ -141,9 +141,11 @@ cd $TMP_MAKE_DIR || exit 1
   #mkdir {bin,boot,dev,etc,home,lib,lib64,media,mnt,opt,root,run,sbin,srv,tmp,usr,var}
   #mkdir -pv home
   mkdir -pv {pkg,var}
-  mkdir -pv pkg/{repository,metadata,blacklist}
+  mkdir -pv pkg/{repository,metadata,blacklist,installed,config,tools}
   mkdir -pv var/log
   touch var/log/make.buildpkg.log
+  touch pkg/config/rsync-exclude-from-file.txt
+  touch pkg/config/tar-exclude-from-file.txt
 
   tar -Jcf $SOURCESDIR/$file1 ../$name-$ver
   #tar -Jcf $SOURCESDIR/$file1 {pkg,var}

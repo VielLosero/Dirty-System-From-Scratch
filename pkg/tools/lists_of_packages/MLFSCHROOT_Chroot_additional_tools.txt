@@ -3,10 +3,10 @@
 # _MLFSCHROOT_
 #
 # 7. Entering Chroot and Building Additional Temporary Tools
-.lfschroot-[0-9]*_LFSCHROOT_*
-.gettext-[0-9]*_LFSCHROOT_*
-.bison-[0-9]*_LFSCHROOT_*
-.perl-[0-9]*_LFSCHROOT_*
-.Python-[0-9]*_LFSCHROOT_*
-.texinfo-[0-9]*_LFSCHROOT_*
-.util-linux-[0-9]*_LFSCHROOT_*
+.lfschroot-[0-9]*_MLFSCHROOT_*
+.gettext-[0-9]*_MLFSCHROOT_*
+.bison-[0-9]*_MLFSCHROOT_*
+.perl-[0-9]*_MLFSCHROOT_*
+.Python-[0-9]*_MLFSCHROOT_*
+.texinfo-[0-9]*_MLFSCHROOT_*
+.util-linux-[0-9]*_MLFSCHROOT_*
