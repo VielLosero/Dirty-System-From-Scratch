@@ -126,8 +126,9 @@ cat /pkg/installed/*/index | sort -u | sed 's%^%/%' > /tmp/1
 find $(cat /pkg/installed/*/index | grep "/$" | sort -u | sed 's%^%/%' ) -type f | sort -u > /tmp/2
 comm -13 /tmp/1 /tmp/2
 bash-5.2# comm -13 /tmp/1 /tmp/2 | grep -v linux | grep -v modules | grep -v "mnt/lfs" | grep -v "/tmp" | grep -v "/sys" | grep -v "/proc/"
-# dont work found linked files in other dirs ... 
+# dont work found linked files in other dirs ... need see late
 
 
-
+# get build time for MLFSCHROOT with v5
+echo $(grep Builder /pkg/metadata/MLFSCHROOT/*/timings | cut -d ' ' -f3 | tr '\n' '+' | sed 's/+$/\n/' | bc )/60 | bc
 

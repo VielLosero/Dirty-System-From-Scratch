@@ -24,10 +24,10 @@
 # # D M B I glibc-2.41-x86_64-1_MLFS_current_Viel.0.0.3
 # when taks wass successfull will edit /tmp/run.repo.list and remove successfull task.
 
-RUN_REPO_LIST=/tmp/run.repo.list
-ROOT=${ROOT:-/pkg}
+ROOT=${ROOT:-}
+RUN_REPO_LIST=$ROOT/tmp/run.repo.list
 REPO=dirty-0.0
-REPODIR=$ROOT/pkg/repository/dirty-0.0
+REPODIR=$ROOT/pkg/repository/$REPO
 INSTALLED_DIR="$ROOT/installed"
 BLACKLISTED_DIR="$ROOT/blacklisted"
 

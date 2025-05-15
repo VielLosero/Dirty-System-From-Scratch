@@ -33,7 +33,7 @@ ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
 REPO=MLFSCHROOT
 REPODIR=${REPODIR:-$ROOT/pkg/repository/$REPO}
 LFSREPODIR=${LFSREPODIR:-/mnt/lfs/pkg/repository/$REPO}
-METADATADIR="${METADATADIR:-$ROOT/pkg/metadata/$REPO}"
+METADATADIR="${METADATADIR:-/mnt/lfs/pkg/metadata/$REPO}"
 INSTALLED_DIR="/mnt/lfs/pkg/installed"
 BLACKLISTED_DIR="/mnt/lfs/pkg/blacklisted"
 
@@ -45,6 +45,11 @@ bash /pkg/tools/lfs-chroot mount
 
 # run lfs-chroot login to chek environment if desired.
 #bash /pkg/tools/lfs-chroot login
+
+# Check for rsync.
+if ! type -p rsync &>/dev/null ; then
+  echo "ERROR: Cannot find rsync, please install it."; exit 1 
+fi
 
 # Trap lfs-chroot umount at end or exit.
 trap "bash /pkg/tools/lfs-chroot umount" EXIT

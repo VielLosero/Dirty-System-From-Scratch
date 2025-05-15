@@ -20,6 +20,7 @@ modprobe virtio-snd --> sound
 modprobe virtio-gpu --> video
 modprobe bochs --> video too use lspci -vk and dmesg pci 00:03:0
 modprobe psmouse 
+# done set up udev udev-retry start scripts.
 
 # Generate certificates for https etc.
 make-ca -g
@@ -47,6 +48,8 @@ ln -s /usr/sbin/udevadm /bin/
 # start desired services
 chmod +x /etc/rc.d/init.d/network
 chmod +x /etc/rc.d/init.d/sshd
+chmod +x /etc/rc.d/init.d/udev
+chmod +x /etc/rc.d/init.d/udev-retry
 
 # cp the repository from backup to system.
 
@@ -58,9 +61,10 @@ chmod +x /etc/rc.d/init.d/sshd
 
 
 # todo:
-Remove LFS License part from packages.
+Remove LFS License part from my packages.
 Add TAGS in a more standard way.
 Revise automake release version if script exist ... lot of scripts ... manually best?
 Add a Changelog.
 Redo updates
 --> done v1 on installpkg Check needed libs --> external libs and pkg libs
+add some check for rsync if not installed.

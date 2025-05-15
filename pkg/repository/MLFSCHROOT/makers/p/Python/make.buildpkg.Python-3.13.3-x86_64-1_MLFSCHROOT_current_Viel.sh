@@ -291,7 +291,7 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  ./configure --prefix=$PKGDIR/usr   \
+  ./configure --prefix=/usr   \
               --enable-shared \
               --without-ensurepip || exit 1
   # --- END_LFS_CMD_CONFIG ---

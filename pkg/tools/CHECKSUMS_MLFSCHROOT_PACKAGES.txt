@@ -15,6 +15,7 @@ e9af6d59675efe9c4c13868f1526ab74  /pkg/repository/MLFSCHROOT/packages/c/coreutil
 6903d42d0244b923c76d46e1a7cd7ee9  /pkg/repository/MLFSCHROOT/packages/l/linux-headers/linux-headers-6.14.3-x86_64-1_MLFSCHROOT_current_Viel.sh
 bcc1eba148be1f88dcfd7820524e3893  /pkg/repository/MLFSCHROOT/packages/d/diffutils/diffutils-3.11-x86_64-1_MLFSCHROOT_current_Viel.sh
 f63d4cbf0889b9dd3cf978d3a4d2a464  /pkg/repository/MLFSCHROOT/packages/d/diffutils/diffutils-3.12-x86_64-1_MLFSCHROOT_current_Viel.sh
+860550e418c98d0c6a22c755083d1eb4  /pkg/repository/MLFSCHROOT/packages/z/zlib/zlib-1.3.1-x86_64-1_MLFSCHROOT_current_Viel.sh
 ee58a20ea991bbb63ba23d456be2887e  /pkg/repository/MLFSCHROOT/packages/s/sed/sed-4.9-x86_64-1_MLFSCHROOT_current_Viel.sh
 b818cd82078726016661cf967c692add  /pkg/repository/MLFSCHROOT/packages/m/make/make-4.4.1-x86_64-1_MLFSCHROOT_current_Viel.sh
 ed9f8dbadc397db629a1ddd3249184ef  /pkg/repository/MLFSCHROOT/packages/m/m4/m4-1.4.19-x86_64-1_MLFSCHROOT_current_Viel.sh
@@ -32,7 +33,7 @@ e7939dc4dafa9e041a084554382f7122  /pkg/repository/MLFSCHROOT/packages/f/findutil
 2af37f28b3c1bcc0e24d4272dcdbaf76  /pkg/repository/MLFSCHROOT/packages/p/patch/patch-2.8-x86_64-1_MLFSCHROOT_current_Viel.sh
 2f40501ae8ac7d29c4342bda70cc2462  /pkg/repository/MLFSCHROOT/packages/p/patch/patch-2.7.6-x86_64-1_MLFSCHROOT_current_Viel.sh
 c9d1d2ac1e75ce8e00d8ae617b5b5527  /pkg/repository/MLFSCHROOT/packages/p/Python/Python-3.13.2-x86_64-1_MLFSCHROOT_current_Viel.sh
-4c122f240de8e1fc83eb50aa0f6c5879  /pkg/repository/MLFSCHROOT/packages/p/Python/Python-3.13.3-x86_64-1_MLFSCHROOT_current_Viel.sh
+38d2a4e15d7fba75102a1ab216ca27f1  /pkg/repository/MLFSCHROOT/packages/p/Python/Python-3.13.3-x86_64-1_MLFSCHROOT_current_Viel.sh
 6a5ccab79a65ad9d29c047f90f5df9e2  /pkg/repository/MLFSCHROOT/packages/p/perl/perl-5.40.1-x86_64-1_MLFSCHROOT_current_Viel.sh
 3aded5cf92553f5c68207938b587cde9  /pkg/repository/MLFSCHROOT/packages/p/perl/perl-5.40.2-x86_64-1_MLFSCHROOT_current_Viel.sh
 52817ce9b21a6152b07f2ad79be6ddf1  /pkg/repository/MLFSCHROOT/packages/u/util-linux/util-linux-2.40.4-x86_64-1_MLFSCHROOT_current_Viel.sh

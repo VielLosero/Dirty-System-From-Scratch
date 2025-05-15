@@ -4,3 +4,7 @@ find /pkg/repository/MLFSCHROOT/makers/ -type f  -exec md5sum {} \; > /pkg/tools
 find /pkg/repository/MLFSCHROOT/builders/ -type f  -exec md5sum {} \; > /pkg/tools/CHECKSUMS_MLFSCHROOT_BUILDERS.txt
 find /pkg/repository/MLFSCHROOT/packages/ -type f  -exec md5sum {} \; > /pkg/tools/CHECKSUMS_MLFSCHROOT_PACKAGES.txt
 
+
+find /pkg/repository/dirty-0.0/makers/ -type f  -exec md5sum {} \; > /pkg/tools/CHECKSUMS_dirty-0.0_MAKERS.txt
+find /pkg/repository/dirty-0.0/builders/ -type f  -exec md5sum {} \; > /pkg/tools/CHECKSUMS_dirty-0.0_BUILDERS.txt
+find /pkg/repository/dirty-0.0/packages/ -type f  -exec md5sum {} \; > /pkg/tools/CHECKSUMS_dirty-0.0_PACKAGES.txt

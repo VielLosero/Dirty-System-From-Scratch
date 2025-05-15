@@ -40,12 +40,14 @@ BLACKLISTED_DIR="$ROOT/pkg/blacklisted"
 INSTALLPKG=1
 list=/pkg/tools/lists_of_packages/MLFSCHROOT_Cross-Toolchain_and_cross_tools.txt
 
-#if [ ! -e "$INSTALLED_DIR/make_buildpkg_dirty_package_manager*" ] ; then 
-#INSTALLDIR=$ROOT bash $REPODIR/packages/m/make_buildpkg_dirty_package_manager/make_buildpkg_dirty_package_manager-0.0.1-all-1_MLFSCHROOT_Viel.sh install || exit 1
-#fi
-#if [ ! -e "$INSTALLED_DIR/filesystem_hierarchy*" ] ; then 
-#INSTALLDIR=$ROOT bash $REPODIR/packages/f/filesystem_hierarchy/filesystem_hierarchy-3.0-all-1_MLFSCHROOT_r12.2_multilib.sh install || exit 1
-#fi
+# Check for ROOT.
+[[ -d $ROOT ]] || mkdir -vp $ROOT
+
+# Check for rsync.
+if ! type -p rsync &>/dev/null ; then
+  echo "ERROR: Cannot find rsync, please install it."; exit 1 
+fi
+
 # run lfs-user first to make needed user and files.
 bash /pkg/tools/lfs-user create
 

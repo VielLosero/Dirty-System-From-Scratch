@@ -29,7 +29,7 @@
 #:Maintainer: Viel Losero <viel.losero@gmail.com>
 #:Contributor: -
 
-#:Version:0.0.4
+#:Version:0.0.5
 
 # Get Application init data from filename.
 cd $(dirname $0) ; SWD=$(pwd) # script work directory
@@ -40,6 +40,10 @@ pkg_ver="${pkg_name%-*-*}" ; ver="${pkg_ver/$name-/}"
 pkg_arch="${pkg_name%-*}" ; arch=${pkg_arch/$name-$ver-/}
 rel=${pkg_name/$name-$ver-$arch-/}
 first_pkg_char=$(printf %.1s ${name,})
+rel_build=${rel%%_*} ; rel_helper1=${rel/${rel_build}_}
+rel_tag1=${rel_helper1/_*} ; rel_helper2=${rel/${rel_build}_${rel_tag1}_}
+rel_tag2=${rel_helper2/_*} ; rel_helper3=${rel/${rel_build}_${rel_tag1}_${rel_tag2}_}
+rel_tag3=${rel_helper3/_*}
 echo "  Package name: $name"
 echo "  Version: $ver"
 echo "  Arch: $arch"
@@ -100,7 +104,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: No new versions found." ; exit 0
     else
       if [ $NEW = 0 ] ; then
-        NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
+        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
         if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0

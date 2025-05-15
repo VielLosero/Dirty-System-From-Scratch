@@ -46,7 +46,7 @@ mkdir -pv $LFS/{tmp,pkg}
 # change perms /mnt/lfs/* to lfs user.
 if ls -l /mnt/lfs/ | grep "root root" >/dev/null ; then
 chown -v lfs $LFS/{usr{,/*},lib,var,etc,bin,sbin,tools}
-chown -v lfs $LFS/pkg
+chown -v lfs -R $LFS/pkg
 case $(uname -m) in
   x86_64) chown -v lfs $LFS/lib64 ;;
 esac

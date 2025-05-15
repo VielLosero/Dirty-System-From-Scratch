@@ -32,6 +32,7 @@ if [[ $MOUNT -eq 1 ]] ; then
   # now dirty dirs.
   chown --from lfs -R root:root $LFS/pkg
   fi
+  chmod -v 1777 $LFS/tmp
   echo "7.3. Preparing Virtual Kernel File Systems."
   mkdir -pv $LFS/{dev,proc,sys,run}
 	if ! mount  | grep $LFS/dev ; then mount -v --bind /dev $LFS/dev ; fi
