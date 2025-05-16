@@ -68,3 +68,7 @@ Add a Changelog.
 Redo updates
 --> done v1 on installpkg Check needed libs --> external libs and pkg libs
 add some check for rsync if not installed.
+
+
+Change tar to reproducible on pkg that I make. the pkg manager and the fylesystem.
+

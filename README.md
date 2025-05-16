@@ -1,10 +1,11 @@
 
 ## The Dirty system from scratch
 English is not my main language, so be patient. I will write little.
-As a learning experience I started building a simple package manager to manage my first build of LFS. Late I changed to MLFS and GLFS. This is a work in progress. Happy to share my dirty if this can help someone. For now I build full MLFS and 70% GLFS and some custom packages to get a little functional system that can boot on my laptop and continue the development not in a virtual machine. I need feedback, testers, contributors, supporters ... any help are welcome.
+As a learning experience I started building a simple package manager to manage my first build of LFS. Late I changed to MLFS and GLFS. This is a work in progress. Sure each LFS users have their own scripts to manage their packages, updates and the system. Happy to share my dirty if this can help someone.
+For now I build full MLFS and 70% GLFS and some custom packages to get a little functional system that can boot on my laptop and continue the development not in a virtual machine. I need feedback, testers, contributors, supporters ... any help are welcome.
 Why that name "Dirty"?
 Because it is a work in progress and sure my code can polish more, but it works.
-The concept are easy, a script (the maker) that download the sources do the checksums and make a second script (the builder). The builder creates a thirt script (the package) to install the files. You can find a old description on the file [HOW.DID.DIRTY.START.md](HOW.DID.DIRTY.START.md)
+The concept are easy, a script (the maker) that download the sources do the checksums and make a second script (the builder). The builder creates a thirt script (the package) to install the files. You can read more about it on my old file [HOW.DID.DIRTY.START.md](HOW.DID.DIRTY.START.md)
 
 ### How to install the repository and build from sources.
 Clone the repository and move it to have your / like /pkg/repository/MLFSCHROOT. Root perms are needed.
@@ -13,9 +14,9 @@ cd /tmp
 git clone https://github.com/VielLosero/dirty.current.git
 mv dirty.current/pkg /
 ```
-Then you can mount your disk or partition under /mnt/lfs or mount a disk image on /mnt/lfs for virtual machines or simply run it to build LFS on your /mnt/lfs directory. It is highly recommended to built in a virtual machine. Late you can scp or rsync the packages to install it where you want.
+Then you can mount your disk or partition under /mnt/lfs or mount a disk image on /mnt/lfs for virtual machines or simply run it to build LFS on your /mnt/lfs directory. It is highly recommended to built in a virtual machine if you don't know what you are doing. Late you can scp or rsync the packages to install it where you want.
 
-To start the build run the script that download sources, make the buildes, build the packages and install MLFS chapters 5 and 6 on /mnt/lfs. This will create the chroot environment. Be care about start on a clean /mnt/lfs.
+To start the build you need to run the script that download sources, make the buildes, build the packages and install MLFS chapters 5 and 6 on /mnt/lfs. This will create the chroot environment. Be care about start on a clean /mnt/lfs.
 Alternatively you can run the makers one by one if you create the user and LFS environment before.
 ```
 bash /pkg/tools/scripts/run.MLFSCHROOT_Cross-Toolchain.sh
@@ -24,7 +25,7 @@ This will take some time. On my laptop with an Intel Core i7-6700HQ @ 4x 2.592GH
 
 After build if everything has gone well you can chroot inside using the lfs-chroot script, or manualy like a current LFS.
 ```
-bash-5.2# bash /pkg/tools/lfs-chroot mount
+bash-5.2# bash /pkg/tools/lfs-chroot mount && bash /pkg/tools/lfs-chroot login
 7.2. Changing Ownership.
 7.3. Preparing Virtual Kernel File Systems.
 mkdir: created directory '/mnt/lfs/dev'
@@ -37,7 +38,6 @@ mount: proc mounted on /mnt/lfs/proc.
 mount: sysfs mounted on /mnt/lfs/sys.
 mount: tmpfs mounted on /mnt/lfs/run.
 mount: tmpfs mounted on /mnt/lfs/dev/shm.
-bash-5.2# bash /pkg/tools/lfs-chroot login
 devtmpfs on /mnt/lfs/dev type devtmpfs (rw,relatime,size=14881328k,nr_inodes=3720332,mode=755,inode64)
 devpts on /mnt/lfs/dev/pts type devpts (rw,relatime,gid=5,mode=620,ptmxmode=000)
 tmpfs on /mnt/lfs/dev/shm type tmpfs (rw,nosuid,nodev,relatime,inode64)
@@ -54,7 +54,7 @@ bash /pkg/tools/scripts/run.MLFSCHROOT_Chroot_additional_tools.sh
 ```
 This will take in my system about 20 minutes. If everything has gone well you can now chroot inside /mnt/lfs dir using the lfs-chroot script or manualy mounting dev,proc,sys ... like a current LFS.
 ```
-bash-5.2# bash /pkg/tools/lfs-chroot mount
+bash-5.2# bash /pkg/tools/lfs-chroot mount && bash /pkg/tools/lfs-chroot login
 7.2. Changing Ownership.
 7.3. Preparing Virtual Kernel File Systems.
 mount: /dev bound on /mnt/lfs/dev.
@@ -63,7 +63,6 @@ mount: proc mounted on /mnt/lfs/proc.
 mount: sysfs mounted on /mnt/lfs/sys.
 mount: tmpfs mounted on /mnt/lfs/run.
 mount: tmpfs mounted on /mnt/lfs/dev/shm.
-bash-5.2# bash /pkg/tools/lfs-chroot login
 devtmpfs on /mnt/lfs/dev type devtmpfs (rw,relatime,size=14881332k,nr_inodes=3720333,mode=755,inode64)
 devpts on /mnt/lfs/dev/pts type devpts (rw,relatime,gid=5,mode=620,ptmxmode=000)
 tmpfs on /mnt/lfs/dev/shm type tmpfs (rw,nosuid,nodev,relatime,inode64)
@@ -100,18 +99,13 @@ To chroot into LFS dir.
 bash /pkg/tools/lfs-chroot mount && bash /pkg/tools/lfs-chroot login
 ```
 Inside the chroot. Again you can run the builders one by one and install the packages created or run the above commands to automate the task.
-Be care about the grub package if you don't have on /mnt/lfs a mounted raw file disk for virtual machines or a separated disk.
-Replace the "I" with a black space on /tmp/run.repo.list if you don't want to autoinstall it and destroy your system.
-You can check my old script /pkg/tools/scripts/make_dirty_0.0.1.raw.disk.for.qemu.sh to make a raw disk for qemu and mount it on /mnt/lfs or the newer script /pkg/tools/scripts/qemu-device-mapper.sh to mount the partition on a virtual machine.
 ```
 (lfs chroot) root:/# cp /pkg/tools/run.repo.list.dirty-0.0.build.install /tmp/run.repo.list
 
 (lfs chroot) root:/# bash /pkg/tools/scripts/run.repo.list.sh
 ```
-
 ## What next?
-If you are able to make it work you can then check for updates. Make and share your makers. 
-
+If you are able to make it work you can then check for updates. Make and share your makers. Test and feedback. Contribute and leave the dirty grow.
 
 ## Thanks to:
 
