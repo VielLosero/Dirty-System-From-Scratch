@@ -117,5 +117,5 @@ if [ "$s" != " " ] ; then u=" " ; fi
 # NOTES: s and u lowers reference to makers or builders. Upper reference to packages.
 #echo " M B P I S/s U/u/R V L/l package_name "
 #echo " $m $b $p $i $s $u $v $l $pkg_name "
-echo " $m $b $p $i $s $u $v $l $pkg_name"
+echo "# $m $b $p $i $s $u $v $l $pkg_name"
 done

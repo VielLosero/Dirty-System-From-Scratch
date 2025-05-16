@@ -124,7 +124,9 @@ fi
 # Get sources and check.
 cd $SOURCESDIR || exit 1
 # We don't need download sources, we made it, so only set var for compres the files.
-file1=$name-$ver.tar.xz 
+#MAKER_SOURCE_DATE_EPOCH="${MAKER_SOURCE_DATE_EPOCH:-$(date +%s)}"
+MAKER_SOURCE_DATE_EPOCH="1747391248"
+file1=$name-$ver-$MAKER_SOURCE_DATE_EPOCH.tar.xz
 
 # Check signaure if needed
 
@@ -137,21 +139,22 @@ TMP_MAKE_DIR=$(mktemp -d /tmp/mbp-tmp-make-dir-XXXXXX)
 trap "rm -rf $TMP_MAKE_DIR" EXIT
 cd $TMP_MAKE_DIR || exit 1
   # put all files inside name-ver dir.
-  mkdir -vp $name-$ver && cd $name-$ver || exit 1
+  mkdir -vp $name-$ver-$MAKER_SOURCE_DATE_EPOCH && cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
   #mkdir {bin,boot,dev,etc,home,lib,lib64,media,mnt,opt,root,run,sbin,srv,tmp,usr,var}
   #mkdir -pv home
   mkdir -pv {pkg,var}
-  mkdir -pv pkg/{repository,metadata,blacklist}
+  mkdir -pv pkg/{repository,metadata,blacklist,installed,config,tools}
   mkdir -pv var/log
   touch var/log/make.buildpkg.log
+  touch pkg/config/rsync-exclude-from-file.txt
+  touch pkg/config/tar-exclude-from-file.txt
 
-  tar -Jcf $SOURCESDIR/$file1 ../$name-$ver
-  #tar -Jcf $SOURCESDIR/$file1 {pkg,var}
-  #rm var/log/make.buildpkg.log
-  #rmdir var/log
-  #rmdir pkg/{repository,metadata,blacklist}
-  #rmdir pkg
-  #rmdir $name-$ver || exit 1
+  #tar -Jcf $SOURCESDIR/$file1 ../$name-$ver
+  LC_ALL=POSIX tar --sort=name \
+  --mtime="@${MAKE_SOURCE_DATE_EPOCH}" \
+  --owner=0 --group=0 --numeric-owner \
+  --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
+  -Jcf $SOURCESDIR/$file1 ../$name-$ver-$MAKER_SOURCE_DATE_EPOCH
 
 # link sources to sources per package to code it.
 ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ || exit 1 
