@@ -45,11 +45,13 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Filesystem Hierarchy for the system. Following the Filesystem Hierarchy Standard (FHS)"
-url="https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html"
+short_desc="Libxml2 is a XML C parser and toolkit."
+url="https://gitlab.gnome.org/GNOME/libxml2/-/wikis/home"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
+# sub_ver to download link
+sub_ver="${ver%.*}"
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
@@ -75,13 +77,21 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://refspecs.linuxfoundation.org/fhs.shtml
+version_url=https://gitlab.gnome.org/GNOME/libxml2/-/releases.atom
+sum="sha256sum"
+file1_url=https://download.gnome.org/sources/libxml2/$sub_ver
+file1=$name-$ver.tar.xz
+file1_sum=353f3c83535d4224a4e5f1e88c90b5d4563ea8fec11f6407df640fd28fc8b8c6
+file2_url=$file1_url
+file2=${name}-${ver}.sha256sum
+file2_sum=371bd8645a2c4528b220cd92ae9f12f610d65b13a42445afb2a6314ab02e4bd6
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | grep "^<h2>" | head -1 | cut -d'"' -f2 | sed 's/FHS_//' )
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep "href=\"https://gitlab.gnome.org/GNOME/libxml2/-/releases/v[0-9]" | sort -Vr | head -1 | cut -d'"' -f2 | sed 's%.*/%%g' | sed 's/^v//' )
+  last_sub_ver="${last_version%.*}"
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -90,16 +100,16 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        #if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url/$sub_ver/$last_sub_ver}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else
             cp $0 $NEWMAKE 
             echo "Created: $NEWMAKE" ; exit 2
           fi
-        #else
-        #  echo "Failed: new version file not found." ; exit 1 
-        #fi
+        else
+          echo "Failed: new version file not found." ; exit 1 
+        fi
       else
         echo "Version check: $name $last_version  $version_url" ; exit 2
       fi
@@ -119,117 +129,17 @@ fi
 
 # Get sources and check.
 cd $SOURCESDIR || exit 1
-# We don't need download sources, we made it, so only set var for compres the files.
-file1=$name-$ver.tar.xz 
+[ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
+[ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
+[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
+[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
 
 # Prepare sources or patches.
 echo "Preparing sources."
 cd $SOURCESPPDIR || exit 1
-
-if [ -e $file1 ] ; then rm $file1 ; fi
-TMP_BUILDFILESYSTEM_HIERARCHY_DIR=$(mktemp -d /tmp/make.buildpkg-filesystem-hierarchy-XXXXXX)
-trap "rm -rf $TMP_BUILDFILESYSTEM_HIERARCHY_DIR" EXIT
-cd $TMP_BUILDFILESYSTEM_HIERARCHY_DIR || exit 1
-  #4.2. Creating a Limited Directory Layout in the LFS Filesystem
-  #mkdir {bin,boot,dev,etc,home,lib,lib64,media,mnt,opt,root,run,sbin,srv,tmp,usr,var}
-  #mkdir -pv home
-  mkdir -pv {etc,var,tmp}
-  mkdir -pv usr/{bin,lib,sbin}
-
-  for i in bin lib sbin; do
-    ln -sv usr/$i $i
-  done
-  case $(uname -m) in
-    x86_64) mkdir -pv lib64 ;;
-  esac
-  mkdir -pv usr/lib32
-  ln -sv usr/lib32 lib32
-  mkdir -pv tools
-
-  echo "Creating LFS auto script."
-cat << 'EOF' > tmp/LFS_autoconfig_user_lfs.sh 
-echo "2.6.Setting.The.LFS.Variable.sh"
-export LFS=/mnt/lfs
-echo $LFS
-echo "2.7 Mounting the New Partition"
-mkdir -pv $LFS
-#mount -v -t ext4 /dev/<xxx> $LFS
-echo "4.2. Creating a Limited Directory Layout in the LFS Filesystem"
-chown root:root $LFS
-chmod 755 $LFS
-echo "4.3 Adding LFS user"
-groupadd lfs
-useradd -s /bin/bash -g lfs -m -k /dev/null lfs
-passwd lfs
-chown -v lfs $LFS/{usr{,/*},lib,var,etc,bin,sbin,tools}
-case $(uname -m) in
-  x86_64) chown -v lfs $LFS/lib64 ;;
-esac
-chown -v lfs $LFS/lib32
-echo "4.4. Setting Up the Environment"
-mv  $LFS/tmp/.bash_profile /home/lfs/.bash_profile
-mv  $LFS/tmp/.bashrc /home/lfs/.bashrc 
-chmod 1777 /$LFS/tmp
-su - lfs
-EOF
-
-cat > tmp/.bash_profile << "EOF"
-exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' /bin/bash
-EOF
-
-cat > tmp/.bashrc << "EOF"
-set +h
-umask 022
-LFS=/mnt/lfs
-LC_ALL=POSIX
-LFS_TGT=x86_64-lfs-linux-gnu
-LFS_TGT32=i686-lfs-linux-gnu
-LFS_TGTX32=x86_64-lfs-linux-gnux32
-PATH=/usr/bin
-if [ ! -L /bin ]; then PATH=/bin:$PATH; fi
-PATH=$LFS/tools/bin:$PATH
-CONFIG_SITE=$LFS/usr/share/config.site
-export LFS LC_ALL LFS_TGT LFS_TGT32 LFS_TGTX32 PATH
-export MAKEFLAGS=-j$(nproc) 
-EOF
-
-  tar -Jcf $SOURCESDIR/$file1 {bin,etc,lib,lib64,lib32,sbin,usr,var,tools,tmp}
-  #rmdir home
-  rm tmp/LFS_autoconfig_user_lfs.sh
-  rm tmp/.bash_profile
-  rm tmp/.bashrc
-  rmdir usr/{bin,lib,sbin}
-  rmdir usr/lib32
-  rm lib32
-  rm {bin,lib,sbin}
-  rmdir {etc,lib64,usr,var,tools,tmp}
-
-# add some files 
-#cat << 'EOF' > root/4.2.set-up-Limited-Directory-Layout.sh 
-##To get root dir where this is installed 
-#cd $(dirname $0) && cd ..
-## Added Limited Directory Layout in the LFS Filesystem
-#mkdir -pv $LFS/{etc,var} $LFS/usr/{bin,lib,sbin}
-#
-#for i in bin lib sbin; do
-#  ln -sv usr/$i $LFS/$i
-#done
-#
-#case $(uname -m) in
-#  x86_64) mkdir -pv $LFS/lib64 ;;
-#esac
-#
-#mkdir -pv $LFS/usr/lib{,x}32
-#ln -sv usr/lib32 $LFS/lib32
-#ln -sv usr/libx32 $LFS/libx32
-#
-#mkdir -pv $LFS/tools
-#EOF
-
-# link sources to sources per package to code it.
-ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ || exit 1 
+# Do something if needed.
 
 # Making Buildpkg.sh $OUTBUILD (The builder)
 echo "Making buildpkg."
@@ -330,12 +240,6 @@ if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
   # Check tasks needed to build.
   start_checks_date=$(date +"%s")
   echo "Checking needs to build."
-  # Check if needed packages are installed.
-  if ls /pkg/installed/dirty-repository-manager-* >/dev/null ; then
-  	echo "OK: required packages found."
-  else
-  	echo "ERROR: required packages not found." && exit 1
-  fi
   # --- LFS_CMD_CHECKS ---
   # --- END_LFS_CMD_CHECKS ---
   end_checks_date=$(date +"%s")
@@ -355,6 +259,7 @@ if [ $EXTRACT -eq 1 ] ; then echo "Skipping EXTRACT sources." ; else
 EOF_OUTBUILD
   echo '  tar xf $SOURCESDIR'/$file1 >> $OUTBUILD 
   cat << 'EOF_OUTBUILD' >> $OUTBUILD
+  cd $name-$ver || exit 1
   # --- LFS_CMD_EXTRACT ---
   # --- END_LFS_CMD_EXTRACT ---
   end_extract_date=$(date +"%s")
@@ -362,12 +267,13 @@ EOF_OUTBUILD
   echo "Extract time: $extract_time" >> $TMP_PKG_TIMINGS_FILE
   echo "Extract time: $extract_time seconds" 
 fi
-
+  
 if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else 
   # Apply patches here.
   start_patch_date=$(date +"%s")
   echo "Applying patches."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
@@ -382,7 +288,15 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
+            #--with-icu              \
   # --- LFS_CMD_CONFIG ---
+  ./configure --prefix=/usr           \
+            --sysconfdir=/etc       \
+            --disable-static        \
+            --with-history          \
+            PYTHON=/usr/bin/python3 \
+            --docdir=/usr/share/doc/$name-$ver || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -394,7 +308,10 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   start_build_date=$(date +"%s")
   echo "Compiling sources."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD ---
+  NUMJOBS="-j $(nproc)"
+  make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -407,10 +324,9 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   #Installing sources.
   echo "Installing sources."
   cd $BUILDDIR || exit 1
-  echo "  Cleaning $PKGDIR"
-  if [ -d $PKGDIR ] ; then rm -rf $PKGDIR/* ; fi || exit 1
-  cp -rv * $PKGDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
+  make DESTDIR=$PKGDIR install || exit 1
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -423,8 +339,15 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   start_post_date=$(date +"%s")
   echo "Post compilation tasks."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_POST ---
+  # Finally, prevent some packages from unnecessarily linking to ICU
+  rm -vf $PKGDIR/usr/lib/libxml2.la 
+  sed '/libs=/s/xml2.*/xml2"/' -i $PKGDIR/usr/bin/xml2-config 
   # --- END_LFS_CMD_POST ---
+  # add missed link for usr/lib/libxml2.so.2 -> libxml2.so.16.0.1
+  cd $PKGDIR/usr/lib || exit 1
+  ln -s libxml2.so.16.0.1 libxml2.so.2
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
   echo "Post compilation tasks time: $post_time" >> $TMP_PKG_TIMINGS_FILE
@@ -436,6 +359,7 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   start_config32_date=$(date +"%s")
   echo "Configuring 32bits sources."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG32 ---
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
@@ -448,6 +372,7 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   start_build32_date=$(date +"%s")
   echo "Compiling 32bits sources."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD32 ---
   # --- END_LFS_CMD_BUILD32 ---
   end_build32_date=$(date +"%s")
@@ -461,6 +386,7 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   start_install32_date=$(date +"%s")
   echo "Installing 32bits sources."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL32 ---
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
@@ -474,6 +400,7 @@ if [ $POST32 -eq 1 ] ; then echo "Skipping POST32 bits compilation tasks." ; els
   start_post32_date=$(date +"%s")
   echo "Post compilation 32bits tasks."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_POST32 ---
   # --- END_LFS_CMD_POST32 ---
   end_post32_date=$(date +"%s")

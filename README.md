@@ -94,6 +94,8 @@ You can check the packages build statistics in /pkg/metadata/MLFSCHROOT/{pkg_nam
 You can check the statisctics inside chroot on /pkg/metadata/dirty-0.0/ too.
 ...
 
+Some changes are comming ... stay up. 
+
 ## Thanks to:
 
 LFS BLFS MLFS GLFS For their job.

@@ -334,7 +334,7 @@ if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
   start_checks_date=$(date +"%s")
   echo "Checking needs to build."
   # Check if needed packages are installed.
-  if ls /mnt/lfs/pkg/installed/make_buildpkg_dirty_package_manager-* >/dev/null ; then
+  if ls $ROOT/pkg/installed/dirty-repository-manager-* >/dev/null ; then
   	echo "OK: required packages found."
   else
   	echo "ERROR: required packages not found." && exit 1

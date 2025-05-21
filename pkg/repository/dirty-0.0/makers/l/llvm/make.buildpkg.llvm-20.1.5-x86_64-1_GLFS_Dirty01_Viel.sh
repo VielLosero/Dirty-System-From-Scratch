@@ -45,11 +45,12 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Filesystem Hierarchy for the system. Following the Filesystem Hierarchy Standard (FHS)"
-url="https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html"
+short_desc="LLD is a linker from the LLVM project that is a drop-in replacement for system linkers and runs much faster than them."
+url="https://lld.llvm.org/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
+sub_ver=$ver.src
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
@@ -75,13 +76,49 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://refspecs.linuxfoundation.org/fhs.shtml
+version_url=https://github.com/llvm/llvm-project/releases/latest
+sum="sha256sum"
+file1_url=https://github.com/llvm/llvm-project/releases/download/llvmorg-$ver
+#https://github.com/llvm/llvm-project/releases/tag/llvmorg-$ver
+file1=$name-$ver.src.tar.xz
+file1_sum=e5dc9b9d842c5f79080f67860a084077e163430de1e2cd3a74e8bee86e186751
+file2_url=$file1_url
+file2=${file1}.sig
+file2_sum=15bf0bcc672e3deaede87839c1ecab4cbbb88a4c09a01d2575956b7b6ff2863d
+file3_url=$file1_url
+file3=cmake-$ver.src.tar.xz
+file3_sum=d5423ec180f14df6041058a2b66e321e4420499e111235577e09515a38a03451
+file4_url=$file1_url
+file4=${file3}.sig
+file4_sum=c41008d797d2d6a66a30210c1d6e59bf390989fad097b0500666e51852c19b52
+file5_url=$file1_url
+file5=third-party-$ver.src.tar.xz
+file5_sum=bae96bfc535f4e8e27db8c7bce88d1236ae2af25afb70333b90aabf55168c186
+file6_url=$file1_url
+file6=${file5}.sig
+file6_sum=7181c7ffc542ee61b64a0f8b180f7a0f881e0b1bfa1d9d1352ce914a246a34e7
+#recomended
+file7_url=$file1_url
+file7=clang-$ver.src.tar.xz
+file7_sum=3cddfd12c81a64d2e6036478417e0314278aec3a76e1d197c6fa444a07ed6bfc
+file8_url=$file1_url
+file8=${file7}.sig
+file8_sum=d67efab70922f542bcd4e116ee65589468a7660c26fac8e60605a12f9b244e38
+file9_url=$file1_url
+file9=compiler-rt-$ver.src.tar.xz
+file9_sum=74ba10db2c9e8938cd7c77f4e4d4fea609d116d7b0eaaf3ef8e8c5db19c0d301
+file10_url=$file1_url
+file10=${file9}.sig
+file10_sum=e794d1638ecd8c040c617c0c8653a7a61bfba07c990a2ada69151673fd0aafe7
+llvm_gpgkey=474E22316ABF4785A88C6E8EA2C794A986419D8A
+
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | grep "^<h2>" | head -1 | cut -d'"' -f2 | sed 's/FHS_//' )
+  # Final URL after the redirect.
+  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/llvmorg-%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/llvmorg-%%' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -90,16 +127,16 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        #if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url/$ver/$last_version}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else
             cp $0 $NEWMAKE 
             echo "Created: $NEWMAKE" ; exit 2
           fi
-        #else
-        #  echo "Failed: new version file not found." ; exit 1 
-        #fi
+        else
+          echo "Failed: new version file not found." ; exit 1 
+        fi
       else
         echo "Version check: $name $last_version  $version_url" ; exit 2
       fi
@@ -119,117 +156,39 @@ fi
 
 # Get sources and check.
 cd $SOURCESDIR || exit 1
-# We don't need download sources, we made it, so only set var for compres the files.
-file1=$name-$ver.tar.xz 
+[ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
+[ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
+[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
+[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
+[ ! -e $file3 ] && $GETFILE ${file3_url}/${file3}
+[ -e $file3 ] && if echo "$file3_sum $file3" | $sum -c ; then ln -v $SOURCESDIR/$file3 $SOURCESPPDIR/ ; else $sum $file3 ; exit 1 ; fi
+[ ! -e $file4 ] && $GETFILE ${file4_url}/${file4}
+[ -e $file4 ] && if echo "$file4_sum $file4" | $sum -c ; then ln -v $SOURCESDIR/$file4 $SOURCESPPDIR/ ; else $sum $file4 ; exit 1 ; fi
+[ ! -e $file5 ] && $GETFILE ${file5_url}/${file5}
+[ -e $file5 ] && if echo "$file5_sum $file5" | $sum -c ; then ln -v $SOURCESDIR/$file5 $SOURCESPPDIR/ ; else $sum $file5 ; exit 1 ; fi
+[ ! -e $file6 ] && $GETFILE ${file6_url}/${file6}
+[ -e $file6 ] && if echo "$file6_sum $file6" | $sum -c ; then ln -v $SOURCESDIR/$file6 $SOURCESPPDIR/ ; else $sum $file6 ; exit 1 ; fi
+[ ! -e $file7 ] && $GETFILE ${file7_url}/${file7}
+[ -e $file7 ] && if echo "$file7_sum $file7" | $sum -c ; then ln -v $SOURCESDIR/$file7 $SOURCESPPDIR/ ; else $sum $file7 ; exit 1 ; fi
+[ ! -e $file8 ] && $GETFILE ${file8_url}/${file8}
+[ -e $file8 ] && if echo "$file8_sum $file8" | $sum -c ; then ln -v $SOURCESDIR/$file8 $SOURCESPPDIR/ ; else $sum $file8 ; exit 1 ; fi
+[ ! -e $file9 ] && $GETFILE ${file9_url}/${file9}
+[ -e $file9 ] && if echo "$file9_sum $file9" | $sum -c ; then ln -v $SOURCESDIR/$file9 $SOURCESPPDIR/ ; else $sum $file9 ; exit 1 ; fi
+[ ! -e $file10 ] && $GETFILE ${file10_url}/${file10}
+[ -e $file10 ] && if echo "$file10_sum $file10" | $sum -c ; then ln -v $SOURCESDIR/$file10 $SOURCESPPDIR/ ; else $sum $file10 ; exit 1 ; fi
 
 # Check signaure if needed
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $llvm_gpgkey
+gpg --verify ./$file2 $file1 || exit 1
+gpg --verify ./$file4 $file3 || exit 1
+gpg --verify ./$file6 $file5 || exit 1
+gpg --verify ./$file8 $file7 || exit 1
+gpg --verify ./$file10 $file9 || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
 cd $SOURCESPPDIR || exit 1
-
-if [ -e $file1 ] ; then rm $file1 ; fi
-TMP_BUILDFILESYSTEM_HIERARCHY_DIR=$(mktemp -d /tmp/make.buildpkg-filesystem-hierarchy-XXXXXX)
-trap "rm -rf $TMP_BUILDFILESYSTEM_HIERARCHY_DIR" EXIT
-cd $TMP_BUILDFILESYSTEM_HIERARCHY_DIR || exit 1
-  #4.2. Creating a Limited Directory Layout in the LFS Filesystem
-  #mkdir {bin,boot,dev,etc,home,lib,lib64,media,mnt,opt,root,run,sbin,srv,tmp,usr,var}
-  #mkdir -pv home
-  mkdir -pv {etc,var,tmp}
-  mkdir -pv usr/{bin,lib,sbin}
-
-  for i in bin lib sbin; do
-    ln -sv usr/$i $i
-  done
-  case $(uname -m) in
-    x86_64) mkdir -pv lib64 ;;
-  esac
-  mkdir -pv usr/lib32
-  ln -sv usr/lib32 lib32
-  mkdir -pv tools
-
-  echo "Creating LFS auto script."
-cat << 'EOF' > tmp/LFS_autoconfig_user_lfs.sh 
-echo "2.6.Setting.The.LFS.Variable.sh"
-export LFS=/mnt/lfs
-echo $LFS
-echo "2.7 Mounting the New Partition"
-mkdir -pv $LFS
-#mount -v -t ext4 /dev/<xxx> $LFS
-echo "4.2. Creating a Limited Directory Layout in the LFS Filesystem"
-chown root:root $LFS
-chmod 755 $LFS
-echo "4.3 Adding LFS user"
-groupadd lfs
-useradd -s /bin/bash -g lfs -m -k /dev/null lfs
-passwd lfs
-chown -v lfs $LFS/{usr{,/*},lib,var,etc,bin,sbin,tools}
-case $(uname -m) in
-  x86_64) chown -v lfs $LFS/lib64 ;;
-esac
-chown -v lfs $LFS/lib32
-echo "4.4. Setting Up the Environment"
-mv  $LFS/tmp/.bash_profile /home/lfs/.bash_profile
-mv  $LFS/tmp/.bashrc /home/lfs/.bashrc 
-chmod 1777 /$LFS/tmp
-su - lfs
-EOF
-
-cat > tmp/.bash_profile << "EOF"
-exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' /bin/bash
-EOF
-
-cat > tmp/.bashrc << "EOF"
-set +h
-umask 022
-LFS=/mnt/lfs
-LC_ALL=POSIX
-LFS_TGT=x86_64-lfs-linux-gnu
-LFS_TGT32=i686-lfs-linux-gnu
-LFS_TGTX32=x86_64-lfs-linux-gnux32
-PATH=/usr/bin
-if [ ! -L /bin ]; then PATH=/bin:$PATH; fi
-PATH=$LFS/tools/bin:$PATH
-CONFIG_SITE=$LFS/usr/share/config.site
-export LFS LC_ALL LFS_TGT LFS_TGT32 LFS_TGTX32 PATH
-export MAKEFLAGS=-j$(nproc) 
-EOF
-
-  tar -Jcf $SOURCESDIR/$file1 {bin,etc,lib,lib64,lib32,sbin,usr,var,tools,tmp}
-  #rmdir home
-  rm tmp/LFS_autoconfig_user_lfs.sh
-  rm tmp/.bash_profile
-  rm tmp/.bashrc
-  rmdir usr/{bin,lib,sbin}
-  rmdir usr/lib32
-  rm lib32
-  rm {bin,lib,sbin}
-  rmdir {etc,lib64,usr,var,tools,tmp}
-
-# add some files 
-#cat << 'EOF' > root/4.2.set-up-Limited-Directory-Layout.sh 
-##To get root dir where this is installed 
-#cd $(dirname $0) && cd ..
-## Added Limited Directory Layout in the LFS Filesystem
-#mkdir -pv $LFS/{etc,var} $LFS/usr/{bin,lib,sbin}
-#
-#for i in bin lib sbin; do
-#  ln -sv usr/$i $LFS/$i
-#done
-#
-#case $(uname -m) in
-#  x86_64) mkdir -pv $LFS/lib64 ;;
-#esac
-#
-#mkdir -pv $LFS/usr/lib{,x}32
-#ln -sv usr/lib32 $LFS/lib32
-#ln -sv usr/libx32 $LFS/libx32
-#
-#mkdir -pv $LFS/tools
-#EOF
-
-# link sources to sources per package to code it.
-ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ || exit 1 
+# Do something if needed.
 
 # Making Buildpkg.sh $OUTBUILD (The builder)
 echo "Making buildpkg."
@@ -330,12 +289,6 @@ if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
   # Check tasks needed to build.
   start_checks_date=$(date +"%s")
   echo "Checking needs to build."
-  # Check if needed packages are installed.
-  if ls /pkg/installed/dirty-repository-manager-* >/dev/null ; then
-  	echo "OK: required packages found."
-  else
-  	echo "ERROR: required packages not found." && exit 1
-  fi
   # --- LFS_CMD_CHECKS ---
   # --- END_LFS_CMD_CHECKS ---
   end_checks_date=$(date +"%s")
@@ -355,20 +308,38 @@ if [ $EXTRACT -eq 1 ] ; then echo "Skipping EXTRACT sources." ; else
 EOF_OUTBUILD
   echo '  tar xf $SOURCESDIR'/$file1 >> $OUTBUILD 
   cat << 'EOF_OUTBUILD' >> $OUTBUILD
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_EXTRACT ---
+  tar -xf $SOURCESDIR/cmake-$ver.src.tar.xz &&
+  tar -xf $SOURCESDIR/third-party-$ver.src.tar.xz &&
+  sed "/LLVM_COMMON_CMAKE_UTILS/s@../cmake@cmake-$ver.src@" \
+    -i CMakeLists.txt &&
+  sed "/LLVM_THIRD_PARTY_DIR/s@../third-party@third-party-$ver.src@" \
+    -i cmake/modules/HandleLLVMOptions.cmake
+  #Install clang into the source tree.
+  tar -xf $SOURCESDIR/clang-$ver.src.tar.xz -C tools &&
+  mv tools/clang-$ver.src tools/clang
+  #Install compiler-rt into the source tree.
+  tar -xf $SOURCESDIR/compiler-rt-$ver.src.tar.xz -C projects    &&
+  mv projects/compiler-rt-$ver.src projects/compiler-rt
   # --- END_LFS_CMD_EXTRACT ---
   end_extract_date=$(date +"%s")
   extract_time=$(($end_extract_date - $start_extract_date))
   echo "Extract time: $extract_time" >> $TMP_PKG_TIMINGS_FILE
   echo "Extract time: $extract_time seconds" 
 fi
-
+  
 if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else 
   # Apply patches here.
   start_patch_date=$(date +"%s")
   echo "Applying patches."
   cd $BUILDDIR || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_PATCH ---
+  #There are many Python scripts in this package which use /usr/bin/env python to access the system Python which on LFS is Python3.
+  grep -rl '#!.*python' | xargs sed -i '1s/python$/python3/'
+  #Ensure installing the FileCheck program which is needed by the test suite of some packages (for example rustc-1.86.0):
+  sed 's/utility/tool/' -i utils/FileCheck/CMakeLists.txt
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -382,7 +353,23 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_CONFIG ---
+  mkdir build ; cd build || exit 1
+  CC=gcc CXX=g++                                         \
+  cmake -D CMAKE_INSTALL_PREFIX=/usr                     \
+      -D CMAKE_SKIP_INSTALL_RPATH=ON                   \
+      -D LLVM_ENABLE_FFI=ON                            \
+      -D CMAKE_BUILD_TYPE=Release                      \
+      -D LLVM_BUILD_LLVM_DYLIB=ON                      \
+      -D LLVM_LINK_LLVM_DYLIB=ON                       \
+      -D LLVM_ENABLE_RTTI=ON                           \
+      -D LLVM_TARGETS_TO_BUILD="X86;host;AMDGPU;NVPTX" \
+      -D LLVM_BINUTILS_INCDIR=/usr/include             \
+      -D LLVM_INCLUDE_BENCHMARKS=OFF                   \
+      -D CLANG_DEFAULT_PIE_ON_LINUX=ON                 \
+      -D CLANG_CONFIG_FILE_SYSTEM_DIR=/etc/clang       \
+      -W no-dev -G Ninja .. || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -394,7 +381,10 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   start_build_date=$(date +"%s")
   echo "Compiling sources."
   cd $BUILDDIR || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_BUILD ---
+  cd build || exit 1
+  ninja
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -407,10 +397,12 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   #Installing sources.
   echo "Installing sources."
   cd $BUILDDIR || exit 1
-  echo "  Cleaning $PKGDIR"
-  if [ -d $PKGDIR ] ; then rm -rf $PKGDIR/* ; fi || exit 1
-  cp -rv * $PKGDIR || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_INSTALL ---
+  cd build || exit 1
+  DESTDIR=$PKGDIR ninja install || exit 1
+  mkdir -vp $PKGDIR/usr/bin
+  cp bin/FileCheck $PKGDIR/usr/bin
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -423,7 +415,10 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   start_post_date=$(date +"%s")
   echo "Post compilation tasks."
   cd $BUILDDIR || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_POST ---
+  cd build || exit 1
+  rm -rf *
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
@@ -436,7 +431,29 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   start_config32_date=$(date +"%s")
   echo "Configuring 32bits sources."
   cd $BUILDDIR || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_CONFIG32 ---
+  cd build || exit 1
+  CC=gcc CXX=g++                                          \
+  cmake -D CMAKE_INSTALL_PREFIX=/usr                      \
+      -D CMAKE_C_FLAGS:STRING=-m32                      \
+      -D CMAKE_SKIP_INSTALL_RPATH=ON                    \
+      -D CMAKE_CXX_FLAGS:STRING=-m32                    \
+      -D LLVM_TARGET_ARCH:STRING=i686                   \
+      -D LLVM_LIBDIR_SUFFIX=32                          \
+      -D LLVM_ENABLE_FFI=ON                             \
+      -D CMAKE_BUILD_TYPE=Release                       \
+      -D LLVM_BUILD_LLVM_DYLIB=ON                       \
+      -D LLVM_LINK_LLVM_DYLIB=ON                        \
+      -D LLVM_ENABLE_RTTI=ON                            \
+      -D LLVM_DEFAULT_TARGET_TRIPLE="i686-pc-linux-gnu" \
+      -D LLVM_TARGETS_TO_BUILD="X86;host;AMDGPU;NVPTX"  \
+      -D LLVM_HOST_TRIPLE="x86_64-pc-linux-gnu"         \
+      -D LLVM_BINUTILS_INCDIR=/usr/include              \
+      -D LLVM_INCLUDE_BENCHMARKS=OFF                    \
+      -D CLANG_DEFAULT_PIE_ON_LINUX=ON                  \
+      -D CLANG_CONFIG_FILE_SYSTEM_DIR=/etc/clang        \
+      -W no-dev -G Ninja .. || exit 1
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
   config32_time=$(($end_config32_date - $start_config32_date))
@@ -448,7 +465,10 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   start_build32_date=$(date +"%s")
   echo "Compiling 32bits sources."
   cd $BUILDDIR || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_BUILD32 ---
+  cd build || exit 1
+  ninja
   # --- END_LFS_CMD_BUILD32 ---
   end_build32_date=$(date +"%s")
   build32_time=$(($end_build32_date - $start_build32_date))
@@ -461,7 +481,13 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   start_install32_date=$(date +"%s")
   echo "Installing 32bits sources."
   cd $BUILDDIR || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_INSTALL32 ---
+  cd build || exit 1
+  mkdir -vp $PKGDIR/usr/lib32
+  DESTDIR=$PWD/DESTDIR ninja install || exit 1
+  cp -vr DESTDIR/usr/lib32/* $PKGDIR/usr/lib32
+  rm -rf DESTDIR 
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
   install32_time=$(($end_install32_date - $start_install32_date))
@@ -474,6 +500,7 @@ if [ $POST32 -eq 1 ] ; then echo "Skipping POST32 bits compilation tasks." ; els
   start_post32_date=$(date +"%s")
   echo "Post compilation 32bits tasks."
   cd $BUILDDIR || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_POST32 ---
   # --- END_LFS_CMD_POST32 ---
   end_post32_date=$(date +"%s")

@@ -2,6 +2,7 @@
 # cat list.txt | grep -v "#" | while read line ; do ls /pkg/repository/*/*/*/*$line ; done
 # _DIRTY_
 .make_buildpkg_dirty_package_manager-[0-9]*_DIRTY_*
+.dirty-repository-manager-[0-9]*_DIRTY_*
 .filesystem_hierarchy-[0-9]*_DIRTY_*
 #.lfschroot-[0-9]*_MLFSCHROOT_*
 #

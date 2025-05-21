@@ -45,8 +45,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Filesystem Hierarchy for the system. Following the Filesystem Hierarchy Standard (FHS)"
-url="https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html"
+short_desc="System configuration file for dirty system from scratch."
+url="https://example.org"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -75,13 +75,13 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://refspecs.linuxfoundation.org/fhs.shtml
+version_url=https://example.org
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | grep "^<h2>" | head -1 | cut -d'"' -f2 | sed 's/FHS_//' )
+  last_version=0.0.1
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -331,7 +331,7 @@ if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
   start_checks_date=$(date +"%s")
   echo "Checking needs to build."
   # Check if needed packages are installed.
-  if ls /pkg/installed/dirty-repository-manager-* >/dev/null ; then
+  if ls /pkg/installed/make_buildpkg_dirty_package_manager-* >/dev/null ; then
   	echo "OK: required packages found."
   else
   	echo "ERROR: required packages not found." && exit 1
