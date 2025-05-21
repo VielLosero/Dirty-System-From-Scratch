@@ -70,5 +70,3 @@ Redo updates
 add some check for rsync if not installed.
 
 
-Change tar to reproducible on pkg that I make. the pkg manager and the fylesystem.
-

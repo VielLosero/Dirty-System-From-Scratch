@@ -45,18 +45,11 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Perl is a highly capable, feature-rich programming language with over 37 years of development."
-url="https://www.perl.org/"
+short_desc="PulseAudio is a sound system for POSIX OSes, meaning that it is a proxy for sound applications."
+url="https://www.freedesktop.org/wiki/Software/PulseAudio/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
-#sub_ver for build perl with 5.40 dir and not 5.40.2
-if [[ "$(echo "$ver" | grep -o "\." | wc -l)" -eq "1" ]] ; then
-  sub_ver="${ver}"
-else
-  sub_ver="${ver%.*}"
-fi
-
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
@@ -81,21 +74,21 @@ if wget --help >/dev/null 2>&1 ; then GETVER="wget --output-document - --quiet" 
 elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --silent" GETFILE="curl -C - -O --silent" SPIDER="curl -L --head --fail --silent"
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
-# Package vars.
-version_url=https://www.cpan.org/src/README.html
+# Package var.
+version_url=https://www.freedesktop.org/software/pulseaudio/releases
 sum="md5sum"
-file1_url=https://www.cpan.org/src/5.0
+file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=9ad7a269dc4053cdbeecd4fde444291b
-file2_url=https://www.cpan.org/src/5.0
-file2=${file1}.md5.txt
-file2_sum=91f76f7f929f7705a6b549353dfbaaae
+file1_sum=c4a3596a26ff4b9dcd0c394dd1d4f8ee
+file2_url=$file1_url
+file2=${file1}.sha256sum
+file2_sum=a6cfabdb7532979464eb698282f948fa
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$( $GETVER $version_url | grep wget | cut -d'>' -f2 | cut -d'<' -f1 | sed 's%.*/%%' | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f3 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -120,7 +113,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: $name $last_version  $version_url" ; exit 2
     fi
   fi
-  exit 1
+  exit 2
 fi
 
 # Make needed dirs.
@@ -294,23 +287,14 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  # This version of Perl builds the Compress::Raw::Zlib and Compress::Raw::BZip2 modules. By default Perl will use an internal copy of the sources for the build. Issue the following command so that Perl will use the libraries installed on the system.
-  export BUILD_ZLIB=False
-  export BUILD_BZIP2=0
-  sh Configure -des                                          \
-               -D prefix=/usr                                \
-               -D vendorprefix=/usr                          \
-               -D privlib=/usr/lib/perl5/$sub_ver/core_perl      \
-               -D archlib=/usr/lib/perl5/$sub_ver/core_perl      \
-               -D sitelib=/usr/lib/perl5/$sub_ver/site_perl      \
-               -D sitearch=/usr/lib/perl5/$sub_ver/site_perl     \
-               -D vendorlib=/usr/lib/perl5/$sub_ver/vendor_perl  \
-               -D vendorarch=/usr/lib/perl5/$sub_ver/vendor_perl \
-               -D man1dir=/usr/share/man/man1                \
-               -D man3dir=/usr/share/man/man3                \
-               -D pager="/usr/bin/less -isR"                 \
-               -D useshrplib                                 \
-               -D usethreads || exit 1
+  mkdir build ; cd build || exit 1
+  meson setup --prefix=/usr       \
+            --buildtype=release \
+            -D database=gdbm    \
+            -D doxygen=false    \
+            -D bluez5=disabled  \
+            -D tests=false      \
+            .. || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -324,8 +308,8 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD ---
-  NUMJOBS="-j $(nproc)"
-  make $NUMJOBS || exit 1
+  cd build || exit 1
+  ninja || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -340,7 +324,10 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
-  make DESTDIR=$PKGDIR install || exit 1
+  cd build || exit 1
+  DESTDIR=$PKGDIR ninja install || exit 1
+  # Remove the D-Bus configuration file for the system wide daemon to avoid creating unnecessary system users and groups.
+  rm $PKGDIR/usr/share/dbus-1/system.d/pulseaudio-system.conf || exit 1
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -355,7 +342,8 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_POST ---
-  unset BUILD_ZLIB BUILD_BZIP2
+  cd build || exit 1
+  rm -rf *
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
@@ -370,6 +358,16 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG32 ---
+  mkdir build ; cd build || exit 1
+  meson setup --cross-file=lib32  \
+            --prefix=/usr       \
+            --libdir=/usr/lib32 \
+            --buildtype=release \
+            -D database=gdbm    \
+            -D doxygen=false    \
+            -D bluez5=disabled  \
+            -D tests=false      \
+            ..  || exit 1
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
   config32_time=$(($end_config32_date - $start_config32_date))
@@ -383,6 +381,8 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD32 ---
+  cd build || exit 1
+  ninja || exit 1
   # --- END_LFS_CMD_BUILD32 ---
   end_build32_date=$(date +"%s")
   build32_time=$(($end_build32_date - $start_build32_date))
@@ -397,6 +397,13 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL32 ---
+  cd build || exit 1
+  mkdir -vp $PKGDIR/usr/lib32
+  DESTDIR=$PWD/DESTDIR ninja install
+  cp -vr DESTDIR/usr/lib32/* $PKGDIR/usr/lib32
+  rm -rf DESTDIR  
+  # Furthermore, if this package was not built with elogind-255.17 support, add any non-root users to the audio group as the root user.
+  #usermod -a -G audio <username>
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
   install32_time=$(($end_install32_date - $start_install32_date))

@@ -41,6 +41,7 @@
 #   M     inetutils-2.6-x86_64-1_MLFS_current_Viel
 #   M     less-668-x86_64-1_MLFS_current_Viel
 #   M     perl-5.40.2-x86_64-1_MLFS_current_Viel
+#   M     XML-Parser-2.47-x86_64-1_MLFS_current_Viel
 #   M     autoconf-2.72-x86_64-1_MLFS_current_Viel
 #   M     automake-1.17-x86_64-1_MLFS_current_Viel
 #   M     openssl-3.5.0-x86_64-1_MLFS_current_Viel
@@ -103,6 +104,8 @@
 #   M     alsa-lib-1.2.14-x86_64-1_GLFS_Audio
 #   M     alsa-plugins-1.2.12-x86_64-1_GLFS_Audio
 #   M     alsa-utils-1.2.14-x86_64-1_GLFS_Audio
+#   M     libsndfile-1.2.2-x86_64-1_GLFS_Audio
+#   M     pulseaudio-17.0-x86_64-1_GLFS_Audio
 #   M     util-macros-1.20.2-x86_64-1_GLFS_BasicX11Software
 #   M     xorgproto-2024.1-x86_64-1_GLFS_BasicX11Software
 #   M     libXau-1.0.12-x86_64-1_GLFS_BasicX11Software

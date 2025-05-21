@@ -45,18 +45,11 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Perl is a highly capable, feature-rich programming language with over 37 years of development."
-url="https://www.perl.org/"
+short_desc="OATH Toolkit provide components to build one-time password authentication systems."
+url="https://www.nongnu.org/oath-toolkit/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
-#sub_ver for build perl with 5.40 dir and not 5.40.2
-if [[ "$(echo "$ver" | grep -o "\." | wc -l)" -eq "1" ]] ; then
-  sub_ver="${ver}"
-else
-  sub_ver="${ver%.*}"
-fi
-
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
@@ -82,20 +75,21 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://www.cpan.org/src/README.html
-sum="md5sum"
-file1_url=https://www.cpan.org/src/5.0
-file1=$name-$ver.tar.xz
-file1_sum=9ad7a269dc4053cdbeecd4fde444291b
-file2_url=https://www.cpan.org/src/5.0
-file2=${file1}.md5.txt
-file2_sum=91f76f7f929f7705a6b549353dfbaaae
+version_url=https://download.savannah.nongnu.org/releases/oath-toolkit
+sum="sha256sum"
+file1_url=$version_url
+file1=$name-$ver.tar.gz
+file1_sum=cafdf739b1ec4b276441c6aedae6411434bbd870071f66154b909cc6e2d9e8ba
+file2_url=$file1_url
+file2=${file1}.sig
+file2_sum=c0037f776e704a8e3f68100ae217901aaae1e35c712165ef8869c35b6fcf55c2
+file2_gpgkey=A3CC9C870B9D310ABAD4CF2F51722B08FE4745A2
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$( $GETVER $version_url | grep wget | cut -d'>' -f2 | cut -d'<' -f1 | sed 's%.*/%%' | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -139,6 +133,8 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $file2_gpgkey
+gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
@@ -294,23 +290,7 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  # This version of Perl builds the Compress::Raw::Zlib and Compress::Raw::BZip2 modules. By default Perl will use an internal copy of the sources for the build. Issue the following command so that Perl will use the libraries installed on the system.
-  export BUILD_ZLIB=False
-  export BUILD_BZIP2=0
-  sh Configure -des                                          \
-               -D prefix=/usr                                \
-               -D vendorprefix=/usr                          \
-               -D privlib=/usr/lib/perl5/$sub_ver/core_perl      \
-               -D archlib=/usr/lib/perl5/$sub_ver/core_perl      \
-               -D sitelib=/usr/lib/perl5/$sub_ver/site_perl      \
-               -D sitearch=/usr/lib/perl5/$sub_ver/site_perl     \
-               -D vendorlib=/usr/lib/perl5/$sub_ver/vendor_perl  \
-               -D vendorarch=/usr/lib/perl5/$sub_ver/vendor_perl \
-               -D man1dir=/usr/share/man/man1                \
-               -D man3dir=/usr/share/man/man3                \
-               -D pager="/usr/bin/less -isR"                 \
-               -D useshrplib                                 \
-               -D usethreads || exit 1
+  ./configure --prefix=/usr || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -355,7 +335,6 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_POST ---
-  unset BUILD_ZLIB BUILD_BZIP2
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))

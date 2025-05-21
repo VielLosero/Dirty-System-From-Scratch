@@ -45,18 +45,11 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Perl is a highly capable, feature-rich programming language with over 37 years of development."
-url="https://www.perl.org/"
+short_desc="The XML::Parser module is a Perl interface to James Clark's XML parser, Expat."
+url="https://github.com/chorny/XML-Parser"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
-#sub_ver for build perl with 5.40 dir and not 5.40.2
-if [[ "$(echo "$ver" | grep -o "\." | wc -l)" -eq "1" ]] ; then
-  sub_ver="${ver}"
-else
-  sub_ver="${ver%.*}"
-fi
-
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
@@ -82,20 +75,19 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://www.cpan.org/src/README.html
+#version_url=https://tukaani.org/xz/#_stable
+version_url=https://cpan.metacpan.org/authors/id/T/TO/TODDR
 sum="md5sum"
-file1_url=https://www.cpan.org/src/5.0
-file1=$name-$ver.tar.xz
-file1_sum=9ad7a269dc4053cdbeecd4fde444291b
-file2_url=https://www.cpan.org/src/5.0
-file2=${file1}.md5.txt
-file2_sum=91f76f7f929f7705a6b549353dfbaaae
+file1_url=$version_url
+file1=$name-$ver.tar.gz
+file1_sum=89a8e82cfd2ad948b349c0a69c494463
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$( $GETVER $version_url | grep wget | cut -d'>' -f2 | cut -d'<' -f1 | sed 's%.*/%%' | sed 's/.tar.*//' | cut -d'-' -f2 )
+  # Final URL after the redirect.
+  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/v%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/v%%' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -104,7 +96,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url/$ver/$last_version}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else
@@ -133,10 +125,8 @@ fi
 
 # Get sources and check.
 cd $SOURCESDIR || exit 1
-[ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
+[ ! -e $file1 ] && $GETFILE $file1_url/$file1
 [ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
-[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
-[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
 
@@ -244,8 +234,6 @@ if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
   # Check tasks needed to build.
   start_checks_date=$(date +"%s")
   echo "Checking needs to build."
-  # --- LFS_CMD_CHECKS ---
-  # --- END_LFS_CMD_CHECKS ---
   end_checks_date=$(date +"%s")
   checks_time=$(($end_checks_date - $start_checks_date))
   echo "Checks time: $checks_time" >> $TMP_PKG_TIMINGS_FILE
@@ -255,8 +243,8 @@ fi
 if [ $EXTRACT -eq 1 ] ; then echo "Skipping EXTRACT sources." ; else
   # Extracting sources.
   start_extract_date=$(date +"%s")
+  cd $BUILDDIR
   echo "Preparing sources."
-  cd $BUILDDIR || exit 1
   # deleting source dirs if exist.
   if [ -d $name-$ver ] ; then rm -rf $name-$ver ; fi
   if [ -d $PKGDIR ] ; then rm -rf $PKGDIR && mkdir $PKGDIR ; fi
@@ -264,14 +252,12 @@ EOF_OUTBUILD
   echo '  tar xf $SOURCESDIR'/$file1 >> $OUTBUILD 
   cat << 'EOF_OUTBUILD' >> $OUTBUILD
   cd $name-$ver || exit 1
-  # --- LFS_CMD_EXTRACT ---
-  # --- END_LFS_CMD_EXTRACT ---
   end_extract_date=$(date +"%s")
   extract_time=$(($end_extract_date - $start_extract_date))
   echo "Extract time: $extract_time" >> $TMP_PKG_TIMINGS_FILE
   echo "Extract time: $extract_time seconds" 
 fi
-  
+
 if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else 
   # Apply patches here.
   start_patch_date=$(date +"%s")
@@ -294,23 +280,7 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  # This version of Perl builds the Compress::Raw::Zlib and Compress::Raw::BZip2 modules. By default Perl will use an internal copy of the sources for the build. Issue the following command so that Perl will use the libraries installed on the system.
-  export BUILD_ZLIB=False
-  export BUILD_BZIP2=0
-  sh Configure -des                                          \
-               -D prefix=/usr                                \
-               -D vendorprefix=/usr                          \
-               -D privlib=/usr/lib/perl5/$sub_ver/core_perl      \
-               -D archlib=/usr/lib/perl5/$sub_ver/core_perl      \
-               -D sitelib=/usr/lib/perl5/$sub_ver/site_perl      \
-               -D sitearch=/usr/lib/perl5/$sub_ver/site_perl     \
-               -D vendorlib=/usr/lib/perl5/$sub_ver/vendor_perl  \
-               -D vendorarch=/usr/lib/perl5/$sub_ver/vendor_perl \
-               -D man1dir=/usr/share/man/man1                \
-               -D man3dir=/usr/share/man/man3                \
-               -D pager="/usr/bin/less -isR"                 \
-               -D useshrplib                                 \
-               -D usethreads || exit 1
+  perl Makefile.PL || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -355,7 +325,6 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_POST ---
-  unset BUILD_ZLIB BUILD_BZIP2
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))

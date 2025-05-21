@@ -52,7 +52,7 @@
 .inetutils-[0-9]*_MLFS_*
 .less-[0-9]*_MLFS_*
 .perl-[0-9]*_MLFS_*
-#.XML-Parser-[0-9]*_MLFS_*
+.XML-Parser-[0-9]*_MLFS_*
 #.intltool-[0-9]*_MLFS_*
 .autoconf-[0-9]*_MLFS_*
 .automake-[0-9]*_MLFS_*
@@ -393,10 +393,16 @@
 .glibmm-[0-9]*_BLFS_*
 .atkmm-[0-9]*_BLFS_*
 .gtk-[0-9]*_BLFS_*
-.dbus-[0-9]*_BLFS_*
 #
 #order list for update and build packages.
 .tmux-[0-9]*_DIRTY_*
 .dwm-[0-9]*_DIRTY_*
 .dmenu-[0-9]*_DIRTY_*
 .st-[0-9]*_DIRTY_*
+# password manager
+.unix-tree-[0-9]*_DIRTY_*
+.pass-[0-9]*_DIRTY_*
+.pinentry-[0-9]*_DIRTY_*
+.oath-toolkit-[0-9]*_DIRTY_*
+.pass-otp-[0-9]*_DIRTY_*
+# next tool

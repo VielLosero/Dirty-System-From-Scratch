@@ -310,7 +310,8 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
-  pip3 install --root $PKGDIR --no-index --find-links dist flit_core
+  EXTRA_OPT=" --root $PKGDIR -v --log /tmp/log.install.$name-$ver.txt --no-deps --force-reinstall"
+  pip3 install $EXTRA_OPT --no-index --find-links dist flit_core || exit 1
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))

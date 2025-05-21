@@ -45,18 +45,11 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Perl is a highly capable, feature-rich programming language with over 37 years of development."
-url="https://www.perl.org/"
+short_desc="Libsndfile is a library of C routines for reading and writing files containing sampled audio data."
+url="https://github.com/libsndfile/libsndfile/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
-#sub_ver for build perl with 5.40 dir and not 5.40.2
-if [[ "$(echo "$ver" | grep -o "\." | wc -l)" -eq "1" ]] ; then
-  sub_ver="${ver}"
-else
-  sub_ver="${ver%.*}"
-fi
-
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
@@ -81,21 +74,22 @@ if wget --help >/dev/null 2>&1 ; then GETVER="wget --output-document - --quiet" 
 elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --silent" GETFILE="curl -C - -O --silent" SPIDER="curl -L --head --fail --silent"
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
-# Package vars.
-version_url=https://www.cpan.org/src/README.html
+# Package var.
+version_url=https://github.com/libsndfile/libsndfile/releases/latest
 sum="md5sum"
-file1_url=https://www.cpan.org/src/5.0
+file1_url=https://github.com/libsndfile/libsndfile/releases/download/$ver
 file1=$name-$ver.tar.xz
-file1_sum=9ad7a269dc4053cdbeecd4fde444291b
-file2_url=https://www.cpan.org/src/5.0
-file2=${file1}.md5.txt
-file2_sum=91f76f7f929f7705a6b549353dfbaaae
+file1_sum=04e2e6f726da7c5dc87f8cf72f250d04
+file2_url=$file1_url
+file2=${file1}.asc
+file2_sum=a6801db566cfb2eede03ba0bc698c1d0
+file2_gpgkey=B8D5315DA00072C0A860889FCE36E117202E3842
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$( $GETVER $version_url | grep wget | cut -d'>' -f2 | cut -d'<' -f1 | sed 's%.*/%%' | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f3 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -120,7 +114,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: $name $last_version  $version_url" ; exit 2
     fi
   fi
-  exit 1
+  exit 2
 fi
 
 # Make needed dirs.
@@ -139,6 +133,8 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $file2_gpgkey
+gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
@@ -279,6 +275,77 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
+  #Fix the code to allow building with GCC-15.x.x:
+  sed '/typedef enum/,/bool ;/d' -i src/ALAC/alac_{en,de}coder.c || exit 1
+  # https://patchwork.ozlabs.org/project/buildroot/patch/20250512214910.478137-1-bernd@kuhls.net/
+  # https://github.com/libsndfile/libsndfile/commit/2c6ffea6ac8bb1b89e1f778bdad8bf8b0342d32f
+  # sed -i '8i This is Line 8' FILE
+  #sed -i '26i#include "config.h"' src/ALAC/alac_decoder.c || exit 1
+  #sed -i '31i#include "config.h"' src/ALAC/alac_encoder.c || exit 1
+  cat << EOF > 2251737b3b175925684ec0d37029ff4cb521d302.patch
+From 2251737b3b175925684ec0d37029ff4cb521d302 Mon Sep 17 00:00:00 2001
+From: Fabian Greffrath <fabian@greffrath.com>
+Date: Tue, 17 Dec 2024 10:38:47 +0100
+Subject: [PATCH] Include <stdbool.h> instead of redefining `bool`, `true` and
+ `false` keywords
+
+Fixes #1049
+---
+ src/ALAC/alac_decoder.c | 6 +-----
+ src/ALAC/alac_encoder.c | 7 +------
+ 2 files changed, 2 insertions(+), 11 deletions(-)
+
+diff --git a/src/ALAC/alac_decoder.c b/src/ALAC/alac_decoder.c
+index 978919a70..417645316 100644
+--- a/src/ALAC/alac_decoder.c
++++ b/src/ALAC/alac_decoder.c
+@@ -28,6 +28,7 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <stddef.h>
++#include <stdbool.h>
+ #include <string.h>
+ 
+ #include "alac_codec.h"
+@@ -40,11 +41,6 @@
+ #include "ALACBitUtilities.h"
+ #include "EndianPortable.h"
+ 
+-typedef enum
+-{  false = 0,
+- true = 1
+-} bool ;
+-
+ // constants/data
+ const uint32_t kMaxBitDepth = 32 ;     // max allowed bit depth is 32
+ 
+diff --git a/src/ALAC/alac_encoder.c b/src/ALAC/alac_encoder.c
+index 29012f3f4..c9395b1d5 100644
+--- a/src/ALAC/alac_encoder.c
++++ b/src/ALAC/alac_encoder.c
+@@ -32,6 +32,7 @@
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <stdbool.h>
+ #include <string.h>
+ 
+ #include "sfendian.h"
+@@ -46,12 +47,6 @@
+ #include "ALACAudioTypes.h"
+ #include "EndianPortable.h"
+ 
+-typedef enum
+-{
+- false = 0,
+- true = 1
+-} bool ;
+-
+ static void  GetConfig (ALAC_ENCODER *p, ALACSpecificConfig * config) ;
+ 
+ static int32_t EncodeStereo (ALAC_ENCODER *p, struct BitBuffer * bitstream, const int32_t * input, uint32_t stride, uint32_t channelIndex, uint32_t numSamples) ;
+EOF
+  patch -p1 -i 2251737b3b175925684ec0d37029ff4cb521d302.patch
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -294,23 +361,8 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  # This version of Perl builds the Compress::Raw::Zlib and Compress::Raw::BZip2 modules. By default Perl will use an internal copy of the sources for the build. Issue the following command so that Perl will use the libraries installed on the system.
-  export BUILD_ZLIB=False
-  export BUILD_BZIP2=0
-  sh Configure -des                                          \
-               -D prefix=/usr                                \
-               -D vendorprefix=/usr                          \
-               -D privlib=/usr/lib/perl5/$sub_ver/core_perl      \
-               -D archlib=/usr/lib/perl5/$sub_ver/core_perl      \
-               -D sitelib=/usr/lib/perl5/$sub_ver/site_perl      \
-               -D sitearch=/usr/lib/perl5/$sub_ver/site_perl     \
-               -D vendorlib=/usr/lib/perl5/$sub_ver/vendor_perl  \
-               -D vendorarch=/usr/lib/perl5/$sub_ver/vendor_perl \
-               -D man1dir=/usr/share/man/man1                \
-               -D man3dir=/usr/share/man/man3                \
-               -D pager="/usr/bin/less -isR"                 \
-               -D useshrplib                                 \
-               -D usethreads || exit 1
+  ./configure --prefix=/usr    \
+            --docdir=/usr/share/doc/libsndfile-$ver || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -355,7 +407,7 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_POST ---
-  unset BUILD_ZLIB BUILD_BZIP2
+  make distclean || exit 1
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
@@ -370,6 +422,11 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG32 ---
+  CC="gcc -m32" CXX="g++ -m32"         \
+  PKG_CONFIG_PATH=/usr/lib32/pkgconfig \
+  ./configure --prefix=/usr            \
+            --libdir=/usr/lib32      \
+            --host=i686-pc-linux-gnu || exit 1
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
   config32_time=$(($end_config32_date - $start_config32_date))
@@ -383,6 +440,8 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD32 ---
+  NUMJOBS="-j $(nproc)"
+  make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD32 ---
   end_build32_date=$(date +"%s")
   build32_time=$(($end_build32_date - $start_build32_date))
@@ -397,6 +456,12 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL32 ---
+  mkdir -vp $PKGDIR/usr/lib32
+  make DESTDIR=$PWD/DESTDIR install 
+  cp -vr DESTDIR/usr/lib32/* $PKGDIR/usr/lib32
+  rm -rf DESTDIR  
+  # Furthermore, if this package was not built with elogind-255.17 support, add any non-root users to the audio group as the root user.
+  #usermod -a -G audio <username>
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
   install32_time=$(($end_install32_date - $start_install32_date))
