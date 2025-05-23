@@ -297,7 +297,6 @@ fi
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
   start_config_date=$(date +"%s")
-  start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
