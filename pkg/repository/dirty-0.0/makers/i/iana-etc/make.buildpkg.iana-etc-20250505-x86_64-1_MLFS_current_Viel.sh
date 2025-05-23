@@ -79,10 +79,10 @@ version_url=https://github.com/Mic92/iana-etc/releases/latest
 sum="sha256sum"
 file1_url=https://github.com/Mic92/iana-etc/releases/download/$ver
 file1=$name-$ver.tar.gz
-file1_sum=ce7420ec30e0d2e246dcdf2931d13c5859b18f6a235e238471dd499ce3dde49e
+file1_sum=86c99768c8a5c831be2650efbd3f2a7e072093875504b8a5f23e1c273c5d91a9
 file2_url=$file1_url
 file2=${file1}.sha256
-file2_sum=73eaa324f2332fd9b04da3cef44a3242c8ff5b2d037d2a92445086ccce3b3728
+file2_sum=3b7e07e4b08557b42767eadcd8fc8a62034743bd3f552bb55f4f42d8bd105396
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -278,7 +278,6 @@ fi
 
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -555,7 +554,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

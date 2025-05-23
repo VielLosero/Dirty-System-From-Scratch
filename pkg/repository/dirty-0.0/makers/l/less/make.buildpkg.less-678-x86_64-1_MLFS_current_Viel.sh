@@ -79,13 +79,13 @@ version_url=https://www.greenwoodsoftware.com/less/download.html
 sum="sha256sum"
 file1_url=https://www.greenwoodsoftware.com/less
 file1=$name-$ver.tar.gz
-file1_sum=2819f55564d86d542abbecafd82ff61e819a3eec967faa36cd3e68f1596a44b8
+file1_sum=4c085364f3028290d34647df27f56018c365dc4c0092ab7de74ed8fe89014fe7
 file2_url=$file1_url
 file2=$name-$ver.sig
-file2_sum=c864c68b9564886497467cca2030f780bf0aa087154276049899151139a919f7
+file2_sum=f626512b711733f53039bdab0ec85606f879cc93c023d8c8beb1caa4b2cf5a55
 file3_url=$file1_url
-file3=less-pubkey.asc
-file3_sum=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+file3=$name-$ver.pubkey.asc
+file3_sum=e1a9150cc94e518a4bdcc799ad1aeaf304c94161358473d2454fe6db7d06c61d
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -288,7 +288,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -619,7 +618,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

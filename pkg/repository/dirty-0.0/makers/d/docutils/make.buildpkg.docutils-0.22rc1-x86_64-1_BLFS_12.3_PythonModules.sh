@@ -79,7 +79,7 @@ version_url=https://pypi.org/rss/project/docutils/releases.xml
 sum="md5sum"
 file1_url=https://files.pythonhosted.org/packages/source/d/docutils
 file1=$name-$ver.tar.gz
-file1_sum=c4064e1e0e3cd142951fd2b95b830874
+file1_sum=30ef7d6817895159daf199275062697b
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -277,7 +277,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -610,7 +609,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

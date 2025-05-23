@@ -94,13 +94,13 @@ version_url=https://cmake.org/files
 sum="sha256sum"
 file1_url=$version_url/v$sub_ver
 file1=$name-$ver.tar.gz
-file1_sum=d630a7e00e63e520b25259f83d425ef783b4661bdc8f47e21c7f23f3780a21e1
+file1_sum=1c3a82c8ca7cf12e0b17178f9d0c32f7ac773bd5651a98fcfd80fbf4977f8d48
 file2_url=$file1_url
 file2=${name}-${ver}-SHA-256.txt
-file2_sum=d928ca96b50063847b3f231b5068dc558943f9a14b7c5d9ffe637b5873a15340
+file2_sum=44e2ae903cefd45589947a6b5e93a100c223cccb0bf8ed828953ba33b109efe7
 file3_url=$file1_url
 file3=${file2}.asc
-file3_sum=777e46380f1920cb164804f1c3918c09dfbfaaf81915de97554ae3dde3716966
+file3_sum=2315a2eedaf5e3394e07c30850aeb29d74313ceafa3e7d3239f9d2f09bb7a97d
 cmake_gpgkey=C6C265324BBEBDC350B513D02D2CEF1034921684 
 
 # Check for new releases.
@@ -306,7 +306,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -646,7 +645,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

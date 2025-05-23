@@ -79,10 +79,10 @@ version_url=https://github.com/NetworkConfiguration/dhcpcd/releases/latest
 sum="sha256sum"
 file1_url=https://github.com/NetworkConfiguration/dhcpcd/releases/download/v$ver
 file1=$name-$ver.tar.xz
-file1_sum=5f257b02f874b3b8cb031e5be79c99cf9cbd4f65eae2a50c9b1beddafb3f51bc
+file1_sum=4137a382d1a203bffdf8e757bbdfd0032433d06e5c69a3785b88b83251f89616
 file2_url=$file1_url
 file2=${file1}.asc
-file2_sum=bff219ce4206582e64f799007afa5376b1320d3e1a61c56d9fcec16a4f0106a9
+file2_sum=48c98dee404bdd041861de62e6123b7c5d5933b037087e40251db39e34b53007
 dhcpcd_gpgkey=A785ED2755955D9E93EA59F6597F97EA9AD45549
 
 # Check for new releases.
@@ -285,7 +285,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -636,7 +635,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

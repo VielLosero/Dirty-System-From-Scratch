@@ -90,10 +90,10 @@ version_url=https://archive.mesa3d.org
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=76293cf4372ca4e4e73fd6c36c567b917b608a4db9d11bd2e33068199a7df04d
+file1_sum=b1c45888969ee5df997e2542654f735ab1b772924b442f3016d2293414c99c14
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=053f4d397691db88982686c9cdd9db305f12ec66cb3989c30eb0aadb7a840138
+file2_sum=c8e1e36360b74110d89e757e5e1347c7edadd1a171174952fc79b8945c977f87
 mesa_gpgkey=57551DE15B968F6341C248F68D8E31AFC32428A6 
 
 # Check for new releases.
@@ -295,7 +295,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -671,7 +670,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

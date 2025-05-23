@@ -1,11 +1,19 @@
 
-## The Dirty system from scratch
-English is not my main language, so be patient. I will write little.
-As a learning experience I started building a simple package manager to manage my first build of LFS. Late I changed to MLFS and GLFS. This is a work in progress. Sure each LFS users have their own scripts to manage their packages, updates and the system. Happy to share my dirty.
-I need feedback, testers, contributors, supporters ... any help are welcome.
+# Makers scripts for dirty current (The Dirty system from scratch)
+Reading here and there before start build LFS, hoping to be able to use it as my daily distribution and as a learning experience I started building a simple package manager to manage my first build of LFS.
+This is the result and a work in progress that I will share. My dirty system from scratch.
+Any feedback, testers, contributors, supporters ... help are welcome.
+
+## Motivation
+
+
+
+## What you can expect?
+
+
 
 ## The concept
-The concept are easy, a script (the maker) that download the sources do the checksums and make a second script (the builder). The builder creates a thirt script (the package) to install the files on the system. You can read more about it on my old file [HOW.DID.DIRTY.START.md](HOW.DID.DIRTY.START.md)
+The concept are easy, a script (the maker) that download the sources do the checksums and make a second script (the builder). The builder creates a thirt script (the package) to install the files on the system.
 ```
 bash-5.2# ls -la /pkg/repository/dirty-0.0/
 total 20
@@ -16,6 +24,9 @@ drwxr-xr-x 38 root root 4096 Apr 24 10:35 makers
 drwxr-xr-x 38 root root 4096 Apr 24 10:35 packages
 bash-5.2#
 ```
+The maker 
+
+
 
 ## How to install the repository and build from sources.
 Clone the repository and move it to the / root dir.
@@ -107,10 +118,6 @@ The readers, if you have arrived here.
 You can catch me on [LQ LFS Forum](https://www.linuxquestions.org/questions/linux-from-scratch-13/).
 
 Please read [Contributor covenant](https://www.contributor-covenant.org/) for details, and  [code of conduct](https://www.contributor-covenant.org/version/2/0/code_of_conduct) before submitting pull requests or issues.
-
-If you want to support this project with a donation, here is mi Bitcoin address:
-
-bc1q6d245chm8t5sdkqjugwg3ce2c92m276ee4ksv4
 
 ## The Author
 

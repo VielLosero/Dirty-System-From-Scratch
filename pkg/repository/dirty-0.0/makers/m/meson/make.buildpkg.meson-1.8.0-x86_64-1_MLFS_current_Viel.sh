@@ -79,10 +79,10 @@ version_url=https://github.com/mesonbuild/meson/releases/latest
 sum="md5sum"
 file1_url=https://github.com/mesonbuild/meson/releases/download/$ver
 file1=$name-$ver.tar.gz
-file1_sum=caec869e85ba1046f22972fbd5d2c497
+file1_sum=74664d20851d29bc3e491d502d66e1f7
 file2_url=$file1_url
 file2=${file1}.asc
-file2_sum=93a4149fa2674e19bb211757f8624b99
+file2_sum=c5548235c9904f8f56bc4b968d2bc122
 meson_gpgkey=60411304C09D36628340EEFFCEB167EFB5722BD6
 
 # Check for new releases.
@@ -285,7 +285,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -624,7 +623,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

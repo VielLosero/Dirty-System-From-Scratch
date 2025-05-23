@@ -88,11 +88,11 @@ version_url=https://www.x.org/archive/individual/lib/
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=2af9e12da5ef670dc3a7bce1895c9c0f1bfb0cb9e64e8db40fcc33f883bd20bc
+file1_sum=be7c0abdb15cbfd29ac62573c1c82e877f9d4047ad15321e7ea97d1e43d835be
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=807bbd3ecdd5d69875a9a05ea00c70bf8080c6af54a0029bb5c2df6b09b10f4f
-libX11_gpgkey=2F7DBCAD5B30E668BBD516C1CFDF148828C642A7 
+file2_sum=3e01af31a5a36aeb22cb33f9565b2c54d36403a0031fbb268749eff5b71772ad
+file2_gpgkey=2F7DBCAD5B30E668BBD516C1CFDF148828C642A7 
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -142,7 +142,7 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --receive-keys $libX11_gpgkey
+gpg --receive-keys $file2_gpgkey
 gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
@@ -293,7 +293,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -624,7 +623,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

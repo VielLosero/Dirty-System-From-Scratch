@@ -88,11 +88,11 @@ version_url=https://www.x.org/pub/individual/app
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=4aa99237cc9dab7d87ce9bc7cca4116674a853b5f08dfe3f9db1bb2b2cf9f305
+file1_sum=fee584eae2ec1ce2d178d72d3b484920271ba68a27935769cefbafbc3a2ff6c8
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=99039b070cba90b2d0d19e84d2ba9178f4969e8a0d6ca2e7424b8bd7ada44e35
-gpgkey=4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E 
+file2_sum=4b792f79dd790c0db6b0f7c8c1224db0b1d49162be337b1fbe77bb535b3cc29b
+file2_gpgkey=3AB285232C46AE43D8E192F4DAB0F78EA6E7E2D2 
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -142,7 +142,7 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --receive-keys $gpgkey
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $file2_gpgkey
 gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
@@ -293,7 +293,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -624,7 +623,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

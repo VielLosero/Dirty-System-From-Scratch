@@ -79,10 +79,10 @@ version_url=https://sourceware.org/elfutils/ftp/
 sum="sha512sum"
 file1_url=https://sourceware.org/elfutils/ftp/$ver
 file1=$name-$ver.tar.bz2
-file1_sum=543188f5f2cfe5bc7955a878416c5f252edff9926754e5de0c6c57b132f21d9285c9b29e41281e93baad11d4ae7efbbf93580c114579c182103565fe99bd3909
+file1_sum=557e328e3de0d2a69d09c15a9333f705f3233584e2c6a7d3ce855d06a12dc129e69168d6be64082803630397bd64e1660a8b5324d4f162d17922e10ddb367d76
 file2_url=https://sourceware.org/elfutils/ftp/$ver
 file2=${file1}.sig
-file2_sum=9de0731dd3986a3dde03cfacdc3daa668f0e2cc482adfc31ab97320f85f7d13d3f056154aa16299db3f09e1c89020635012ffdd0e4cb68c1391b0e218721fb22
+file2_sum=75f3935c4a519dc0b23e59e2e6f2bae7926c988aec484f2e1f0759cf7662eca1752f02c16b2f129fee0d7451e961322cf9a315c4ce23e91520f4779ed9fda713
 elfutils_gpgkey=6C2B631563B8D330578D3CB474FD3FA2779E7073
 
 # Check for new releases.
@@ -285,7 +285,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -632,7 +631,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

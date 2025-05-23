@@ -79,10 +79,10 @@ version_url=https://download.savannah.nongnu.org/releases/man-db
 sum="md5sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=97ab5f9f32914eef2062d867381d8cee
+file1_sum=b6335533cbeac3b24cd7be31fdee8c83
 file2_url=$file1_url
 file2=${file1}.asc
-file2_sum=0c3a440c38eefb78cb9407ab5e6a27d0
+file2_sum=91bd3e1993fc4527117e3bcf73959d2f
 man_db_gpgkey=AC0A4FF12611B6FCCF01C111393587D97D86500B
 
 # Check for new releases.
@@ -284,7 +284,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -624,7 +623,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

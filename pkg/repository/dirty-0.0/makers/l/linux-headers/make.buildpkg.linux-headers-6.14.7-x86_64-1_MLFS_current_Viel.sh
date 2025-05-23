@@ -81,10 +81,10 @@ version_url=https://www.kernel.org/
 sum="md5sum"
 file1_url=https://www.kernel.org/pub/linux/kernel/v6.x
 file1=$sub_name-$ver.tar.xz
-file1_sum=fa7f4ad7ad3e48476b6fe3f282fabf2c
+file1_sum=e2981ea5ebdda69ac5924114441985a5
 file2_url=$file1_url
 file2=$sub_name-$ver.tar.sign
-file2_sum=74062dbe1b65741719e5b141edab8dbc
+file2_sum=2aac34ae15bf781907b0eba020b81ca1
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -562,7 +562,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

@@ -21,7 +21,7 @@ UPDATEDIR_REPO_MAKERS=/tmp/updates/repository/makers
 if [ -e /pkg/tools/scripts/repo-status.sh ] ; then 
 
   # can be replaced with repo-status lines. Exist maker, exist builder, no package, no installed, no blacklisted, last version, not in logs.
-  for file in  $(bash /pkg/tools/scripts/repo-status.sh | grep " M           V - " | grep -v LFSCHROOT | sed 's/ M           V - //' ) ; do 
+  for file in  $(bash /pkg/tools/scripts/repo-status.sh | grep "# M           V - " | sed 's/# M           V - //' ) ; do 
     if [ -h $UPDATEDIR_REPO_MAKERS/make.buildpkg.${file}.sh ] ; then
       true
     else

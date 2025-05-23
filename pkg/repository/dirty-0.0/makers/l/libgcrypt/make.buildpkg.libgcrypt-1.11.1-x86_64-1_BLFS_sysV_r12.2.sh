@@ -79,10 +79,10 @@ version_url=https://www.gnupg.org/ftp/gcrypt/libgcrypt
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.bz2
-file1_sum=09120c9867ce7f2081d6aaa1775386b98c2f2f246135761aae47d81f58685b9c
+file1_sum=24e91c9123a46c54e8371f3a3a2502f1198f2893fbfbf59af95bc1c21499b00e
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=87b81c940520bd1987e092ff13dbcb5727eda87858d75b64cdc654f267943411
+file2_sum=d0bd508cd75843171c841bd980f12c179a5fc1254b86abbb018d4d6341433795
 libgcrypt_gpgkey=6DAA6E64A76D2840571B4902528897B826403ADA
 
 # Check for new releases.
@@ -284,7 +284,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -628,7 +627,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

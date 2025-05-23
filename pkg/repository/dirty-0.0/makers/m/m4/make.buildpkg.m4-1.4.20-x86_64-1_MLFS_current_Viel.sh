@@ -79,10 +79,10 @@ version_url=https://ftp.gnu.org/gnu/m4
 sum="md5sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=0d90823e1426f1da2fd872df0311298d
+file1_sum=6eb2ebed5b24e74b6e890919331d2132
 file2_url=$file1_url
 file2=$name-$ver.tar.xz.sig
-file2_sum=909bddbbf035fd997754e6295d9e3a07
+file2_sum=8e415614563bc8dadb87d3438eb3e054
 file2_gpgkey=71C2CC22B1C4602927D2F3AAA7A16B4A2527436A
 
 # Check for new releases.
@@ -280,7 +280,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -611,7 +610,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

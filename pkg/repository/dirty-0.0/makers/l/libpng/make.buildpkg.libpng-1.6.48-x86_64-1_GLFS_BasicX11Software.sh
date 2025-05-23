@@ -90,10 +90,10 @@ version_url=https://sourceforge.net/projects/libpng/files/libpng16
 sum="sha256sum"
 file1_url=$version_url/$ver
 file1=$name-$ver.tar.xz
-file1_sum=b213cb381fbb1175327bd708a77aab708a05adde7b471bc267bd15ac99893631
+file1_sum=46fd06ff37db1db64c0dc288d78a3f5efd23ad9ac41561193f983e20937ece03
 file2_url=https://downloads.sourceforge.net/sourceforge/libpng-apng
-file2=libpng-1.6.46-apng.patch.gz
-file2_sum=29bec2dfd046ef51d52f3e5320f91faffc96be07b41d9cb9d43d9df557a0d303
+file2=libpng-$ver-apng.patch.gz
+file2_sum=b68e523146dc326d6fd3cd49d55f9ca2d73f4a4d6e3d0f095bcc8988ffe8db2b
 libpng_gpgkey=2F7DBCAD5B30E668BBD516C1CFDF148828C642A7 
 
 # Check for new releases.
@@ -295,7 +295,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -641,7 +640,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

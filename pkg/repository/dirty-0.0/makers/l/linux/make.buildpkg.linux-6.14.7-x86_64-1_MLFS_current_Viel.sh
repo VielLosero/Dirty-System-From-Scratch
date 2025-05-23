@@ -79,10 +79,10 @@ version_url=https://www.kernel.org/
 sum="md5sum"
 file1_url=https://www.kernel.org/pub/linux/kernel/v6.x
 file1=$name-$ver.tar.xz
-file1_sum=6e6ba29247ff0ab954d0224547586ba0
+file1_sum=e2981ea5ebdda69ac5924114441985a5
 file2_url=$file1_url
 file2=$name-$ver.tar.sign
-file2_sum=2a4d04b68d580709c1dcdd6ed517b837
+file2_sum=2aac34ae15bf781907b0eba020b81ca1
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -282,7 +282,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -635,7 +634,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

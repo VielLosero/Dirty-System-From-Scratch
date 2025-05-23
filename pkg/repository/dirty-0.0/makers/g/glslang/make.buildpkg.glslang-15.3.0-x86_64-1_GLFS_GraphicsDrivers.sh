@@ -88,10 +88,7 @@ version_url=https://github.com/KhronosGroup/glslang/releases/latest
 sum="sha256sum"
 file1_url=https://github.com/KhronosGroup/glslang/archive/refs/tags
 file1=$name-$ver.tar.gz
-file1_sum=45e3920d264d5c2cc3bfaec0e5dbb66cffd549255e0aaaf38cd283918e35c8ba
-file2_url=https://glfs-book.github.io/glfs/patches/glslang
-file2=glslang-$ver-SPIRV_install-1.patch
-file2_sum=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+file1_sum=c6c21fe1873c37e639a6a9ac72d857ab63a5be6893a589f34e09a6c757174201
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -138,8 +135,6 @@ fi
 cd $SOURCESDIR || exit 1
 [ ! -e $file1 ] && $GETFILE ${file1_url}/$ver.tar.gz -O ${file1}
 [ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
-[ ! -e $file2 ] && $GETFILE ${file2_url}/$ver.tar.gz -O ${file2}
-[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
 
@@ -293,7 +288,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -649,7 +643,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

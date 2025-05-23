@@ -79,13 +79,13 @@ version_url=https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases.
 sum="sha256sum"
 file1_url=https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/$ver/downloads
 file1=$name-$ver.tar.xz
-file1_sum=ba3c3425dd27c57b5291e93dba97be12479601e00bcab24d26471948cb643653
+file1_sum=3df1107ecf8bfd6ee878aeca5d3b7afd81248a48031e14caf6ae01f14eebb50e
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=fc7ea461b0151001178e18a7e8cd16572f3a49f92d558d11d6eafc169bbef098
+file2_sum=1120f80d090590ae717e87d5e23035d953324f62d27622504663f3667b908924
 file3_url=$file1_url
 file3=${file1}.sha256sum
-file3_sum=f515958a3c94a6b406a661cc1571ddf4bb76626e91d5fb047aa5e48adac589a7
+file3_sum=6982395f0ec7861018e2d628221e271a1de5447726727ace8d7b236b60bb0037
 wayland_gpgkey=8307C0A224BABDA1BABD0EB9A6EEEC9E0136164A
 
 # Check for new releases.
@@ -291,7 +291,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -624,7 +623,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

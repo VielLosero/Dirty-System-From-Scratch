@@ -80,10 +80,10 @@ version_url=https://github.com/llvm/llvm-project/releases/latest
 sum="sha256sum"
 file1_url=https://github.com/llvm/llvm-project/releases/download/llvmorg-$ver
 file1=$name-$ver.src.tar.xz
-file1_sum=bc5050fd1bcb7383da37fa13f9d7c075cfa0de2d7f86a6385a62517fdb815630
+file1_sum=7aabcc31eff12bc54778c38752192939df8d983002c961cb1ac97f57e50ccff1
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=e9f0233d4fe3436c693b520bd953a3396e6beac3ed495bc1cbbb9d1f79894b89
+file2_sum=9fd401e46ac2cbdbc65da052e92434eecf08e40423236f3e985bfc1eb3657712
 llvm_gpgkey=474E22316ABF4785A88C6E8EA2C794A986419D8A
 
 
@@ -287,7 +287,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -622,7 +621,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

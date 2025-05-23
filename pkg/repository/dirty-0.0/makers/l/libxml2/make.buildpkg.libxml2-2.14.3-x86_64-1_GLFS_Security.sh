@@ -83,10 +83,10 @@ version_url=https://gitlab.gnome.org/GNOME/libxml2/-/releases.atom
 sum="sha256sum"
 file1_url=https://download.gnome.org/sources/libxml2/$sub_ver
 file1=$name-$ver.tar.xz
-file1_sum=353f3c83535d4224a4e5f1e88c90b5d4563ea8fec11f6407df640fd28fc8b8c6
+file1_sum=6de55cacc8c2bc758f2ef6f93c313cb30e4dd5d84ac5d3c7ccbd9344d8cc6833
 file2_url=$file1_url
 file2=${name}-${ver}.sha256sum
-file2_sum=371bd8645a2c4528b220cd92ae9f12f610d65b13a42445afb2a6314ab02e4bd6
+file2_sum=92491b628de32cbf68189060a60e89940b0fc899d1201dbfbfa474be84f5ebe9
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -286,7 +286,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -649,7 +648,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

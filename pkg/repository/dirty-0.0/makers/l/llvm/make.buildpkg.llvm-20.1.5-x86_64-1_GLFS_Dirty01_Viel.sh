@@ -81,35 +81,35 @@ sum="sha256sum"
 file1_url=https://github.com/llvm/llvm-project/releases/download/llvmorg-$ver
 #https://github.com/llvm/llvm-project/releases/tag/llvmorg-$ver
 file1=$name-$ver.src.tar.xz
-file1_sum=e5dc9b9d842c5f79080f67860a084077e163430de1e2cd3a74e8bee86e186751
+file1_sum=9a9a80ca4c0d902531f2b43e9e4d6c36b57cdd5702430e0b54567bf273bd32c1
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=15bf0bcc672e3deaede87839c1ecab4cbbb88a4c09a01d2575956b7b6ff2863d
+file2_sum=28c9ca300f965b46f106e6005a3d966d2c969edf1888238080b8b30f7bc333b6
 file3_url=$file1_url
 file3=cmake-$ver.src.tar.xz
-file3_sum=d5423ec180f14df6041058a2b66e321e4420499e111235577e09515a38a03451
+file3_sum=1b5abaa2686c6c0e1f394113d0b2e026ff3cb9e11b6a2294c4f3883f1b02c89c
 file4_url=$file1_url
 file4=${file3}.sig
-file4_sum=c41008d797d2d6a66a30210c1d6e59bf390989fad097b0500666e51852c19b52
+file4_sum=2578ff699a50af354c32203c670f0bb8ecc4fe797f05c929ba8f3aeeb7ee7d25
 file5_url=$file1_url
 file5=third-party-$ver.src.tar.xz
-file5_sum=bae96bfc535f4e8e27db8c7bce88d1236ae2af25afb70333b90aabf55168c186
+file5_sum=8667f47185bee07f7c7988ead7161b0d9e41a1a01d5d7afd8f325c607641470c
 file6_url=$file1_url
 file6=${file5}.sig
-file6_sum=7181c7ffc542ee61b64a0f8b180f7a0f881e0b1bfa1d9d1352ce914a246a34e7
+file6_sum=fea93492c0b9692e94a31ca3139c34c0fbd943a798d63fb3e8f4d7897138134a
 #recomended
 file7_url=$file1_url
 file7=clang-$ver.src.tar.xz
-file7_sum=3cddfd12c81a64d2e6036478417e0314278aec3a76e1d197c6fa444a07ed6bfc
+file7_sum=97025772b25c6694db049d3c4be5a72d926299aa1a9b861f490d66750e31c9dd
 file8_url=$file1_url
 file8=${file7}.sig
-file8_sum=d67efab70922f542bcd4e116ee65589468a7660c26fac8e60605a12f9b244e38
+file8_sum=8b06371c90f698ea3867e16d7c00967f161a63f5a091712f747a8d4ee533aa51
 file9_url=$file1_url
 file9=compiler-rt-$ver.src.tar.xz
-file9_sum=74ba10db2c9e8938cd7c77f4e4d4fea609d116d7b0eaaf3ef8e8c5db19c0d301
+file9_sum=bdcebca627f377ffcff5405cd5694efbddb14c89ad7d0ea481b1646a42bfeca3
 file10_url=$file1_url
 file10=${file9}.sig
-file10_sum=e794d1638ecd8c040c617c0c8653a7a61bfba07c990a2ada69151673fd0aafe7
+file10_sum=0b0d5c161ea6288a36e6b629f3182e4e9b6783040b4bd62fb9e91bd1a2ece064
 llvm_gpgkey=474E22316ABF4785A88C6E8EA2C794A986419D8A
 
 
@@ -349,7 +349,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -727,7 +726,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

@@ -88,10 +88,10 @@ version_url=https://www.x.org/pub/individual/app
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=022acd5de8077dddc4f919961f79e102ecd5f3228a333681af5cd0e7344facc2
+file1_sum=4e85b52f4f65a93449753bfb00ceb5d77f3317e24d07dc23147f2f116c785350
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=5f09ca6acee722b38fca96a93846d438ac3a9905fe4d29634bf946632673ef52
+file2_sum=61a597f881b95ac18032d7cf9c55c1cf9eb8f025df07f541a0e6fd2415a7f8af
 gpgkey=4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E 
 
 # Check for new releases.
@@ -293,7 +293,6 @@ fi
   
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -624,7 +623,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   

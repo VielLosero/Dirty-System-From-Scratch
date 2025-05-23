@@ -132,3 +132,11 @@ bash-5.2# comm -13 /tmp/1 /tmp/2 | grep -v linux | grep -v modules | grep -v "mn
 # get build time for MLFSCHROOT with v5
 echo $(grep Builder /pkg/metadata/MLFSCHROOT/*/timings | cut -d ' ' -f3 | tr '\n' '+' | sed 's/+$/\n/' | bc )/60 | bc
 
+# make sources Checksum file
+grep "sha256sum -c" /pkg/repository/*/builders/*/*/* | cut -d '"' -f2 | sort -u > /pkg/tools/CHECKSUMS_SOURCES.txt
+
+# find installed packages with 0 files 
+wc -l /pkg/installed/*/index
+wc -l /pkg/installed/*/index | grep " 0 "
+
+

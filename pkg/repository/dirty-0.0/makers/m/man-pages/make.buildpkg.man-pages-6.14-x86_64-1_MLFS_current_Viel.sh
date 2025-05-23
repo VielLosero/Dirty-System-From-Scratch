@@ -79,13 +79,13 @@ version_url=https://www.kernel.org/pub/linux/docs/man-pages
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=a2c8a0c2efe8a978ce51ce800461eb9e8931f12cc7ba4b7faa3082b69ba7f12c
+file1_sum=71e13067b780044b2f372eec25f4209bc0413cc32af714141ef3d22d21eae8e3
 file2_url=$file1_url
 file2=$name-$ver.tar.sign
-file2_sum=7048e981dc78d976e843cd996e1598929cb86963283c802c99f043b354b022a0
+file2_sum=18ca6c043bacb5e512d1abf8f5f22016ada9b1350da7ba299516cabbc75f7032
 file3_url=$file1_url
-file3=man-pages-sha256sums.asc
-file3_sum=e31a1313837e433d35ee1d556ecfa9b4822f4ed0da7d4eee92540c64d89aab85
+file3=$name-$ver.sha256sums.asc
+file3_sum=341b42209e01516afc07aebc5f03800081533d2a2d114b9f95cdee1866fc83af
 man_pages_gpgkey=EA3A87F0A4EBA030E45DF2409E8C1AFBBEFFDB32
 
 # Check for new releases.
@@ -287,7 +287,6 @@ fi
 
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
-  start_config_date=$(date +"%s")
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
@@ -559,7 +558,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
       fi
     done
     # remove pkg 
-    rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+    rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
   fi
   rm -rf "$TMP_PKG_DIR"
   
