@@ -1,32 +1,10 @@
 
-# Makers scripts for dirty current (The Dirty system from scratch)
-Reading here and there before start build LFS, hoping to be able to use it as my daily distribution and as a learning experience I started building a simple package manager to manage my first build of LFS.
-This is the result and a work in progress that I will share. My dirty system from scratch.
-Any feedback, testers, contributors, supporters ... help are welcome.
-
-## Motivation
-
-
-
-## What you can expect?
-
-
-
-## The concept
-The concept are easy, a script (the maker) that download the sources do the checksums and make a second script (the builder). The builder creates a thirt script (the package) to install the files on the system.
-```
-bash-5.2# ls -la /pkg/repository/dirty-0.0/
-total 20
-drwxr-xr-x  5 root root 4096 May  9 14:26 .
-drwxr-xr-x  4 root root 4096 May 13 17:36 ..
-drwxr-xr-x 38 root root 4096 Apr 24 10:35 builders
-drwxr-xr-x 38 root root 4096 Apr 24 10:35 makers
-drwxr-xr-x 38 root root 4096 Apr 24 10:35 packages
-bash-5.2#
-```
-The maker 
-
-
+# Makers scripts for dirty current. (The Dirty system from scratch)
+This git repository have the makers scripts for build a Dirty system from scratch based on MLFS and GLFS.
+It is recomended to run on a virtual machine the first time you try it.
+Be care if you don't know what are you doing.
+Know how to build LFS BLFS MLFS and GLFS are recomended. Take a look.
+This can destroy your system, you are warned.
 
 ## How to install the repository and build from sources.
 Clone the repository and move it to the / root dir.
@@ -105,11 +83,11 @@ You can check the packages build statistics in /pkg/metadata/MLFSCHROOT/{pkg_nam
 You can check the statisctics inside chroot on /pkg/metadata/dirty-0.0/ too.
 ...
 
-Some changes are comming ... stay up. 
+This is a work in progress, sure some changes will be ... stay up.
 
 ## Thanks to:
 
-LFS BLFS MLFS GLFS For their job.
+LFS BLFS MLFS GLFS For their great job.
 
 The readers, if you have arrived here.
 
@@ -119,12 +97,6 @@ You can catch me on [LQ LFS Forum](https://www.linuxquestions.org/questions/linu
 
 Please read [Contributor covenant](https://www.contributor-covenant.org/) for details, and  [code of conduct](https://www.contributor-covenant.org/version/2/0/code_of_conduct) before submitting pull requests or issues.
 
-## The Author
-
-* **Viel Losero** - *Initial work* - [Viel Losero](https://github.com/VielLosero)
-
-References:
+## References:
 
 [LFS](https://www.linuxfromscratch.org/)
-
-Licence: [CC-BY-SA](http://creativecommons.org/licenses/by-sa/4.0/)

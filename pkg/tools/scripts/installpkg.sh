@@ -26,7 +26,7 @@
 
 #:Version:0.0.1
 
-REPODIR=/pkg/repository/dirty-0.1
+REPODIR=/pkg/repository/*
 PKG_DB=/pkg/installed
 LOGFILE=/var/log/make.buildpkg.log
 
@@ -60,14 +60,14 @@ fi
 
 pkg=$1
 install_pkg=""
-if [[ "$(ls -1 /pkg/repository/dirty-0.1/packages/*/$pkg/* 2>/dev/null | wc -l)" -eq 1 ]] ; then 
-	install_pkg="$(ls -1 /pkg/repository/dirty-0.1/packages/*/$pkg/*)"
+if [[ "$(ls -1 $REPODIR/packages/*/$pkg/* 2>/dev/null | wc -l)" -eq 1 ]] ; then 
+	install_pkg="$(ls -1 $REPODIR/packages/*/$pkg/*)"
 else
-	if [[ "$(ls -1 /pkg/repository/dirty-0.1/packages/*/*/$pkg 2>/dev/null | wc -l)" -eq 1 ]] ; then 
-		install_pkg="$(ls -1 /pkg/repository/dirty-0.1/packages/*/*/$pkg)"
+	if [[ "$(ls -1 $REPODIR/packages/*/*/$pkg 2>/dev/null | wc -l)" -eq 1 ]] ; then 
+		install_pkg="$(ls -1 $REPODIR/packages/*/*/$pkg)"
 	else
 		echo "  Select one pkg to install as argument:"
-		ls -1 /pkg/repository/dirty-0.1/packages/*/*/*$pkg* | sed 's%.*/%%g' | sort -Vr
+		ls -1 $REPODIR/packages/*/*/*$pkg* | sed 's%.*/%%g' | sort -Vr
 	fi
 fi
 

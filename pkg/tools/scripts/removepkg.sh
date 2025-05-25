@@ -70,14 +70,14 @@ echo "  Removing files ..."
     TMP_ALL_NEEDED_FILES_SORT=$TMP_PKG_DIR/make.buildpkg-all-needed-files-sort.remove
     TMP_FILES_TO_REMOVE=$TMP_PKG_DIR/make.buildpkg-files-to.remove
     # find all files installed
-    find $PKG_DB -name "index" -not -path "*/$pkg_name/*" -exec cat {} \; | sort > $TMP_ALL_NEEDED_FILES
-    cat $TMP_ALL_NEEDED_FILES | sort > $TMP_ALL_NEEDED_FILES_SORT
+    find $PKG_DB -name "index" -not -path "*/$pkg_name/*" -exec cat {} \; | LC_ALL=POSIX sort > $TMP_ALL_NEEDED_FILES
+    cat $TMP_ALL_NEEDED_FILES | LC_ALL=POSIX sort > $TMP_ALL_NEEDED_FILES_SORT
     # compare all files to pkg installed and get uniques no needed by third parties
-    comm -23 $PKG_INDEX_FILE $TMP_ALL_NEEDED_FILES_SORT 2>/dev/null > $TMP_FILES_TO_REMOVE
+    LC_ALL=POSIX comm -23 $PKG_INDEX_FILE $TMP_ALL_NEEDED_FILES_SORT 2>/dev/null > $TMP_FILES_TO_REMOVE
     # need to do a dry run.
     if [ -z $DRY_RUN ]  ; then
       # remove no needed files
-      cat $TMP_FILES_TO_REMOVE | sort -ru | while read line ; do
+      cat $TMP_FILES_TO_REMOVE | LC_ALL=POSIX sort -ru | while read line ; do
         if [ -f $line ] ; then 
           rm -v $line
         elif [ -d $line ] ; then 
@@ -91,7 +91,7 @@ echo "  Removing files ..."
     else
       # dry run no needed files
       echo "  Dry run mode ..."
-      cat $TMP_FILES_TO_REMOVE | sort -ru | while read line ; do
+      cat $TMP_FILES_TO_REMOVE | LC_ALL=POSIX sort -ru | while read line ; do
         if [ -f $line ] ; then 
           echo "rm -v $line"
         elif [ -d $line ] ; then 
