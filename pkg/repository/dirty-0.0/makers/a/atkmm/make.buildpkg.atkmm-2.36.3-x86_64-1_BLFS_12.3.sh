@@ -94,7 +94,8 @@ file2_sum=f369dd0b8b80f989b16eec741b2e4b93b73a21cf01a9c7555c79acad03fe9b91
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_sub_ver=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep "href=\"[0-9]" | sort -Vr | head -1 | cut -d'"' -f2 | sed 's%/%%' )
+  last_version=$(echo "$($GETVER $version_url/$last_sub_ver)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -103,7 +104,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url/$sub_ver/$last_sub_ver}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else

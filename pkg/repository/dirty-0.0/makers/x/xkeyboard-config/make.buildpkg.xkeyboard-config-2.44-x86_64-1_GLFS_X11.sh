@@ -90,9 +90,9 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://download.gnome.org/sources/libepoxy
+version_url=http://www.x.org/releases/individual/data/xkeyboard-config
 sum="sha256sum"
-file1_url=$version_url/$sub_ver
+file1_url=$version_url
 file1=$name-$ver.tar.xz
 file1_sum=072cda4b59dd098bba8c2363a6247299db1fa89411dc221c8b81b8ee8192e623
 file2_url=$file1_url
@@ -103,8 +103,7 @@ file2_sum=678ef649b4f10dea239fac088201d3f52e5eca2fcf57fd7a766404f835e2cb1d
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_sub_ver=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*[0-9].*[0-9]/\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's%/%%' )
-  last_version=$(echo "$($GETVER $version_url/$last_sub_ver)" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f3 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -113,7 +112,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        if $SPIDER ${file1_url/$sub_ver/$last_sub_ver}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else

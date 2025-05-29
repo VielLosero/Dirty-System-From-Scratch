@@ -45,17 +45,11 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="The GLib package contains low-level libraries useful for providing data structure handling for C, portability wrappers and interfaces for runtime functionality such as an event loop, threads, dynamic loading and an object system."
-url="https://gtk.org/"
+short_desc="Vim is a greatly improved version of the good old UNIX editor Vi."
+url="https://www.vim.org/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
-# sub ver for download
-if [[ "$(echo "$ver" | grep -o "\." | wc -l)" -eq "1" ]] ; then
-  sub_ver="${ver}"
-else
-  sub_ver="${ver%.*}"
-fi
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
@@ -81,20 +75,17 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://download.gnome.org/sources/$name/$sub_ver
-sum="sha256sum"
-file1_url=$version_url
-file1=$name-$ver.tar.xz
-file1_sum=05c2031f9bdf6b5aba7a06ca84f0b4aced28b19bf1b50c6ab25cc675277cbc3f
-file2_url=$file1_url
-file2=$name-$ver.sha256sum
-file2_sum=77c46b865a13003cfe030d4901d3c92df06e104e681af3e2cd073ec70dfda7c4
+version_url=https://github.com/vim/vim/tags
+sum="md5sum"
+file1_url=https://github.com/vim/vim/archive/refs/tags
+file1=v$ver.tar.gz
+file1_sum=3fdc6b9f8da719aea7caab3c43a1d7c1
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | sed 's/lynx//' )
+  last_version=$(echo "$($GETVER $version_url)" | grep "href=\"/vim/vim/releases/tag/" | head -1 | cut -d'"' -f6 | sed 's%.*/v%%' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -134,8 +125,6 @@ fi
 cd $SOURCESDIR || exit 1
 [ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
 [ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
-[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
-[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
 
@@ -278,6 +267,8 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
+  # First, change the default location of the vimrc configuration file to /etc.
+  echo '#define SYS_VIMRC_FILE "/etc/vimrc"' >> src/feature.h
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -292,14 +283,7 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  mkdir build ; cd build || exit 1
-  meson setup ..                  \
-      --prefix=/usr             \
-      --buildtype=release       \
-      -D introspection=disabled \
-      -D glib_debug=disabled    \
-      -D man-pages=enabled      \
-      -D sysprof=disabled || exit 1
+  ./configure --prefix=/usr || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -313,8 +297,8 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD ---
-  cd build || exit 1
-  ninja || exit 1
+  NUMJOBS="-j $(nproc)"
+  make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -329,8 +313,35 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
-  cd build || exit 1
-  DESTDIR=$PKGDIR ninja install
+  make DESTDIR=$PKGDIR install || exit 1
+  #Many users reflexively type vi instead of vim.
+  ln -sv vim /usr/bin/vi
+  cd $PKGDIR
+  for L in  usr/share/man/{,*/}man1/vim.1; do
+    ln -sv vim.1 $(dirname $L)/vi.1
+  done
+  #By default, Vim's documentation is installed in /usr/share/vim.
+  mkdir -vp $PKGDIR/usr/share/doc
+  ln -sv $PKGDIR/usr/share/vim/vim91/doc $PKGDIR/usr/share/doc/$name-$ver
+
+  mkdir -vp $PKGDIR/etc
+  cat > $PKGDIR/etc/vimrc << "EOF"
+" Begin /etc/vimrc
+
+" Ensure defaults are set before customizing settings, not after
+source $VIMRUNTIME/defaults.vim
+let skip_defaults_vim=1
+
+set nocompatible
+set backspace=2
+set mouse=
+syntax on
+if (&term == "xterm") || (&term == "putty")
+  set background=dark
+endif
+
+" End /etc/vimrc
+EOF
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))

@@ -94,7 +94,8 @@ file2_sum=69db37bcf5d9fab753394b911e4159756cb15b0edb8d8cec0d530c64c2123efd
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | sed 's/lynx//' )
+  last_sub_ver=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep "href=\"[0-9]" | sort -Vr | head -1 | cut -d'"' -f2 | sed 's%/%%' )
+  last_version=$(echo "$($GETVER $version_url/$last_sub_ver)" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f3 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -103,7 +104,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url/$sub_ver/$last_sub_ver}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else
@@ -245,7 +246,8 @@ if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
   echo "Checking needs to build."
   # --- LFS_CMD_CHECKS ---
   # Requires glib sources to build.
-  glib_name_ver=glib-2.84.1
+  glib_name_ver=$(ls -d1 /pkg/installed/glib-[0-9]*_GLFS_* | sort -Vr | sed 's%.*/%%' | cut -d'-' -f1-2 | head -1)
+  [ -z $glib_name_ver ] && exit 1
   echo "Extracting needed $glib_name_ver sources."
   SKIP=1 DECODE=0 EXTRACT=0 bash /pkg/repository/dirty-0.0/builders/g/glib/buildpkg.$glib_name_ver-x86_64-1_GLFS_Security.sh || exit 1
   # --- END_LFS_CMD_CHECKS ---

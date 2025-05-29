@@ -96,7 +96,7 @@ file4_sum=a954fde8f1087ff2fd0c35cbed2b773335c83a0836a69893e7ecb36341f18972
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | sed 's/lynx//' )
+  last_version=$(echo "$($GETVER $version_url)" |tr ' ' '\n' | grep "href=\"${name}-[0-9].[0-9].*.tar.*z\"" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2)
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else

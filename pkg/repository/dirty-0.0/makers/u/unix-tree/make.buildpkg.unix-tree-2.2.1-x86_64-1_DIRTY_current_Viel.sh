@@ -85,7 +85,7 @@ file1_sum=70d9c6fc7c5f4cb1f7560b43e2785194594b9b8f6855ab53376f6bd88667ee04
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=$(echo "$($GETVER $version_url)" | grep "href=\"https://gitlab.com/OldManProgrammer/unix-tree/-/tags/[0-9]" | head -1 | cut -d'"' -f2 | sed 's%.*/%%g' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -94,7 +94,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url/$ver/$last_version}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else

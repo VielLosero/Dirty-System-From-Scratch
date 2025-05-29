@@ -75,7 +75,7 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://github.com/keepassxreboot/keepassxc/releases/latest
+version_url=https://git.zx2c4.com/password-store/refs/
 sum="sha256sum"
 file1_url=https://git.zx2c4.com/password-store/snapshot
 file1=$name-$ver.tar.xz
@@ -89,7 +89,7 @@ file1_sum=cfa9faf659f2ed6b38e7a7c3fb43e177d00edbacc6265e6e32215ff40e3793c0
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z | cut -d'=' -f2 | cut -d"'" -f2 | sed 's%.*/%%' | head -1 | sed "s/$name-//" | sed 's/.tar.*// ' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else

@@ -61,6 +61,9 @@ chmod +x /etc/rc.d/init.d/udev-retry
 
 
 # todo:
+Check failed Updates, change v4 v5 to v6, decide multi repo or single, and multi config files or single.
+When upgrade a package mv old files to .old ? Then we can restore. or ovewrite it?
+Beauty the exit of scripts.
 Remove LFS License part from my packages.
 Done. Add TAGS in a more standard way.
 Revise automake release version if script exist ... lot of scripts ... manually best?

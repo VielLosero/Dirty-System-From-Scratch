@@ -129,10 +129,9 @@
 .duktape-[0-9]*_GLFS_*
 .PCRE2-[0-9]*_GLFS_*
 .glib-[0-9]*_GLFS_*
-# gobject-introspection is build inside glib, I extract sources
-# run circular dep to 
-.glib-[0-9]*_GLFS_*
+# gobject-introspection is build inside glib, I extract sources and re run glib with gobject
 .gobject-introspection-[0-9]*_GLFS_*
+.glib-[0-9]*_GLFS_*
 .icu-[0-9]*_GLFS_*
 .libxml2-[0-9]*_GLFS_*
 .shared-mime-info-[0-9]*_GLFS_*

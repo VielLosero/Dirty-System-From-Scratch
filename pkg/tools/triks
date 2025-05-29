@@ -139,4 +139,7 @@ grep "sha256sum -c" /pkg/repository/*/builders/*/*/* | cut -d '"' -f2 | sort -u 
 wc -l /pkg/installed/*/index
 wc -l /pkg/installed/*/index | grep " 0 "
 
+# config kernel 
+bash-5.2# for line in $(diff -u /pkg/tools/config /pkg/tools/kernel.config.dirty1 | grep +C | cut -c 2- ) ; do echo $line ; bash /pkg/tools/scripts/kernel.config.sh --file /pkg/tools/config  --set-val ${line/=*} ${line/*=} ; done
+
 

@@ -45,8 +45,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Mesa is an OpenGL compatible 3D graphics library. Open source implementations of OpenGL, OpenGL ES, Vulkan, OpenCL, and more!"
-url="https://www.mesa3d.org/"
+short_desc="docutils is a set of Python modules and programs for processing plaintext docs into formats such as HTML, XML, or LaTeX."
+url="https://www.docutils.org/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -66,17 +66,6 @@ OUTPKG=${OUTPKG:-$REPODIR/$DIST-$DISTVER/packages/$first_pkg_char/${name}/${pkg_
 # Other need vars for example to change the default INSTALLDIR=$LFS.
 LFS=/mnt/lfs
 LFS_TGT=$(uname -m)-lfs-linux-gnu
-# As with previous releases of the X Window System, it may be desirable to install Xorg into an alternate prefix. This is no longer common practice among Linux distributions. The common installation prefix for Xorg on Linux is /usr. There is no standard alternate prefix, nor is there any exception in the current revision of the Filesystem Hierarchy Standard for Release 7 of the X Window System. Alan Coopersmith of Sun Microsystems, once stated "At Sun, we were using /usr/X11 and plan to stick with it." Only the /opt/* prefix or the /usr prefix adhere to the current FHS guidelines.
-# The BLFS editors recommend using the /usr prefix.
-# Choose your installation prefix, and set the XORG_PREFIX variable with the following command:
-# export XORG_PREFIX="<PREFIX>"
-XORG_PREFIX="/usr"
-docdir="--docdir=$XORG_PREFIX/share/doc/$name-$ver"
-#Xorg_environment https://www.linuxfromscratch.org/blfs/view/stable/x/xorg7.html#xorg-env
-XORG_CONFIG="--prefix=$XORG_PREFIX --sysconfdir=/etc --localstatedir=/var --disable-static"
-#export XORG_PREFIX XORG_CONFIG
-#
-PKG_CONFIG_PATH=/usr/lib/pkgconfig
 
 # --- END CAT SEED ---
  
@@ -86,21 +75,18 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://archive.mesa3d.org
-sum="sha256sum"
-file1_url=$version_url
-file1=$name-$ver.tar.xz
-file1_sum=76293cf4372ca4e4e73fd6c36c567b917b608a4db9d11bd2e33068199a7df04d
-file2_url=$file1_url
-file2=${file1}.sig
-file2_sum=053f4d397691db88982686c9cdd9db305f12ec66cb3989c30eb0aadb7a840138
-mesa_gpgkey=57551DE15B968F6341C248F68D8E31AFC32428A6 
+version_url=https://pypi.org/rss/project/docutils/releases.xml
+sum="md5sum"
+file1_url=https://files.pythonhosted.org/packages/source/d/docutils
+file1=$name-$ver.tar.gz
+file1_sum=a1abf8f9c46989de1cdc5d175b9fe847
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | grep -v "rc[0-9]" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  # Final URL after the redirect.
+  last_version=$( $GETVER  $version_url 2>&1 | grep "<link>https://pypi.org/project/docutils/[0-9].*" | head -1 | sed 's%/</link>%%' | sed 's%.*/%%' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -140,12 +126,8 @@ fi
 cd $SOURCESDIR || exit 1
 [ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
 [ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
-[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
-[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $mesa_gpgkey
-gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
@@ -300,18 +282,6 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  # Please ask your lawyer or remove the -D video-codecs=all option if you will distribute the compiled Mesa libraries and drivers to others.
-  echo "Please ask your lawyer or remove the -D video-codecs=all option if you will distribute the compiled Mesa libraries and drivers to others."
-  mkdir build && cd build || exit 1
-  meson setup ..                 \
-      --prefix=$XORG_PREFIX    \
-      --buildtype=release      \
-      -D platforms=x11,wayland \
-      -D gallium-drivers=i915,virgl,svga  \
-      -D vulkan-drivers=intel   \
-      -D valgrind=disabled     \
-      -D video-codecs=all      \
-      -D libunwind=disabled || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -325,8 +295,8 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD ---
-  mkdir build ; cd build || exit 1
-  ninja || exit 1
+  # Create whell config file in dist/pkg_name_file.whl 
+  pip3 wheel -w dist --no-cache-dir --no-build-isolation --no-deps $PWD || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -341,11 +311,10 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
-  mkdir build ; cd build || exit 1
-  DESTDIR=$PKGDIR ninja install || exit 1
-  #If desired, install the optional documentation by running the following commands as the root user:
-  mkdir -vp $PKGDIR/usr/share/doc/mesa-$ver
-  cp -rv ../docs -T $PKGDIR/usr/share/doc/mesa-$ver
+  # if pkg are installed no files are pushed, so --force-reinstall 
+  # no-deps: Do't install package dependencies. Only the package.
+  EXTRA_OPT=" --root $PKGDIR -v --log /tmp/log.install.$name-$ver.txt --no-deps --force-reinstall"
+  pip3 install $EXTRA_OPT --no-index --find-links dist --no-user docutils
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))

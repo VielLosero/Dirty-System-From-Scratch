@@ -56,6 +56,9 @@ if [[ "$(echo "$ver" | grep -o "\." | wc -l)" -eq "1" ]] ; then
 else
   sub_ver="${ver%.*}"
 fi
+# to stay in  gtk+3 3.24 release
+#release_ver="${ver%%.*}"
+release_ver="3.24"
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
@@ -81,9 +84,9 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://download.gnome.org/sources/$name/$sub_ver
+version_url=https://download.gnome.org/sources/$name
 sum="sha256sum"
-file1_url=$version_url
+file1_url=$version_url/$sub_ver
 file1=$name-$ver.tar.xz
 file1_sum=d10ce9ea9df44c1016d8d1721f39e55d3d607fcfb85334aec0d236cdc9a70556
 file2_url=$file1_url
@@ -94,7 +97,8 @@ file2_sum=6360b91dd87717f2743553762ac1af6987db3a29edb3428579ab4332b4adcf1b
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | sed 's/lynx//' )
+  last_sub_ver=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep "href=\"${release_ver}.*" | sort -Vr | head -1 | cut -d'"' -f2 | sed 's%/%%' )
+  last_version=$(echo "$($GETVER $version_url/$last_sub_ver)" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -103,7 +107,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url/$sub_ver/$last_sub_ver}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else

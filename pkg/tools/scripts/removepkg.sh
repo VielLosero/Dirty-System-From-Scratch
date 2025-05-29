@@ -59,6 +59,8 @@ echo "  Removing files ..."
   TMP_PKG_DIR=$(mktemp -d /tmp/make.buildpkg-tmp-pkg-XXXXXX)
   # pkg installed files
   PKG_INDEX_FILE="$PKG_DIR/index"
+  # temp file for order pkg installed files if not in LC_ALL=POSIX for old pkg
+  TMP_PKG_INDEX_FILE="$TMP_PKG_DIR/index.posix"
   # pkg shared libs
   PKG_SHAREDLIBS_FILE="$PKG_DIR/needed-libs"
   # pkg build time
@@ -70,10 +72,12 @@ echo "  Removing files ..."
     TMP_ALL_NEEDED_FILES_SORT=$TMP_PKG_DIR/make.buildpkg-all-needed-files-sort.remove
     TMP_FILES_TO_REMOVE=$TMP_PKG_DIR/make.buildpkg-files-to.remove
     # find all files installed
-    find $PKG_DB -name "index" -not -path "*/$pkg_name/*" -exec cat {} \; | LC_ALL=POSIX sort > $TMP_ALL_NEEDED_FILES
-    cat $TMP_ALL_NEEDED_FILES | LC_ALL=POSIX sort > $TMP_ALL_NEEDED_FILES_SORT
+    find $PKG_DB -name "index" -not -path "*/$pkg_name/*" -exec cat {} \; | LC_ALL=POSIX sort -u > $TMP_ALL_NEEDED_FILES
+    cat $TMP_ALL_NEEDED_FILES | LC_ALL=POSIX sort -u > $TMP_ALL_NEEDED_FILES_SORT
+    # order pkg index if not in posix
+    cat $PKG_INDEX_FILE | LC_ALL=POSIX sort -u > $TMP_PKG_INDEX_FILE
     # compare all files to pkg installed and get uniques no needed by third parties
-    LC_ALL=POSIX comm -23 $PKG_INDEX_FILE $TMP_ALL_NEEDED_FILES_SORT 2>/dev/null > $TMP_FILES_TO_REMOVE
+    LC_ALL=POSIX comm -23 $TMP_PKG_INDEX_FILE $TMP_ALL_NEEDED_FILES_SORT 2>/dev/null > $TMP_FILES_TO_REMOVE
     # need to do a dry run.
     if [ -z $DRY_RUN ]  ; then
       # remove no needed files

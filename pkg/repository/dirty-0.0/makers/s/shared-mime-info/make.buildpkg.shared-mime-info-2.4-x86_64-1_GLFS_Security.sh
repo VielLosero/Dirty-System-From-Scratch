@@ -85,8 +85,7 @@ file1_sum=531291d0387eb94e16e775d7e73788d06d2b2fdd8cd2ac6b6b15287593b6a2de
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  # Final URL after the redirect.
-  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/%%' )
+  last_version=$(echo "$($GETVER $version_url)" | grep "href=\"https://gitlab.freedesktop.org/xdg/shared-mime-info/-/releases/[0-9]" | head -1 | cut -d'"' -f2 | sed 's%.*/%%g' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
