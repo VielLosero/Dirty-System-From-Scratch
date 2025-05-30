@@ -90,7 +90,7 @@ version_url=https://github.com/xkbcommon/libxkbcommon/releases/latest
 sum="sha256sum"
 file1_url=https://github.com/xkbcommon/libxkbcommon/archive/refs/tags
 file1=$name-$ver.tar.gz
-file1_sum=763b914c4779e9579ab4d06caffff39cc8f43a1c126ec3b7a2f920bf9817097b
+file1_sum=0427585a4d6ca17c9fc1ac4b539bf303348e9080af70c5ea402503bc370a9631
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

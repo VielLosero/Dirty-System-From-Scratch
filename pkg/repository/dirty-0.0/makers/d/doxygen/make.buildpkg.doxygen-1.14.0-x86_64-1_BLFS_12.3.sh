@@ -83,7 +83,7 @@ version_url=https://github.com/doxygen/doxygen/releases/latest
 sum="sha256sum"
 file1_url=https://github.com/doxygen/doxygen/releases/download/Release_$sub_ver
 file1=$name-$ver.src.tar.gz
-file1_sum=3a25e3386c26ea5494c784e946327225debfbc5dbfa8b13549010a315aace66d
+file1_sum=d4536d11ab13037327d8d026b75f5a86b7ccb2093e2f546235faf61fd86e6b5d
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

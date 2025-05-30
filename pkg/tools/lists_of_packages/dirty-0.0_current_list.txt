@@ -336,7 +336,7 @@
 .Static MinGW-w64-GCC-[0-9]*_GLFS_*
 .MinGW-w64-[0-9]*_GLFS_*
 .MinGW-w64-GCC-[0-9]*_GLFS_*
-.libxkbcommon-[0-9]*_GLFS_*
+.xkbcommon-[0-9]*_GLFS_*
 .SDL2-[0-9]*_GLFS_*
 .NASM-[0-9]*_GLFS_*
 .libaom-[0-9]*_GLFS_*
@@ -388,7 +388,7 @@
 .libxslt-[0-9]*_BLFS_*
 .libjpeg-turbo-[0-9]*_BLFS_*
 .gdk-pixbuf-[0-9]*_BLFS_*
-.doxigen-[0-9]*_BLFS_*
+.doxygen-[0-9]*_BLFS_*
 .libsigc++-[0-9]*_BLFS_*
 .glibmm-[0-9]*_BLFS_*
 .atkmm-[0-9]*_BLFS_*
