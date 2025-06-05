@@ -84,9 +84,9 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://www.freedesktop.org/software/fontconfig/release
+version_url=https://gitlab.freedesktop.org/fontconfig/fontconfig/-/tags?format=atom
 sum="sha256sum"
-file1_url=https://gitlab.freedesktop.org/api/v4/projects/890/packages/generic/fontconfig/$ver
+file1_url=https://gitlab.freedesktop.org/fontconfig/fontconfig/-/archive/$ver
 file1=$name-$ver.tar.xz
 file1_sum=165b8fd2a119864c87464b233986c4a1bc09efb09c65de1ca40cc1e85ffb77e2
 file2_url=$file1_url
@@ -97,7 +97,7 @@ file2_sum=874988545206efac6849780223816393d33969e672420e6d71211ffb0ed94b9e
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=$(echo "$($GETVER $version_url)" | grep "https://gitlab.freedesktop.org/fontconfig/fontconfig/-/tags/[0-9]"| head -1 | sed 's%</id>%%g'| sed 's%.*/%%g' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -106,12 +106,11 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url/$ver/$last_version}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else
-            cp $0 $NEWMAKE 
-            echo "Created: $NEWMAKE" ; exit 2
+            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" || exit 1 ; exit 2
           fi
         else
           echo "Failed: new version file not found." ; exit 1 

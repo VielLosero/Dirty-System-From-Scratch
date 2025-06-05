@@ -97,7 +97,7 @@ if [ "$ver-$arch-${rel}.sh" == "$last_version" ] ; then v="V" ; fi
 # check if pkg_name is on logs.
 if [ -z "$(grep "Installed ${pkg_name}" $LOGFILE)" ] ; then l="-" ; else l=" " ; fi
 # check if package are the last installed in logs.
-if [[ "Installed $pkg_name" == "$(grep "Installed ${name}-[0-9].*_${rel_tag1}_.*" $LOGFILE | tr -s ' ' | tail -1 | cut -d' ' -f7-8)" ]] ; then l="L" ; fi
+if [ "Installed $pkg_name" == "$(grep "Installed ${name}-[0-9].*_${rel_tag1}_.*" $LOGFILE | tr -s ' ' | tail -1 | cut -d' ' -f7-8)" ] ; then l="L" ; fi
 
 # From here start the update/upgrade/remove/skip conditions.
 # check if there is some package to upgrade. New or overwrited.

@@ -99,7 +99,7 @@ CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
   # Final URL after the redirect.
-  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/%%' )
+  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/v%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/v%%' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -112,8 +112,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else
-            cp $0 $NEWMAKE 
-            echo "Created: $NEWMAKE" ; exit 2
+            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" || exit 1 ; exit 2
           fi
         else
           echo "Failed: new version file not found." ; exit 1 
@@ -313,7 +312,7 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD ---
   #CARGO_TARGET_DIR=$PKGDIR/usr/bin cargo build --release
-  cargo build --release
+  cargo build --release || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))

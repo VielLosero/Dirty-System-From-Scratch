@@ -86,8 +86,7 @@ file1_sum=89a8e82cfd2ad948b349c0a69c494463
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  # Final URL after the redirect.
-  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/v%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/v%%' )
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f3 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f3 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -100,8 +99,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else
-            cp $0 $NEWMAKE 
-            echo "Created: $NEWMAKE" ; exit 2
+            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" || exit 1 ; exit 2
           fi
         else
           echo "Failed: new version file not found." ; exit 1 

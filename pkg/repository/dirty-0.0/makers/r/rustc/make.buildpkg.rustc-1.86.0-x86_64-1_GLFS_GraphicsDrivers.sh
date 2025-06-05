@@ -88,7 +88,6 @@ else echo "Needed wget or curl to download files or check for new versions." && 
 # Package vars.
 version_url=https://github.com/rust-lang/rust/releases/latest
 sum="sha256sum"
-#file1_url=https://github.com/rust-lang/rust/archive/refs/tags
 file1_url=https://static.rust-lang.org/dist
 file1=$name-$sub_ver.tar.gz
 file1_sum=022a27286df67900a044d227d9db69d4732ec3d833e4ffc259c4425ed71eed80
@@ -103,6 +102,7 @@ NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
   # Final URL after the redirect.
   last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/%%' )
+  last_sub_ver=${last_version}-src
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -111,12 +111,11 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        if $SPIDER ${file1_url}/${file1/$sub_ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url}/${file1/$sub_ver/$last_sub_ver} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else
-            cp $0 $NEWMAKE 
-            echo "Created: $NEWMAKE" ; exit 2
+            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" || exit 1 ; exit 2
           fi
         else
           echo "Failed: new version file not found." ; exit 1 

@@ -377,7 +377,7 @@
 .iptables-[0-9]*_BLFS_*
 .libevent-[0-9]*_BLFS_*
 .lynx-[0-9]*_BLFS_*
-.# to run mullvad browser needed libgtk-3.so.0 and dbus
+# to run mullvad browser needed libgtk-3.so.0 and dbus
 # gtk need cairo, that need glib 2.80+ that need docutils
 # aplied patch to build without at-spi and dbus, but need pango.
 .docutils-[0-9]*_BLFS_*
@@ -405,4 +405,9 @@
 .pinentry-[0-9]*_DIRTY_*
 .oath-toolkit-[0-9]*_DIRTY_*
 .pass-otp-[0-9]*_DIRTY_*
+# for cryptsetup crypted home
+.json-c-[0-9]*_BLFS_*
+.libaio-[0-9]*_BLFS_*
+.LVM2-[0-9]*_BLFS_*
+.cryptsetup-[0-9]*_BLFS_*
 # next tool

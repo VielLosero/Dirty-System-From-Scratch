@@ -1,6 +1,6 @@
 
-# Makers scripts for dirty current. (The Dirty system from scratch)
-This git repository have the makers scripts for build a Dirty system from scratch based on MLFS and GLFS.
+# Makers scripts for my dirty current. (My Dirty system from scratch)
+This git repository have the makers scripts for build my Dirty system from scratch based on MLFS and GLFS.
 It is recomended to run on a virtual machine the first time you try it.
 Be care if you don't know what are you doing.
 Know how to build LFS BLFS MLFS and GLFS are recomended. Take a look.
@@ -14,7 +14,9 @@ git clone https://github.com/VielLosero/dirty.current.git
 mv dirty.current/pkg /
 ```
 Mount your disk, partition or disk image file under /mnt/lfs.
-
+```
+mount /dev/sdb1 /mnt/lfs
+```
 Start the build for MLFS chapters 5 and 6.
 This will take some time. On my laptop with an Intel Core i7-6700HQ @ 4x 2.592GHz with mitigations on a virtual machine with host cpu and the 4 cores it takes 69 minutes.
 ```

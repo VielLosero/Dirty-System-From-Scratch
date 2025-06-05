@@ -94,21 +94,21 @@ CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
   # Final URL after the redirect.
-  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/%%' )
+  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/release-%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/release-%%' )
+  last_sub_ver=${ver/-/_}
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
-    if [ "$last_version" == "$ver" ] ; then 
+    if [ "$last_version" == "$sub_ver" ] ; then 
       echo "Version check: No new versions found." ; exit 0
     else
       if [ $NEW = 0 ] ; then
-        NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        if $SPIDER ${file1_url/$ver/$last_version}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_sub_ver}-${arch}-${rel}.sh}
+        if $SPIDER ${file1_url/$sub_ver/$last_version}/${file1/$ver/$last_sub_ver} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else
-            cp $0 $NEWMAKE 
-            echo "Created: $NEWMAKE" ; exit 2
+            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" || exit 1 ; exit 2
           fi
         else
           echo "Failed: new version file not found." ; exit 1 

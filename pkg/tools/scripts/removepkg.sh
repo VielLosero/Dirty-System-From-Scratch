@@ -91,7 +91,7 @@ echo "  Removing files ..."
         fi
       done
       # remove pkg 
-      rm -rf $PKG_DIR 2>/dev/null && echo "$(date) Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
+      rm -rf $PKG_DIR 2>/dev/null && echo "$(date +"%a %b %d %T %Z %Y") Removed $pkg_name in $INSTALLDIR" >> $LOGFILE
     else
       # dry run no needed files
       echo "  Dry run mode ..."

@@ -45,11 +45,12 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Cbindgen can be used to generate C bindings for Rust code."
-url="https://www.rust-lang.org/"
+short_desc="The libclc package contains library requirements of the OpenCL C programming language (provides header files but no libraries itself). libclc is an open source, BSD/MIT dual licensed implementation of the library requirements of the OpenCL C programming language, as specified by the OpenCL 1.1 Specification."
+url="https://lld.llvm.org/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
+sub_ver=$ver.src
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
@@ -66,15 +67,6 @@ OUTPKG=${OUTPKG:-$REPODIR/$DIST-$DISTVER/packages/$first_pkg_char/${name}/${pkg_
 # Other need vars for example to change the default INSTALLDIR=$LFS.
 LFS=/mnt/lfs
 LFS_TGT=$(uname -m)-lfs-linux-gnu
-# As with previous releases of the X Window System, it may be desirable to install Xorg into an alternate prefix. This is no longer common practice among Linux distributions. The common installation prefix for Xorg on Linux is /usr. There is no standard alternate prefix, nor is there any exception in the current revision of the Filesystem Hierarchy Standard for Release 7 of the X Window System. Alan Coopersmith of Sun Microsystems, once stated "At Sun, we were using /usr/X11 and plan to stick with it." Only the /opt/* prefix or the /usr prefix adhere to the current FHS guidelines.
-# The BLFS editors recommend using the /usr prefix.
-# Choose your installation prefix, and set the XORG_PREFIX variable with the following command:
-# export XORG_PREFIX="<PREFIX>"
-XORG_PREFIX="/usr"
-docdir="--docdir=$XORG_PREFIX/share/doc/$name-$ver"
-#Xorg_environment https://www.linuxfromscratch.org/blfs/view/stable/x/xorg7.html#xorg-env
-XORG_CONFIG="--prefix=$XORG_PREFIX --sysconfdir=/etc --localstatedir=/var --disable-static"
-#export XORG_PREFIX XORG_CONFIG
 
 # --- END CAT SEED ---
  
@@ -84,22 +76,23 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://github.com/mozilla/cbindgen/releases/latest
-sum="md5sum"
-file1_url=https://github.com/mozilla/cbindgen/archive/refs/tags
-file1=$name-$ver.tar.gz
-file1_sum=0712d991fc8e65121924265d738db71d
-#file2_url=$file1_url
-#file2=${file1}.sig
-#file2_sum=620d80c32b6aaf42d12d85de86fc56950c86b2a13a5b943c10c29d30c4f3efb0
-#rustc_gpgkey=108F66205EAEB0AAA8DD5E1C85AB96E6FA1BE5FE
+version_url=https://github.com/llvm/llvm-project/releases/latest
+sum="sha256sum"
+file1_url=https://github.com/llvm/llvm-project/releases/download/llvmorg-$ver
+file1=$name-$ver.src.tar.xz
+file1_sum=c6c431b0ab5d929395ccd367e87bbde4b1d622588e40460b92202424454c05da
+file2_url=$file1_url
+file2=${file1}.sig
+file2_sum=392486486fa6aa06aca7357b4835fdbe8dfa34da1b3821ccb148aae8ce69810f
+llvm_gpgkey=474E22316ABF4785A88C6E8EA2C794A986419D8A
+
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
   # Final URL after the redirect.
-  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/%%' )
+  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/llvmorg-%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/llvmorg-%%' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -108,12 +101,11 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url/$ver/$last_version}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else
-            cp $0 $NEWMAKE 
-            echo "Created: $NEWMAKE" ; exit 2
+            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" || exit 1 ; exit 2
           fi
         else
           echo "Failed: new version file not found." ; exit 1 
@@ -137,14 +129,14 @@ fi
 
 # Get sources and check.
 cd $SOURCESDIR || exit 1
-[ ! -e $file1 ] && $GETFILE ${file1_url}/v$ver.tar.gz -O ${file1}
+[ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
 [ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
-#[ ! -e $file2 ] && $GETFILE ${file2_url}/$ver.tar.gz -O ${file2}
-#[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
+[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
+[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-#gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $rustc_gpgkey
-#gpg --verify $file2 $file1 || exit 1
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $llvm_gpgkey
+gpg --verify ./$file2 $file1 || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
@@ -269,7 +261,7 @@ if [ $EXTRACT -eq 1 ] ; then echo "Skipping EXTRACT sources." ; else
 EOF_OUTBUILD
   echo '  tar xf $SOURCESDIR'/$file1 >> $OUTBUILD 
   cat << 'EOF_OUTBUILD' >> $OUTBUILD
-  cd $name-$ver || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_EXTRACT ---
   # --- END_LFS_CMD_EXTRACT ---
   end_extract_date=$(date +"%s")
@@ -283,7 +275,7 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   start_patch_date=$(date +"%s")
   echo "Applying patches."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_PATCH ---
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
@@ -297,8 +289,12 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_CONFIG ---
+  mkdir build ; cd build || exit 1
+  cmake -D CMAKE_INSTALL_PREFIX=/usr \
+      -D CMAKE_BUILD_TYPE=Release  \
+      -G Ninja .. || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -310,10 +306,10 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   start_build_date=$(date +"%s")
   echo "Compiling sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_BUILD ---
-  #CARGO_TARGET_DIR=$PKGDIR/usr/bin cargo build --release
-  cargo build --release
+  cd build || exit 1
+  ninja
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -326,10 +322,10 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   #Installing sources.
   echo "Installing sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_INSTALL ---
-  mkdir -vp $PKGDIR/usr/bin/
-  install -v -m755 target/release/cbindgen $PKGDIR/usr/bin/
+  cd build || exit 1
+  DESTDIR=$PKGDIR ninja install || exit 1
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -342,7 +338,7 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   start_post_date=$(date +"%s")
   echo "Post compilation tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_POST ---
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
@@ -356,7 +352,7 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   start_config32_date=$(date +"%s")
   echo "Configuring 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_CONFIG32 ---
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
@@ -369,7 +365,7 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   start_build32_date=$(date +"%s")
   echo "Compiling 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_BUILD32 ---
   # --- END_LFS_CMD_BUILD32 ---
   end_build32_date=$(date +"%s")
@@ -383,7 +379,7 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   start_install32_date=$(date +"%s")
   echo "Installing 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_INSTALL32 ---
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
@@ -397,7 +393,7 @@ if [ $POST32 -eq 1 ] ; then echo "Skipping POST32 bits compilation tasks." ; els
   start_post32_date=$(date +"%s")
   echo "Post compilation 32bits tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$sub_ver || exit 1
   # --- LFS_CMD_POST32 ---
   # --- END_LFS_CMD_POST32 ---
   end_post32_date=$(date +"%s")

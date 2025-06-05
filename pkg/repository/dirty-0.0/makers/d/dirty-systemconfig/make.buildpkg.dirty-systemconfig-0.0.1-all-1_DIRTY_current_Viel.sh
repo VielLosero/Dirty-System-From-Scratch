@@ -94,8 +94,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else
-            cp $0 $NEWMAKE 
-            echo "Created: $NEWMAKE" ; exit 2
+            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" || exit 1 ; exit 2
           fi
         #else
         #  echo "Failed: new version file not found." ; exit 1 
@@ -129,82 +128,73 @@ echo "Preparing sources."
 cd $SOURCESPPDIR || exit 1
 
 if [ -e $file1 ] ; then rm $file1 ; fi
-TMP_BUILDFILESYSTEM_HIERARCHY_DIR=$(mktemp -d /tmp/make.buildpkg-filesystem-hierarchy-XXXXXX)
-trap "rm -rf $TMP_BUILDFILESYSTEM_HIERARCHY_DIR" EXIT
-cd $TMP_BUILDFILESYSTEM_HIERARCHY_DIR || exit 1
-  #4.2. Creating a Limited Directory Layout in the LFS Filesystem
-  #mkdir {bin,boot,dev,etc,home,lib,lib64,media,mnt,opt,root,run,sbin,srv,tmp,usr,var}
-  #mkdir -pv home
-  mkdir -pv {etc,var,tmp}
-  mkdir -pv usr/{bin,lib,sbin}
+TMP_BUILD_SYSTEMCONFIG_DIR=$(mktemp -d /tmp/make.buildpkg-dirty-systemconfig-XXXXXX)
+trap "rm -rf $TMP_BUILD_SYSTEMCONFIG_DIR" EXIT
+cd $TMP_BUILD_SYSTEMCONFIG_DIR || exit 1
+  #Create a start system config script.
+  mkdir -pv etc/init.d
 
-  for i in bin lib sbin; do
-    ln -sv usr/$i $i
-  done
-  case $(uname -m) in
-    x86_64) mkdir -pv lib64 ;;
-  esac
-  mkdir -pv usr/lib32
-  ln -sv usr/lib32 lib32
-  mkdir -pv tools
+  echo "Creating systemconfig start script."
+cat << 'EOF' > etc/init.d/systemconfig
+#!/bin/sh
+########################################################################
+# Begin sysconfig
+#
+# Description : Load initial system config.
+#
+# Author      : Viel Losero - viel.loser@gmail.com
+#
+########################################################################
 
-  echo "Creating LFS auto script."
-cat << 'EOF' > tmp/LFS_autoconfig_user_lfs.sh 
-echo "2.6.Setting.The.LFS.Variable.sh"
-export LFS=/mnt/lfs
-echo $LFS
-echo "2.7 Mounting the New Partition"
-mkdir -pv $LFS
-#mount -v -t ext4 /dev/<xxx> $LFS
-echo "4.2. Creating a Limited Directory Layout in the LFS Filesystem"
-chown root:root $LFS
-chmod 755 $LFS
-echo "4.3 Adding LFS user"
-groupadd lfs
-useradd -s /bin/bash -g lfs -m -k /dev/null lfs
-passwd lfs
-chown -v lfs $LFS/{usr{,/*},lib,var,etc,bin,sbin,tools}
-case $(uname -m) in
-  x86_64) chown -v lfs $LFS/lib64 ;;
+### BEGIN INIT INFO
+# Provides:            systemconfig
+# Required-Start:      
+# Should-Start:        
+# Required-Stop:
+# Should-Stop:         
+# Default-Start:       S
+# Default-Stop:        0 1 6
+# Short-Description:   Load initial system config.
+# Description:         Configure system with custom files.
+### END INIT INFO
+
+. /lib/lsb/init-functions
+
+case "$1" in
+   start)
+      log_info_msg "Configuring system..."
+      # Check if there are certificates (make-ca).  
+      MAKE_CA_CONF="/etc/make-ca.conf"
+      if test -f "${MAKE_CA_CONF}"; then
+        . "${MAKE_CA_CONF}"
+      else
+        SSLDIR="/etc/ssl"
+      fi
+      if [ -z "$(ls -A $SSLDIR/certs 2>/dev/null)" ] ; then
+        echo "No certs found... Runing make-ca -g"
+        # NOTE need net maybe pre and post.
+        make-ca -g
+      fi
+
+      
+      
+      
+      evaluate_retval
+      ;;
+
+   *)
+      echo "Usage: $0 {start}"
+      exit 1
+      ;;
 esac
-chown -v lfs $LFS/lib32
-echo "4.4. Setting Up the Environment"
-mv  $LFS/tmp/.bash_profile /home/lfs/.bash_profile
-mv  $LFS/tmp/.bashrc /home/lfs/.bashrc 
-chmod 1777 /$LFS/tmp
-su - lfs
-EOF
 
-cat > tmp/.bash_profile << "EOF"
-exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' /bin/bash
-EOF
+# End sysconfig
 
-cat > tmp/.bashrc << "EOF"
-set +h
-umask 022
-LFS=/mnt/lfs
-LC_ALL=POSIX
-LFS_TGT=x86_64-lfs-linux-gnu
-LFS_TGT32=i686-lfs-linux-gnu
-LFS_TGTX32=x86_64-lfs-linux-gnux32
-PATH=/usr/bin
-if [ ! -L /bin ]; then PATH=/bin:$PATH; fi
-PATH=$LFS/tools/bin:$PATH
-CONFIG_SITE=$LFS/usr/share/config.site
-export LFS LC_ALL LFS_TGT LFS_TGT32 LFS_TGTX32 PATH
-export MAKEFLAGS=-j$(nproc) 
+
+
 EOF
 
   tar -Jcf $SOURCESDIR/$file1 {bin,etc,lib,lib64,lib32,sbin,usr,var,tools,tmp}
-  #rmdir home
-  rm tmp/LFS_autoconfig_user_lfs.sh
-  rm tmp/.bash_profile
-  rm tmp/.bashrc
-  rmdir usr/{bin,lib,sbin}
-  rmdir usr/lib32
-  rm lib32
-  rm {bin,lib,sbin}
-  rmdir {etc,lib64,usr,var,tools,tmp}
 
 # add some files 
 #cat << 'EOF' > root/4.2.set-up-Limited-Directory-Layout.sh 
