@@ -15,7 +15,7 @@ mv dirty.current/pkg /
 ```
 Mount your disk, partition or disk image file under /mnt/lfs.
 ```
-mount /dev/sdb1 /mnt/lfs
+mount /dev/sda4 /mnt/lfs
 ```
 Start the build for MLFS chapters 5 and 6.
 This will take some time. On my laptop with an Intel Core i7-6700HQ @ 4x 2.592GHz with mitigations on a virtual machine with host cpu and the 4 cores it takes 69 minutes.
@@ -66,8 +66,24 @@ bash /pkg/tools/lfs-chroot mount && bash /pkg/tools/lfs-chroot login
 
 (lfs chroot) root:/# bash /pkg/tools/scripts/run.repo.list.sh
 ```
+Exit from chroot and update your grub.
+```
+menuentry "LFS" {
+  insmod part_gpt
+  insmod gzio
+  insmod part_msdos
+  insmod ext2
+  search --no-floppy --label --set=root --label MY-HD
+  if [ x$feature_platform_search_hint = xy ]; then
+    search --no-floppy --fs-uuid --set=root --hint-bios=hd0,msdos1 --hint-efi=hd0,msdos1 --hint-baremetal=ahci0,msdos1  a4e545d9-59bd-4399-aafe-20361c24de75
+  else
+    search --no-floppy --fs-uuid --set=root a4e545d9-59bd-4399-aafe-20361c24de75
+  fi
+  linux /boot/vmlinuz-linux-6.15_rc1-1_LFS_SlackCurrentKernelConfig root=/dev/sda4 ro
+}
+```
 ## What next?
-Check your repo status. 
+Boot your new MLFS nad check your repo status.
 ```
 bash /pkg/tools/scripts/repo-status.sh
 ```

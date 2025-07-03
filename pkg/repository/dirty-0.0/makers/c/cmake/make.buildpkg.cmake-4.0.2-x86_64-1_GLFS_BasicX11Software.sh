@@ -90,9 +90,9 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://cmake.org/files
+version_url=https://cmake.org/files/LatestRelease/
 sum="sha256sum"
-file1_url=$version_url/v$sub_ver
+file1_url=$version_url
 file1=$name-$ver.tar.gz
 file1_sum=1c3a82c8ca7cf12e0b17178f9d0c32f7ac773bd5651a98fcfd80fbf4977f8d48
 file2_url=$file1_url
@@ -107,8 +107,8 @@ cmake_gpgkey=C6C265324BBEBDC350B513D02D2CEF1034921684
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
+  last_version=$(echo "$($GETVER ${version_url})" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
   last_sub_ver=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*v[0-9].[0-9]/\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/v//' | sed 's%/%%' )
-  last_version=$(echo "$($GETVER ${version_url}/v${last_sub_ver})" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -117,7 +117,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        if $SPIDER ${file1_url/$sub_ver/$last_sub_ver}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else

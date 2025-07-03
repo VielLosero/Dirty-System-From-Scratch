@@ -85,7 +85,7 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://s3.amazonaws.com/json-c_releases/releases/index.html
+version_url=https://s3.amazonaws.com/json-c_releases
 sum="sha256sum"
 file1_url=https://s3.amazonaws.com/json-c_releases/releases
 file1=$name-$ver.tar.gz
@@ -95,7 +95,7 @@ file1_sum=876ab046479166b869afc6896d288183bbc0e5843f141200c677b3e8dfb11724
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=$(echo "$($GETVER $version_url)" | tr '<' '\n' | grep Key.*json-c-[0-9].*[0-9].tar.*z | cut -d'/' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f3 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else

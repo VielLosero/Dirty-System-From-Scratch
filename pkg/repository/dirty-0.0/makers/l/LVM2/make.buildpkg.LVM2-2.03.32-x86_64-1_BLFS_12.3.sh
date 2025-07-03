@@ -89,7 +89,7 @@ file2_gpgkey=D501A478440AE2FD130A1BE8B9112431E509039F
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}.[0-9].*[0-9].tgz\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tgz//' | sed "s/$name.//" )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
