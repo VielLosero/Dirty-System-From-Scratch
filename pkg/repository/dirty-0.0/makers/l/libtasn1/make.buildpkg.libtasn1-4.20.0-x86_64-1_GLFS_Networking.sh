@@ -29,7 +29,7 @@
 #:Maintainer: Viel Losero <viel.losero@gmail.com>
 #:Contributor: -
 
-#:Version:0.0.4
+#:Version:0.0.6
 
 # Get Application init data from filename.
 cd $(dirname $0) ; SWD=$(pwd) # script work directory
@@ -40,6 +40,10 @@ pkg_ver="${pkg_name%-*-*}" ; ver="${pkg_ver/$name-/}"
 pkg_arch="${pkg_name%-*}" ; arch=${pkg_arch/$name-$ver-/}
 rel=${pkg_name/$name-$ver-$arch-/}
 first_pkg_char=$(printf %.1s ${name,})
+rel_build=${rel%%_*} ; rel_helper1=${rel/${rel_build}_}
+rel_tag1=${rel_helper1/_*} ; rel_helper2=${rel/${rel_build}_${rel_tag1}_}
+rel_tag2=${rel_helper2/_*} ; rel_helper3=${rel/${rel_build}_${rel_tag1}_${rel_tag2}_}
+rel_tag3=${rel_helper3/_*}
 echo "  Package name: $name"
 echo "  Version: $ver"
 echo "  Arch: $arch"
@@ -53,15 +57,15 @@ if [ -z $pkg_name ] ; then exit 1 ; fi
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
-REPODIR=${REPODIR:-/pkg/repository}
-METADATADIR="${METADATADIR:-/pkg/metadata/$first_pkg_char/${name}/${pkg_name}}"
-DIST=${DIST:-dirty} ; DISTVER=${DISTVER:-0.0}
-SOURCESDIR=${SOURCESDIR:-$TMP/$DIST-$DISTVER/sources-all}
-SOURCESPPDIR=${SOURCESPPDIR:-$TMP/$DIST-$DISTVER/sources-per-package/$name-$ver}
-BUILDDIR=${BUILDDIR:-$TMP/$DIST-$DISTVER/build/$pkg_name}
-PKGDIR=${PKGDIR:-$TMP/$DIST-$DISTVER/pkgfiles/$pkg_name}
-OUTBUILD=${OUTBUILD:-$REPODIR/$DIST-$DISTVER/builders/$first_pkg_char/${name}/${build_pkg_name}.sh}
-OUTPKG=${OUTPKG:-$REPODIR/$DIST-$DISTVER/packages/$first_pkg_char/${name}/${pkg_name}.sh}
+REPO=${REPO:-dirty-0.0}
+REPODIR=${REPODIR:-$ROOT/pkg/repository/$REPO}
+METADATADIR="${METADATADIR:-$ROOT/pkg/metadata/$REPO/${pkg_name}}"
+SOURCESDIR=${SOURCESDIR:-$TMP/sources-all}
+SOURCESPPDIR=${SOURCESPPDIR:-$TMP/$REPO/sources-per-package/$name-$ver}
+BUILDDIR=${BUILDDIR:-$TMP/$REPO/build/$pkg_name}
+PKGDIR=${PKGDIR:-$TMP/$REPO/pkgfiles/$pkg_name}
+OUTBUILD=${OUTBUILD:-$REPODIR/builders/$first_pkg_char/${name}/${build_pkg_name}.sh}
+OUTPKG=${OUTPKG:-$REPODIR/packages/$first_pkg_char/${name}/${pkg_name}.sh}
 
 # Other need vars for example to change the default INSTALLDIR=$LFS.
 LFS=/mnt/lfs
@@ -75,7 +79,8 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://ftp.gnu.org/gnu/libtasn1/
+gnu_mirror=https://ftpmirror.gnu.org
+version_url=$gnu_mirror/libtasn1/
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.gz
@@ -97,12 +102,12 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: No new versions found." ; exit 0
     else
       if [ $NEW = 0 ] ; then
-        NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
+        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
         if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
-            echo "Exist: $NEWMAKE" ; exit 0
+            echo "Exist: $NEWMAKE" ; exit 4
           else
-            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" || exit 1 ; exit 2
+            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" && exit 3 || exit 1
           fi
         else
           echo "Failed: new version file not found." ; exit 1 
@@ -113,7 +118,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: $name $last_version  $version_url" ; exit 2
     fi
   fi
-  exit 1
+  exit 255
 fi
 
 # Make needed dirs.
@@ -425,8 +430,6 @@ if [ $SHARED -eq 1 ] ; then echo "Skipping find SHARED libs." ; else
   echo "Find ELF files and extract needed shared libs"
   trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
   cd $PKGDIR
-  find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; |\
-    grep NEEDED | sed 's/ *NEEDED *\(l.*\)/\1/' | LC_ALL=POSIX sort -u > $TMP_PKG_SHAREDLIBS_FILE
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; | grep -E "^./|NEEDED" |\
     # change ': file format elf64-x86-64' to :
     sed -e 's/:.*$/:/' |\

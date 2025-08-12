@@ -401,8 +401,8 @@
 .st-[0-9]*_DIRTY_*
 # password manager
 .unix-tree-[0-9]*_DIRTY_*
-.pass-[0-9]*_DIRTY_*
-.pinentry-[0-9]*_DIRTY_*
+.password-store-[0-9]*_DIRTY_*
+.pinentry-[0-9]*_BLFS_*
 .oath-toolkit-[0-9]*_DIRTY_*
 .pass-otp-[0-9]*_DIRTY_*
 # for cryptsetup crypted home
@@ -410,4 +410,11 @@
 .libaio-[0-9]*_BLFS_*
 .LVM2-[0-9]*_BLFS_*
 .cryptsetup-[0-9]*_BLFS_*
+#for mail
+.mutt-[0-9]*_BLFS_*
+#nftables
+.libmnl-[0-9]*_DIRTY_*
+.libnftnl-[0-9]*_DIRTY_*
+#.libedit-[0-9]*_DIRTY_* used readline
+.nftables-[0-9]*_DIRTY_*
 # next tool

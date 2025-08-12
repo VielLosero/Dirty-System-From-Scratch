@@ -106,7 +106,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else
-            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" || exit 1 ; exit 2
+            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" && exit 3 || exit 1
           fi
         else
           echo "Failed: new version file not found." ; exit 1 
@@ -117,7 +117,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: $name $last_version  $version_url" ; exit 2
     fi
   fi
-  exit 1
+  exit 4
 fi
 
 # Make needed dirs.

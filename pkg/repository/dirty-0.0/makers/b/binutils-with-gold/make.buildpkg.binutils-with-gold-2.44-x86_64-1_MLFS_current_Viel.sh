@@ -75,7 +75,8 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://ftp.gnu.org/gnu/binutils
+gnu_mirror=https://ftpmirror.gnu.org
+version_url=$gnu_mirror/binutils
 sum="sha512sum"
 file1_url=$version_url
 file1=$name-$ver.tar.gz
@@ -104,7 +105,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 0
           else
-            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" || exit 1 ; exit 2
+            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" && exit 3 || exit 1
           fi
         else
           echo "Failed: new version file not found." ; exit 1 
@@ -115,7 +116,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: $name $last_version  $version_url" ; exit 2
     fi
   fi
-  exit 1
+  exit 4
 fi
 
 # Make needed dirs.

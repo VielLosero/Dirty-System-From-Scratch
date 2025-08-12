@@ -72,6 +72,7 @@ Redo updates
 Done. v1 on installpkg Check needed libs --> external libs and pkg libs
 add some check for rsync if not installed.
 Change run.repo.list format from # D M B I to eq exit of repo-status.sh
+first boot and machine-id --> dbus-uuidgen --ensure
 
 
 # add to ~/.bash_profile  maybe? see rustc path and env profile 

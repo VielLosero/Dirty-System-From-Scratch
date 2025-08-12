@@ -29,7 +29,7 @@
 #:Maintainer: Viel Losero <viel.losero@gmail.com>
 #:Contributor: -
 
-#:Version:0.0.4
+#:Version:0.0.6
 
 # Get Application init data from filename.
 cd $(dirname $0) ; SWD=$(pwd) # script work directory
@@ -40,28 +40,32 @@ pkg_ver="${pkg_name%-*-*}" ; ver="${pkg_ver/$name-/}"
 pkg_arch="${pkg_name%-*}" ; arch=${pkg_arch/$name-$ver-/}
 rel=${pkg_name/$name-$ver-$arch-/}
 first_pkg_char=$(printf %.1s ${name,})
+rel_build=${rel%%_*} ; rel_helper1=${rel/${rel_build}_}
+rel_tag1=${rel_helper1/_*} ; rel_helper2=${rel/${rel_build}_${rel_tag1}_}
+rel_tag2=${rel_helper2/_*} ; rel_helper3=${rel/${rel_build}_${rel_tag1}_${rel_tag2}_}
+rel_tag3=${rel_helper3/_*}
 echo "  Package name: $name"
 echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="openssh (Secure Shell daemon and clients)"
-url="https://www.openssh.com/"
-license="BSD"
+short_desc="The GNU gettext utilities are a set of tools that provides a framework to help other GNU packages produce multi-lingual messages."
+url="https://www.gnu.org/software/gettext/"
+license="GPL3"
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
-REPODIR=${REPODIR:-/pkg/repository}
-METADATADIR="${METADATADIR:-/pkg/metadata/$first_pkg_char/${name}/${pkg_name}}"
-DIST=${DIST:-dirty} ; DISTVER=${DISTVER:-0.0}
-SOURCESDIR=${SOURCESDIR:-$TMP/$DIST-$DISTVER/sources-all}
-SOURCESPPDIR=${SOURCESPPDIR:-$TMP/$DIST-$DISTVER/sources-per-package/$name-$ver}
-BUILDDIR=${BUILDDIR:-$TMP/$DIST-$DISTVER/build/$pkg_name}
-PKGDIR=${PKGDIR:-$TMP/$DIST-$DISTVER/pkgfiles/$pkg_name}
-OUTBUILD=${OUTBUILD:-$REPODIR/$DIST-$DISTVER/builders/$first_pkg_char/${name}/${build_pkg_name}.sh}
-OUTPKG=${OUTPKG:-$REPODIR/$DIST-$DISTVER/packages/$first_pkg_char/${name}/${pkg_name}.sh}
+REPO=${REPO:-dirty-0.0}
+REPODIR=${REPODIR:-$ROOT/pkg/repository/$REPO}
+METADATADIR="${METADATADIR:-$ROOT/pkg/metadata/$REPO/${pkg_name}}"
+SOURCESDIR=${SOURCESDIR:-$TMP/sources-all}
+SOURCESPPDIR=${SOURCESPPDIR:-$TMP/$REPO/sources-per-package/$name-$ver}
+BUILDDIR=${BUILDDIR:-$TMP/$REPO/build/$pkg_name}
+PKGDIR=${PKGDIR:-$TMP/$REPO/pkgfiles/$pkg_name}
+OUTBUILD=${OUTBUILD:-$REPODIR/builders/$first_pkg_char/${name}/${build_pkg_name}.sh}
+OUTPKG=${OUTPKG:-$REPODIR/packages/$first_pkg_char/${name}/${pkg_name}.sh}
 
 # Other need vars for example to change the default INSTALLDIR=$LFS.
 LFS=/mnt/lfs
@@ -75,15 +79,16 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable
-sum="sha256sum"
+gnu_mirror=https://ftpmirror.gnu.org
+version_url=$gnu_mirror/gettext
+sum="md5sum"
 file1_url=$version_url
-file1=$name-$ver.tar.gz
-file1_sum=021a2e709a0edf4250b1256bd5a9e500411a90dddabea830ed59cef90eb9d85c
+file1=$name-$ver.tar.xz
+file1_sum=355a09fa53ae2e87dd493e040d437874
 file2_url=$file1_url
-file2=${file1}.asc
-file2_sum=f71cf3240516ce59c2240532143982fcd97e2e286e6eb1eb6c3080a1ec012a04
-openssh_gpgkey=7168B983815A5EEF59A4ADFD2A3F414E736060BA
+file2=${file1}.sig
+file2_sum=02339ff633ba8b08bfac0258c799eb12
+file2_gpgkey=35B17DF5752577CA0C541CEB94BFDF4484AD142F
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -97,12 +102,12 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: No new versions found." ; exit 0
     else
       if [ $NEW = 0 ] ; then
-        NEWMAKE=${NEWMAKE:-$REPODIR/$DIST-$DISTVER/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
+        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
         if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
-            echo "Exist: $NEWMAKE" ; exit 0
+            echo "Exist: $NEWMAKE" ; exit 4
           else
-            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" || exit 1 ; exit 2
+            cp $0 $NEWMAKE && echo "Created: $NEWMAKE" && exit 3 || exit 1
           fi
         else
           echo "Failed: new version file not found." ; exit 1 
@@ -113,7 +118,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: $name $last_version  $version_url" ; exit 2
     fi
   fi
-  exit 1
+  exit 255
 fi
 
 # Make needed dirs.
@@ -132,7 +137,7 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --receive-keys $openssh_gpgkey
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $file2_gpgkey
 gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
@@ -274,13 +279,6 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
-  #install -v -g sys -m700 -d /var/lib/sshd || exit 1
-  #groupadd -g 50 sshd        || exit 1
-  #useradd  -c 'sshd PrivSep' \
-  #         -d /var/lib/sshd  \
-  #         -g sshd           \
-  #         -s /bin/false     \
-  #         -u 50 sshd || exit 1
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -295,13 +293,9 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  ./configure --prefix=/usr                          \
-            --sysconfdir=/etc/ssh                    \
-            --with-privsep-path=/var/lib/sshd        \
-            --with-default-path=/usr/bin             \
-            --with-superuser-path=/usr/sbin:/usr/bin \
-            --with-pam                               \
-            --with-pid-dir=/run || exit 1
+  ./configure --prefix=/usr    \
+              --disable-static \
+              --docdir=/usr/share/doc/$name-$ver || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -332,23 +326,7 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
   make DESTDIR=$PKGDIR install || exit 1
-  mkdir -vp $PKGDIR/usr/bin
-  mkdir -vp $PKGDIR/usr/share/man/man1             
-  #mkdir -vp $PKGDIR/usr/share/doc/$name-$ver
-  install -v -m755    contrib/ssh-copy-id $PKGDIR/usr/bin
-  install -v -m644    contrib/ssh-copy-id.1 $PKGDIR/usr/share/man/man1             
-  install -v -m755 -d $PKGDIR/usr/share/doc/$name-$ver    
-  install -v -m644    INSTALL LICENCE OVERVIEW README* $PKGDIR/usr/share/doc/$name-$ver
-
-  echo "PermitRootLogin yes" >> $PKGDIR/etc/ssh/sshd_config
-  echo "PermitEmptyPasswords yes" >> $PKGDIR/etc/ssh/sshd_config
-  #echo "PasswordAuthentication no" >> $PKGDIR/etc/ssh/sshd_config &&
-  #echo "KbdInteractiveAuthentication no" >> $PKGDIR/etc/ssh/sshd_config
-
-  mkdir -vp $PKGDIR/etc/pam.d/
-  sed 's@d/login@d/sshd@g' $PKGDIR/etc/pam.d/login > $PKGDIR/etc/pam.d/sshd &&
-  chmod 644 $PKGDIR/etc/pam.d/sshd &&
-  echo "UsePAM yes" >> $PKGDIR/etc/ssh/sshd_config
+  chmod -v 0755 $PKGDIR/usr/lib/preloadable_libintl.so
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -442,8 +420,6 @@ if [ $SHARED -eq 1 ] ; then echo "Skipping find SHARED libs." ; else
   echo "Find ELF files and extract needed shared libs"
   trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
   cd $PKGDIR
-  find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; |\
-    grep NEEDED | sed 's/ *NEEDED *\(l.*\)/\1/' | LC_ALL=POSIX sort -u > $TMP_PKG_SHAREDLIBS_FILE
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; | grep -E "^./|NEEDED" |\
     # change ': file format elf64-x86-64' to :
     sed -e 's/:.*$/:/' |\

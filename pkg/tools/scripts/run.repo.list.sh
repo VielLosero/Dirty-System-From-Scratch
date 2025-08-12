@@ -3,16 +3,17 @@
 # make a ordered list with repo-status.sh like:
 # cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  ; done | grep " V " > /tmp/run.repo.list
 # sh-5.2# cat /tmp/run.repo.list | head -10
-#  M B P I     V L make_buildpkg_dirty_package_manager-0.0.1-all-1_DIRTY_current_Viel.0.0.3
-#  M B P I     V L filesystem_hierarchy-3.0-all-1_DIRTY_current_Viel.0.0.3
-#  M B P I     V L man-pages-6.13-x86_64-1_MLFS_current_Viel.0.0.3
-#  M B P I     V L iana-etc-20250407-x86_64-1_MLFS_current_Viel.0.0.3
-#  M B P I     V L glibc-2.41-x86_64-1_MLFS_current_Viel.0.0.3
-#  M B P I     V L tzdata-2025b-all-1_MLFS_current_Viel.0.0.3
-#  M B P I     V L zlib-1.3.1-x86_64-1_MLFS_current_Viel.0.0.3
-#  M B P I     V L bzip2-1.0.8-x86_64-1_MLFS_current_Viel.0.0.3
-#  M B P I     V L xz-5.8.1-x86_64-1_MLFS_current_Viel.0.0.3
-#  M B P I     V L lz4-1.10.0-x86_64-1_MLFS_current_Viel.0.0.3
+# M B P I     V L make_buildpkg_dirty_package_manager-0.0.1-all-1_DIRTY_current_Viel.0.0.3
+# M B P I     V L filesystem_hierarchy-3.0-all-1_DIRTY_current_Viel.0.0.3
+# M B P I     V L man-pages-6.13-x86_64-1_MLFS_current_Viel.0.0.3
+# M B P I     V L iana-etc-20250407-x86_64-1_MLFS_current_Viel.0.0.3
+# M B P I     V L glibc-2.41-x86_64-1_MLFS_current_Viel.0.0.3
+# M B P I     V L tzdata-2025b-all-1_MLFS_current_Viel.0.0.3
+# M B P I     V L zlib-1.3.1-x86_64-1_MLFS_current_Viel.0.0.3
+# M B P I     V L bzip2-1.0.8-x86_64-1_MLFS_current_Viel.0.0.3
+# M B P I     V L xz-5.8.1-x86_64-1_MLFS_current_Viel.0.0.3
+# M B P I     V L lz4-1.10.0-x86_64-1_MLFS_current_Viel.0.0.3
+#echo " M B P I S/s U/u/R V L/l package_name "
 
 # Edit the list /tmp/run.repo.list as:
 # Add # at start of each line.

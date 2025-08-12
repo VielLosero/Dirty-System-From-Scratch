@@ -143,3 +143,17 @@ wc -l /pkg/installed/*/index | grep " 0 "
 bash-5.2# for line in $(diff -u /pkg/tools/config /pkg/tools/kernel.config.dirty1 | grep +C | cut -c 2- ) ; do echo $line ; bash /pkg/tools/scripts/kernel.config.sh --file /pkg/tools/config  --set-val ${line/=*} ${line/*=} ; done
 
 
+# version 6
+bash-5.2# find /pkg/repository/dirty-0.0/makers/ -type f -exec sh -c 'grep "#:Version:0.0.6" {} &&  patch --fuzz=20 --dry-run {} -i /tmp/patch5 | grep -B3 FAILED'  \; | grep checking
+bash-5.2# find /pkg/repository/dirty-0.0/makers/ -type f -name "*.sh" -exec sh -c 'grep "#:Version:0.0.6" {} &&  patch --fuzz=20 --dry-run {} -i /tmp/patch5 && echo +++++++++++++ && patch --fuzz=20  {} -i /tmp/patch5 ' \;
+# version 6 last
+bash-5.2# cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do ls -1 /pkg/repository/dirty-0.0/makers/*/*/*$(bash /pkg/tools/scripts/repo-status.sh ${pkg} | grep " V " | cut -c19-)* ; done
+
+
+# find libs needed 
+cat /pkg/installed/*/index | grep "\.so$" | rev | cut -d / -f1 | rev | sort -u >/tmp/installed1
+cat /pkg/installed/*/index | grep "\.so\." | rev | cut -d / -f1 | rev | sort -u >/tmp/installed2
+cat /pkg/installed/*/needed-libs | cut -d':' -f2 | sed 's/,/\n/g' | sort -u > /tmp/needed
+cat /tmp/installed1 /tmp/installed2 | sort -u >/tmp/installed
+comm -13 /tmp/installed /tmp/needed
+
