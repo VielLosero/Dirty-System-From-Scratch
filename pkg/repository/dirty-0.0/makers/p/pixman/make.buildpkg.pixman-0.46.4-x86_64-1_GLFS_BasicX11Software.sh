@@ -92,13 +92,13 @@ version_url=https://cairographics.org/releases
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=d075209d18728b1ca5d0bb864aa047a262a1fde206da8a677d6af75b2ee1ae98
+file1_sum=a098c33924754ad43f981b740f6d576c70f9ed1006e12221b1845431ebce1239
 file2_url=$file1_url
 file2=${file1}.sha512
-file2_sum=55902fa6d8d030cbd31a526637f3b173cbce5eb7f5f004581d87555568106312
+file2_sum=d285f8030f2134749712a7bfbc68fa5cfd934d8dcc7bf63d63e0b24888f30328
 file3_url=$file1_url
 file3=${file2}.asc
-file3_sum=e41d19ff9396ec52fc5d57aa904634b96d70648a2ada1173035a11f0918cd503
+file3_sum=407d2e373b23ab3e7835df1e2873908e74cc9ed3bb55bf316d4006729721e62a
 pixman_gpgkey=3BB639E56F861FA2E86505690FDD682D974CA72A 
 
 # Check for new releases.

@@ -94,7 +94,7 @@ version_url=https://github.com/KhronosGroup/SPIRV-LLVM-Translator/releases/lates
 sum="sha256sum"
 file1_url=https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v$ver
 file1=$name-$ver.tar.gz
-file1_sum=8e953931a09b0a4c2a77ddc8f1df4783571d8ffca9546150346c401573866062
+file1_sum=4f7019a06c731daebbc18080db338964002493ead4cfb440fef95d120c50a170
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

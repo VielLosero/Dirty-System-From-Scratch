@@ -89,10 +89,10 @@ version_url="https://download.gnome.org/sources/pango"
 sum="sha256sum"
 file1_url="$version_url/$sub_ver"
 file1=$name-$ver.tar.xz
-file1_sum=2606252bc25cd8d24e1b7f7e92c3a272b37acd6734347b73b47a482834ba2491
+file1_sum=17065e2fcc5f5a5bdbffc884c956bfc7c451a96e8c4fb2f8ad837c6413cb5a01
 file2_url="$file1_url"
 file2=$name-$ver.sha256sum
-file2_sum=09271e9b4b90df83148e79ca0d99a2b2bf7c50ae6f4d17249948cf8f9923e28c
+file2_sum=e9094987258c1f7a96c14b5811ffd1c17162174c3902a2f1c89c3207850f23a8
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

@@ -92,11 +92,11 @@ version_url=https://www.x.org/pub/individual/app
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=a8ada581dbd7266440d7c3794fa89edf6b99b8857fc2e8c31042684f3af4822b
+file1_sum=dc1de6e6e091ed46c4837b0ae9811e8182f7be0d2af638cab3e530ff081a48b6
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=c29a81133d4beb1182b4dbad04507b80c45ae99a649d6595f72a5e46717c1d8e
-gpgkey=4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E 
+file2_sum=b95956e4e39460e537ebeb01f3327200433d83791b9bca9696e56f3e26b4be80
+gpgkey=3AB285232C46AE43D8E192F4DAB0F78EA6E7E2D2 
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -145,7 +145,7 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --receive-keys $gpgkey
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $gpgkey
 gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.

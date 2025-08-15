@@ -83,13 +83,13 @@ version_url=https://e2fsprogs.sourceforge.net/e2fsprogs-release.html
 sum="sha256sum"
 file1_url=https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v$ver
 file1=$name-$ver.tar.xz
-file1_sum=08242e64ca0e8194d9c1caad49762b19209a06318199b63ce74ae4ef2d74e63c
+file1_sum=857e6ef800feaa2bb4578fbc810214be5d3c88b072ea53c5384733a965737329
 file2_url=$file1_url
 file2=$name-$ver.tar.sign
-file2_sum=76e12cf9778d2af38e6dcf87dcfa1d90b97c5d651a742453fb263a0f6fe51086
+file2_sum=51dce6e42faabe7e62716112f0c60c670b6aa52dfa532c8aaad0ce2ce64961e7
 file3_url=$file1_url
 file3=e2fsprogs-sha256sums.asc
-file3_sum=1a2fdece0e44b46674f282db353809a77773c9ed24bf56d1b9b74ab76be5faff
+file3_sum=325338e479814226111bbd53e06345fc8d93a9b2616a728818cea362ebc271a1
 e2fsprogs_gpgkey=2B69B954DBFE0879288137C9F2F95956950D81A3
 
 # Check for new releases.
@@ -141,7 +141,7 @@ cd $SOURCESDIR || exit 1
 [ -e $file3 ] && if echo "$file3_sum $file3" | $sum -c ; then ln -v $SOURCESDIR/$file3 $SOURCESPPDIR/ ; else $sum $file3 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --receive-keys $e2fsprogs_gpgkey
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $e2fsprogs_gpgkey
 xz -k -d -c $file1 |  gpg --verify $file2 - || exit 1
 
 # Prepare sources or patches.

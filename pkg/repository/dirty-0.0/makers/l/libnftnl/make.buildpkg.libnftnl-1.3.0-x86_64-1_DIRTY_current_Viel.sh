@@ -84,14 +84,14 @@ version_url=https://www.netfilter.org/pub/libnftnl
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=e8c216255e129f26270639fee7775265665a31b11aa920253c3e5d5d62dfc4b8
+file1_sum=0f4be47a8bb8b77a350ee58cbd4b5fae6260ad486a527706ab15cfe1dd55a3c4
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=ee5c849116d6a3379fce83e00264772fb8efbf0a3fcaf01edca8de2feedbe253
+file2_sum=9ed29d57639b7bb81c9688f92bb831332eebf2f352f08d0b44e0c0547a2a59f7
 file2_gpgkey=8C5F7146A1757A65E2422A94D70D1A666ACF2B21
 file3_url=$file1_url
 file3=${file1}.sha256sum
-file3_sum=07c101675f8e7ba8b194dee9b661745fcfa8fd031c2d57e2a43fb99c734d4625
+file3_sum=ccb95cbb1692d0b1d69551b2e89e4a816c05ffcd07208728bd44135e08cdf77b
 
 
 # Check for new releases.

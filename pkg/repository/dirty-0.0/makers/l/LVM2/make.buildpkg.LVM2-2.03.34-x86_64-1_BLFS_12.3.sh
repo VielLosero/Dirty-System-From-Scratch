@@ -83,10 +83,10 @@ version_url=https://sourceware.org/pub/lvm2
 sum="sha256sum"
 file1_url=$version_url
 file1=$name.$ver.tgz
-file1_sum=be4babd8a986d73279f1e75fbb1d33cb41559b75c2063611781bfeb8c2def139
+file1_sum=3f4e78e7d6c49228b4d173ea08ebe158873d54457fba7d31d2abebdddd0e75b9
 file2_url=$file1_url
 file2=${file1}.asc
-file2_sum=b29d9f71e1e55dc88d8d0a79001c7cc357570c99db5b52566666aba02bd0ed7b
+file2_sum=bdee57d8df358c0c9a10a11e34e844fdd339384982729133522cafc8ad8e5e0b
 file2_gpgkey=D501A478440AE2FD130A1BE8B9112431E509039F 
 
 # Check for new releases.

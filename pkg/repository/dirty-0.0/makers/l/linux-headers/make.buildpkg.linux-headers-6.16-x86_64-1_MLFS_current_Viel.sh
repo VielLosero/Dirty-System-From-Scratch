@@ -85,10 +85,10 @@ version_url=https://www.kernel.org/
 sum="md5sum"
 file1_url=https://www.kernel.org/pub/linux/kernel/v6.x
 file1=$sub_name-$ver.tar.xz
-file1_sum=bdbac42cc976b88514ad9083cfee7e0f
+file1_sum=dd850269c3f456c0ff5518b1a2a81836
 file2_url=$file1_url
 file2=$sub_name-$ver.tar.sign
-file2_sum=21afc8f442760939ffd0f19226459e00
+file2_sum=32f877c593eb89b867af5216ffb4b55e
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

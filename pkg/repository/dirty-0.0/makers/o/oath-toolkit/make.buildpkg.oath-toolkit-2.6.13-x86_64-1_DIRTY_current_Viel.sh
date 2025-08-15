@@ -83,10 +83,10 @@ version_url=https://download.savannah.nongnu.org/releases/oath-toolkit
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.gz
-file1_sum=cafdf739b1ec4b276441c6aedae6411434bbd870071f66154b909cc6e2d9e8ba
+file1_sum=5b5d82e9a4455206d24fcbd7ee58bf4c79398a2e67997d80bd45ae927586b18b
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=c0037f776e704a8e3f68100ae217901aaae1e35c712165ef8869c35b6fcf55c2
+file2_sum=fe0f854aa415b149e9c2767109435be05fe543916641a666ccf2b290acbcf39a
 file2_gpgkey=A3CC9C870B9D310ABAD4CF2F51722B08FE4745A2
 
 # Check for new releases.

@@ -83,13 +83,13 @@ version_url=https://github.com/openssl/openssl/releases/latest
 sum="sha256sum"
 file1_url=https://github.com/openssl/openssl/releases/download/$name-$ver
 file1=$name-$ver.tar.gz
-file1_sum=344d0a79f1a9b08029b0744e2cc401a43f9c90acd1044d09a530b4885a8e9fc0
+file1_sum=c53a47e5e441c930c3928cf7bf6fb00e5d129b630e0aa873b08258656e7345ec
 file2_url=$file1_url
 file2=${file1}.asc
-file2_sum=cdede0397099346374e8b31fcc5cc490e4a05205a7426eb34a02cf9800de044b
+file2_sum=9135fb5d2fe846a9e776742ee624c447e2e566b7b6744eaa9c576343e6fdbc32
 file3_url=$file1_url
 file3=${file1}.sha256
-file3_sum=79520b3a8ce52970c48779efb49698a86e321d5f250c78137d40914701dd1b98
+file3_sum=f4ef366f81266fd873ccd018b7e6370c20cf9d6b590363946803cf96838712b9
 openssl_gpgkey=BA5473A2B0587B07FB27CF2D216094DFD0CB81EF
 
 # Check for new releases.
@@ -142,7 +142,7 @@ cd $SOURCESDIR || exit 1
 [ -e $file3 ] && if echo "$file3_sum $file3" | $sum -c ; then ln -v $SOURCESDIR/$file3 $SOURCESPPDIR/ ; else $sum $file3 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --receive-keys $openssl_gpgkey
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $openssl_gpgkey
 gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.

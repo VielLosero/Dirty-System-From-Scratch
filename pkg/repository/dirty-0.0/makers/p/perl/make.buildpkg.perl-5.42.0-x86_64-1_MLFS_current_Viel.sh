@@ -90,10 +90,10 @@ version_url=https://www.cpan.org/src/README.html
 sum="md5sum"
 file1_url=https://www.cpan.org/src/5.0
 file1=$name-$ver.tar.xz
-file1_sum=9ad7a269dc4053cdbeecd4fde444291b
+file1_sum=7a6950a9f12d01eb96a9d2ed2f4e0072
 file2_url=https://www.cpan.org/src/5.0
 file2=${file1}.md5.txt
-file2_sum=91f76f7f929f7705a6b549353dfbaaae
+file2_sum=b077b29ad9598bc5ec7dd1acbd43f960
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

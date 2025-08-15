@@ -83,10 +83,10 @@ version_url=https://www.kernel.org/pub/software/scm/git
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=58e73c5271dc7ac0553648cb58b981690aab6f604eef7da14c579a6bccbe9211
+file1_sum=7dd86882bbc22bef8852924de96b9cb378aad8532089e301c82093da3e7c5478
 file2_url=$file1_url
 file2=$name-$ver.tar.sign
-file2_sum=b04dd0253a538aaae5afcea53a2e8d425a82e717b72d4afca388a524e41e4fad
+file2_sum=f0062e3a12410abd362c5d0873b7746596aa174efd3cf5bbe1644fd77c91288c
 git_gpgkey=E1F036B1FEE7221FC778ECEFB0B5E88696AFE6CB
 
 # Check for new releases.

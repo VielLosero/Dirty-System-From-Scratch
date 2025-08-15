@@ -89,10 +89,10 @@ version_url=https://download.gnome.org/sources/$name
 sum="sha256sum"
 file1_url=$version_url/$sub_ver
 file1=$name-$ver.tar.xz
-file1_sum=d3f57bcd4202d93aa547ffa1d2a5dbd380a05dbaac04cc291bd7dfce93b4a8e5
+file1_sum=af229e1de191d66aebcdb03c7493c724fd4d0a6628b1ca4ea1f35739259b311d
 file2_url=$file1_url
 file2=$name-$ver.sha256sum
-file2_sum=b2aa221dcb36489b0b39a4f35a6728d6ea0d48ea11b9daea8a92e315eeef83e8
+file2_sum=2efdb30eba9f2ddcead7db71674959ec84669597146d1a93af5af3843810f290
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

@@ -83,10 +83,10 @@ version_url=https://www.python.org/downloads/source/
 sum="md5sum"
 file1_url=https://www.python.org/ftp/python/$ver
 file1=$name-$ver.tar.xz
-file1_sum=dbaa8833aa736eddbb18a6a6ae0c10fa
+file1_sum=4170b57e642c15a1dfed17313ec57cc2
 file2_url=$file1_url
 file2=${file1}.asc
-file2_sum=397ab4a94059e647f47cf9a81f46543c
+file2_sum=159d9f9f4eece0e47ba13ca7860765d0
 file2_gpgkey=7169605F62C751356D054A26A821E680E5FA6305 
 
 # Check for new releases.

@@ -92,10 +92,10 @@ version_url=https://github.com/rust-lang/rust/releases/latest
 sum="sha256sum"
 file1_url=https://static.rust-lang.org/dist
 file1=$name-$ver-src.tar.xz
-file1_sum=8623b8651893e8c6aebfa45b6a90645a4f652f7b18189a0992a90d11ac2631f4
+file1_sum=0b9d55610d8270e06c44f459d1e2b7918a5e673809c592abed9b9c600e33d95a
 file2_url=$file1_url
 file2=${file1}.asc
-file2_sum=4c1dec30dc886dcbfd5ca89208e732ed4b09f0da1b25c990d86068dbcf49a401
+file2_sum=aca706cb0ccb675ff01d908e2509dad7c1a1e9921e83e36f05a5df4215c3ea0a
 rustc_gpgkey=108F66205EAEB0AAA8DD5E1C85AB96E6FA1BE5FE
 
 # Check for new releases.
@@ -254,6 +254,20 @@ if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
   start_checks_date=$(date +"%s")
   echo "Checking needs to build."
   # --- LFS_CMD_CHECKS ---
+  #Although GLFS usually installs in /usr, when you later upgrade to a newer version of Rustc, the old libraries in /usr/lib/rustlib will remain, with various hashes in their names, but will not be usable and will waste space. The editors recommend placing the files in the /opt directory. In particular, if you have reason to rebuild with a modified configuration (e.g. using the shipped LLVM after building with shared LLVM, perhaps to compile crates for architectures which the GLFS LLVM build does not support) it is possible for the install to leave a broken cargo program. In such a situation, either remove the existing installation first, or use a different prefix such as /opt/rustc-1.89.0-build2. 
+  # Check if the packages are installed.
+  if ls /pkg/installed/${name}-${ver}* >/dev/null 2>/dev/null ; then
+  	echo "  WARNING: removing $pkg_name before reinstall."
+    package=${pkg_name}.sh
+    package_full_path="$REPODIR/packages/$first_pkg_char/$name/$package"
+    if [ -e $package_full_path ] ; then
+      bash $package_full_path remove || exit 1
+    else
+      bash /pkg/tools/scripts/removepkg.sh $pkg_name || exit 1 
+    fi
+  else
+    echo "  No rust old install found."
+  fi
   # --- END_LFS_CMD_CHECKS ---
   end_checks_date=$(date +"%s")
   checks_time=$(($end_checks_date - $start_checks_date))
@@ -303,15 +317,20 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $name-$ver-src || exit 1
   # --- LFS_CMD_CONFIG ---
   # To install into the /opt directory, remove any existing /opt/rustc symlink and create a new directory.
-  mkdir -pv /opt/rustc-$ver
-  ln -svfn rustc-$ver /opt/rustc 
+  [[ -h /opt/rustc ]] && rm /opt/rustc 
+  rm -rf /opt/rustc-$ver && mkdir -v /opt/rustc-$ver || exit 1
+  ln -svfn rustc-$ver /opt/rustc || exit 1 
   # Create a suitable config.toml file which will configure the build.
-  cat > config.toml << "EOF" &&
-# see config.toml.example for more possible options.
+cat > bootstrap.toml << "EOF" &&
+# See bootstrap.toml.example for more possible options,
+# and see src/bootstrap/defaults/bootstrap.dist.toml for a few options
+# automatically set when building from a release tarball.
+# We have to override a decent number of them.
+
 # Tell x.py the editors have reviewed the content of this file
 # and updated it to follow the major changes of the building system,
 # so x.py will not warn us to do such a review.
-change-id = 138986
+change-id = 142379
 
 [llvm]
 # When using system llvm prefer shared libraries
@@ -319,16 +338,19 @@ link-shared = true
 
 EOF
 if [ ! -f /usr/lib32/libc.so.6 ]; then
-cat >> config.toml << "EOF"
+cat >> bootstrap.toml << "EOF"
 # If building the shipped LLVM source, only enable the x86 target
 # instead of all the targets supported by LLVM.
 targets = "X86"
 
 EOF
 fi
-if [ -f /usr/lib32/libc.so.6 ]; then
-cat >> config.toml << "EOF"
+cat >> bootstrap.toml << "EOF"
 [build]
+description = "for DIRTY"
+EOF
+if [ -f /usr/lib32/libc.so.6 ]; then
+cat >> bootstrap.toml << "EOF"
 target = [
 "x86_64-unknown-linux-gnu",
 "i686-unknown-linux-gnu",
@@ -336,7 +358,7 @@ target = [
 
 EOF
 fi &&
-cat >> config.toml << EOF
+cat >> bootstrap.toml << EOF &&
 # omit docs to save time and space (default is to build them)
 docs = false
 
@@ -344,7 +366,7 @@ docs = false
 locked-deps = true
 
 # Specify which extended tools (those from the default install).
-# tools = ["cargo", "clippy", "rustdoc", "rustfmt"]
+tools = ["cargo", "clippy", "rustdoc", "rustfmt"]
 
 [install]
 prefix = "/opt/rustc-$ver"
@@ -368,7 +390,7 @@ codegen-units = 1
 
 EOF
 if [ -f /usr/lib32/libc.so.6 ]; then
-cat >> config.toml << "EOF"
+cat >> bootstrap.toml << "EOF"
 [target.x86_64-unknown-linux-gnu]
 cc = "/usr/bin/gcc"
 cxx = "/usr/bin/g++"
@@ -383,7 +405,7 @@ ar = "/usr/bin/gcc-ar"
 ranlib = "/usr/bin/gcc-ranlib"
 EOF
 else
-cat >> config.toml << "EOF"
+cat >> bootstrap.toml << "EOF"
 [target.x86_64-unknown-linux-gnu]
 llvm-config = "/usr/bin/llvm-config"
 
@@ -404,7 +426,7 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver-src || exit 1
   # --- LFS_CMD_BUILD ---
-  ./x.py build
+  ./x.py build || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -419,8 +441,7 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver-src || exit 1
   # --- LFS_CMD_INSTALL ---
-  DESTDIR=$PKGDIR ./x.py install rustc std
-  DESTDIR=$PKGDIR ./x.py install --stage=1 cargo clippy rustfmt
+  DESTDIR=$PKGDIR ./x.py install || exit 1
   # fix the /opt installation of the documentation and symlink a Zsh completion file into the correct location and move a Bash completion file into the location recommended
   mkdir -vp $PKGDIR/opt/rustc-$ver/share/doc/rustc-$ver
   rm -fv $PKGDIR/opt/rustc-$ver/share/doc/rustc-$ver/*.old

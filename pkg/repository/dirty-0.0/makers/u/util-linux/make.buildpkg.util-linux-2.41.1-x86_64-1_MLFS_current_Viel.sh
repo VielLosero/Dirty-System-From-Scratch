@@ -89,10 +89,10 @@ version_url=https://www.kernel.org/pub/linux/utils/util-linux
 sum="md5sum"
 file1_url=https://www.kernel.org/pub/linux/utils/util-linux/v${sub_ver}
 file1=$name-$ver.tar.xz
-file1_sum=e666a34b03554c18a1073347b16661ce
+file1_sum=7e5e68845e2f347cf96f5448165f1764
 file2_url=$file1_url
 file2=${name}-${ver}.tar.sign
-file2_sum=9bba90cbc9a28731b65fb12671299548
+file2_sum=ec08dfbb340c8fc827d4e92ffdba7b09
 util_linux_gpgkey=B0C64D14301CC6EFAEDF60E4E4B71D5EEC39C284
 
 # Check for new releases.
@@ -144,7 +144,7 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --receive-keys $util_linux_gpgkey
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $util_linux_gpgkey
 xz -k -d -c $file1 |  gpg --verify $file2 - || exit 1
 
 # Prepare sources or patches.

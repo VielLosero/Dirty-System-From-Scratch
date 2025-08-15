@@ -86,10 +86,10 @@ sum="md5sum"
 file1_url=https://github.com/curl/curl/releases/download/$name-$sub_ver
 sum="sha256sum"
 file1=$name-$ver.tar.gz
-file1_sum=6766ada7101d292b42b8b15681120acd68effa4a9660935853cf6d61f0d984d4
+file1_sum=d85cfc79dc505ff800cb1d321a320183035011fa08cb301356425d86be8fc53c
 file2_url=$file1_url
 file2=${file1}.asc
-file2_sum=39cc2ec8ddc39d04e3e7101bbed46d858d0875cbb297a6bfa20959fa2bc7d5c7
+file2_sum=e42b7de5f97107c9496883750f739b8ebeb5947e2af5340847fd483530f4f970
 curl_gpgkey=27EDEAF22F3ABCEB50DB9A125CC908FDB71E12C2
 
 # Check for new releases.

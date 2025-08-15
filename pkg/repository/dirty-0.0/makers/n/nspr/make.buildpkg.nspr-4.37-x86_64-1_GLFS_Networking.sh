@@ -83,10 +83,10 @@ version_url=https://archive.mozilla.org/pub/nspr/releases/
 sum="sha256sum"
 file1_url=${version_url}v$ver/src
 file1=$name-$ver.tar.gz
-file1_sum=55dec317f1401cd2e5dba844d340b930ab7547f818179a4002bce62e6f1c6895
+file1_sum=5f9344ed0e31855bd38f88b33c9d9ab94f70ce547ef3213e488d1520f61840fa
 file2_url=$file1_url
 file2=${file1}.SHA256SUMS
-file2_sum=2817ccf09c7bb4baecccfc9ba32c7527e53aac50fcf982669580979425799c03
+file2_sum=7095e60e6245c339b063ef4f484a49175adbf1353bc68b0af56293b4fcb7866f
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

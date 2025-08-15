@@ -83,10 +83,10 @@ version_url=https://www.kernel.org/pub/linux/utils/net/iproute2
 sum="sha256sum"
 file1_url=https://mirrors.edge.kernel.org/pub/linux/utils/net/iproute2
 file1=$name-$ver.tar.xz
-file1_sum=8041854a882583ad5263466736c9c8c68c74b1a35754ab770d23343f947528fb
+file1_sum=5900ccc15f9ac3bf7b7eae81deb5937123df35e99347a7f11a22818482f0a8d0
 file2_url=$file1_url
 file2=$name-$ver.tar.sign
-file2_sum=6f301a341c8d9679f4d0ac93dd6a04a28036de2fc35ad12ed131c5c596eb1c99
+file2_sum=45f0552734e3c58b04d59446535ccf0e7b1e0d9b381330126ed2eaa34c7d0e7f
 iproute2_gpgkey=9F6FC345B05BE7E766B83C8F80A77F6095CDE47E
 
 # Check for new releases.
@@ -137,7 +137,7 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --receive-keys $iproute2_gpgkey
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $iproute2_gpgkey
 xz -k -d -c $file1 |  gpg --verify $file2 - || exit 1
 
 # Prepare sources or patches.

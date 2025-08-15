@@ -254,6 +254,18 @@ if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
   start_checks_date=$(date +"%s")
   echo "Checking needs to build."
   # --- LFS_CMD_CHECKS ---
+  if ls /pkg/installed/${name}-${ver}* >/dev/null 2>/dev/null ; then
+  	echo "  WARNING: removing $pkg_name before reinstall."
+    package=${pkg_name}.sh
+    package_full_path="$REPODIR/packages/$first_pkg_char/$name/$package"
+    if [ -e $package_full_path ] ; then
+      bash $package_full_path remove || exit 1
+    else
+      bash /pkg/tools/scripts/removepkg.sh $pkg_name || exit 1 
+    fi
+  else
+    echo "  No rust old install found."
+  fi
   # --- END_LFS_CMD_CHECKS ---
   end_checks_date=$(date +"%s")
   checks_time=$(($end_checks_date - $start_checks_date))
@@ -303,8 +315,9 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $name-$ver-src || exit 1
   # --- LFS_CMD_CONFIG ---
   # To install into the /opt directory, remove any existing /opt/rustc symlink and create a new directory.
-  mkdir -pv /opt/rustc-$ver
-  ln -svfn rustc-$ver /opt/rustc 
+  [[ -h /opt/rustc ]] && rm /opt/rustc 
+  rm -rf /opt/rustc-$ver && mkdir -v /opt/rustc-$ver || exit 1
+  ln -svfn rustc-$ver /opt/rustc || exit 1 
   # Create a suitable config.toml file which will configure the build.
   cat > config.toml << "EOF" &&
 # see config.toml.example for more possible options.
@@ -419,8 +432,11 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver-src || exit 1
   # --- LFS_CMD_INSTALL ---
-  DESTDIR=$PKGDIR ./x.py install rustc std
-  DESTDIR=$PKGDIR ./x.py install --stage=1 cargo clippy rustfmt
+  #DESTDIR=$PKGDIR ./x.py install rustc std
+  #DESTDIR=$PKGDIR ./x.py install --stage=1 cargo clippy rustfmt
+  DESTDIR=$PKGDIR ./x.py install
+  # fix the /opt installation of the documentation and symlink a Zsh completion file into the correct location and move a Bash completion file into the location recommended
+  mkdir -vp $PKGDIR/opt/rustc-$ver/share/doc/rustc-$ver
   # fix the /opt installation of the documentation and symlink a Zsh completion file into the correct location and move a Bash completion file into the location recommended
   mkdir -vp $PKGDIR/opt/rustc-$ver/share/doc/rustc-$ver
   rm -fv $PKGDIR/opt/rustc-$ver/share/doc/rustc-$ver/*.old

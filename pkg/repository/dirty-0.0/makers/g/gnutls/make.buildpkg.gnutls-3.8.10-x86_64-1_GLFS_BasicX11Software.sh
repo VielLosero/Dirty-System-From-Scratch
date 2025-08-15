@@ -85,10 +85,10 @@ version_url=https://www.gnupg.org/ftp/gcrypt/gnutls
 sum="sha256sum"
 file1_url=${version_url}/$sub_ver
 file1=$name-$ver.tar.xz
-file1_sum=69e113d802d1670c4d5ac1b99040b1f2d5c7c05daec5003813c049b5184820ed
+file1_sum=db7fab7cce791e7727ebbef2334301c821d79a550ec55c9ef096b610b03eb6b7
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=b08a62ce97dc4b80566396b0ee572134e61955d493d5473d3df17abcbd09b2ec
+file2_sum=e77c99290fdee5e11c02d1376c8c9a74f9bdad4712a3c66169e47578aff3dbea
 gnutls_gpgkey=462225C3B46F34879FC8496CD605848ED7E69871
 
 # Check for new releases.
@@ -139,7 +139,7 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --receive-keys $gnutls_gpgkey
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $gnutls_gpgkey
 gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.

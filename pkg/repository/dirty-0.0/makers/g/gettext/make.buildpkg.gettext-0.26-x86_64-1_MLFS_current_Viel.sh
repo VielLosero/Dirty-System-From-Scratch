@@ -84,11 +84,11 @@ version_url=$gnu_mirror/gettext
 sum="md5sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=355a09fa53ae2e87dd493e040d437874
+file1_sum=8e14e926f088e292f5f2bce95b81d10e
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=02339ff633ba8b08bfac0258c799eb12
-file2_gpgkey=35B17DF5752577CA0C541CEB94BFDF4484AD142F
+file2_sum=36df96881f640ff5032e86f8eadff620
+file2_gpgkey=E0FFBD975397F77A32AB76ECB6301D9E1BBEAC08
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

@@ -84,11 +84,11 @@ version_url=$gnu_mirror/automake/
 sum="md5sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=1320dd6a6aae0d97668daa089086c083
+file1_sum=cea31dbf1120f890cbf2a3032cfb9a68
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=c396e8ca98f563cb1ef5ec0fa5c3b01e
-file2_gpgkey=155D3FC500C834486D1EEA677FD9FCCB000BEEEE
+file2_sum=f701252331755c01c21f1f30bdb1a95b
+file2_gpgkey=17D3311B14BC0F248267BF020716748A30D155AD
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

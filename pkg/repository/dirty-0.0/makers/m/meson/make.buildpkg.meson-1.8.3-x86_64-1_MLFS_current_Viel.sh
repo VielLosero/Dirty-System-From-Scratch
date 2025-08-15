@@ -83,10 +83,10 @@ version_url=https://github.com/mesonbuild/meson/releases/latest
 sum="md5sum"
 file1_url=https://github.com/mesonbuild/meson/releases/download/$ver
 file1=$name-$ver.tar.gz
-file1_sum=677d8dfec2a8c25bcc4de4227403fe0a
+file1_sum=08221d2f515e759686f666ff6409a903
 file2_url=$file1_url
 file2=${file1}.asc
-file2_sum=e0c779bb233c6eb082dee7a13b8aca45
+file2_sum=e8c08f9bf316c5cd10669e5252ffc2ef
 file2_gpgkey=19E2D6D9B46D8DAA6288F877C24E631BABB1FE70
 
 # Check for new releases.

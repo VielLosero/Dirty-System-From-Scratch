@@ -94,10 +94,10 @@ version_url=https://archive.mesa3d.org
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=164872a5e792408aa72fecd52b7be6409724c4ad81700798675a7d801d976704
+file1_sum=7c726b21c074d14d31d253d638b741422f3c0a497ce7f1b4aaaa917d10bd8d4f
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=b3c4f1c9c9d810db1699f37da91652f3bae38f36c50dac55b81a42573cb61a9d
+file2_sum=59b68e99f27b363b9cbbcd6a012284240e983408d656b26223ac0277479f8d6b
 mesa_gpgkey=57551DE15B968F6341C248F68D8E31AFC32428A6 
 
 # Check for new releases.

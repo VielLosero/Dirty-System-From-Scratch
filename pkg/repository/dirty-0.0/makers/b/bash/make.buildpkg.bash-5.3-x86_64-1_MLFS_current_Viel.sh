@@ -84,10 +84,10 @@ version_url=$gnu_mirror/bash/
 sum="md5sum"
 file1_url=$version_url
 file1=$name-$ver.tar.gz
-file1_sum=9c28f21ff65de72ca329c1779684a972
+file1_sum=977c8c0c5ae6309191e7768e28ebc951
 file2_url=$file1_url
 file2=$name-$ver.tar.gz.sig
-file2_sum=84635d3680acac6dc989912fdffd55cd
+file2_sum=90a9bf21a0066195036fe07a915bd8cc
 file2_gpgkey=7C0135FB088AAF6C66C650B9BB5869F064EA74AB
 
 # Check for new releases.

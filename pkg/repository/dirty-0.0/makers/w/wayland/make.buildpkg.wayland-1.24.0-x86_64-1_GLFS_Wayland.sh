@@ -82,14 +82,14 @@ else echo "Needed wget or curl to download files or check for new versions." && 
 version_url=https://gitlab.freedesktop.org/wayland/wayland/-/releases.atom
 sum="sha256sum"
 file1=$name-$ver.tar.xz
-file1_sum=ada965f893934d5021362323a21bca49028a280dc2b3424347008ee6e1689d7d
+file1_sum=82892487a01ad67b334eca83b54317a7c86a03a89cfadacfef5211f11a5d0536
 file1_url=https://gitlab.freedesktop.org/wayland/wayland/-/releases/$ver/downloads
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=7ff61aa0fa4f3b02f9643496bd16a257f50bebefff409290335a1e10c2c75e70
+file2_sum=94dc71058713f0679749786fe1a5b7244106cc8d43fc3d1e5c956a84dde37190
 file3_url=$file1_url
 file3=${file1}.sha256sum
-file3_sum=a7168b723449a7a3b8c575bf14d4e80612521e190eef53b42c68f4a6646f6577
+file3_sum=bfdd6e1843832fc45e925c84b5c29a386198623210bbfa0b6aef6a867d3ed888
 wayland_gpgkey=34FF9526CFEF0E97A340E2E40FDE7BE0E88F5E48
 
 # Check for new releases.

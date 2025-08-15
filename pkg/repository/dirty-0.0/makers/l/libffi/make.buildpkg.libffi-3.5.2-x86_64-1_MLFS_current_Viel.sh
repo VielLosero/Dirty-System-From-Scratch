@@ -83,7 +83,7 @@ version_url=https://github.com/libffi/libffi/releases/latest
 sum="sha256sum"
 file1_url=https://github.com/libffi/libffi/releases/download/v$ver
 file1=$name-$ver.tar.gz
-file1_sum=f99eb68a67c7d54866b7706af245e87ba060d419a062474b456d3bc8d4abdbd1
+file1_sum=f3a3082a23b37c293a4fcd1053147b371f2ff91fa7ea1b2a52e335676bac82dc
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

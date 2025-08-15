@@ -83,14 +83,14 @@ version_url=https://www.kernel.org/pub/linux/docs/man-pages
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=71e13067b780044b2f372eec25f4209bc0413cc32af714141ef3d22d21eae8e3
+file1_sum=03d8ebf618bd5df57cb4bf355efa3f4cd3a00b771efd623d4fd042b5dceb4465
 file2_url=$file1_url
 file2=$name-$ver.tar.sign
-file2_sum=18ca6c043bacb5e512d1abf8f5f22016ada9b1350da7ba299516cabbc75f7032
+file2_sum=bca9ac59a05874887a1f697d5e650200512b166af6053a040b447de296911266
 file3_url=$file1_url
 file3=$name-$ver.sha256sums.asc
-file3_sum=341b42209e01516afc07aebc5f03800081533d2a2d114b9f95cdee1866fc83af
-man_pages_gpgkey=EA3A87F0A4EBA030E45DF2409E8C1AFBBEFFDB32
+file3_sum=ac61ba6ee8b5c2c8cd2d6082b60138f5554beaa21a98bb8faac421f42800bced
+man_pages_gpgkey=4BB26DF6EF466E6956003022EB89995CC290C2A9
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -141,7 +141,7 @@ cd $SOURCESDIR || exit 1
 [ -e $file3 ] && if echo "$file3_sum $file3" | $sum -c ; then ln -v $SOURCESDIR/$file3 $SOURCESPPDIR/ ; else $sum $file3 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --receive-keys $man_pages_gpgkey
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $man_pages_gpgkey
 xz -k -d -c $file1 |  gpg --verify $file2 - || exit 1
 
 # Prepare sources or patches.

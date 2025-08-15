@@ -65,7 +65,8 @@ SOURCE_DATE_EPOCH="1746190997"
 # make the list
 # cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  ; done | grep " V " | sed 's/#/# C/g' > /tmp/run.repo.list
 # cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  ; done | grep " V " | sed 's/#/# N/g' > /tmp/run.repo.list
-# cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  ; done | grep " V " | grep " M       "| sed 's/#/#  /g' > /tmp/run.repo.list
+# cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  ; done | grep "# M           V " | sed 's/#/#  /g' > /tmp/run.repo.list
+# cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  ; done | grep "# M B         V " | sed 's/#/#  /g' | sed 's/M B    /  B   I/g' > /tmp/run.repo.list
 
 
 pkg_name=$(echo "${current_line}" | cut -c 21-)
@@ -88,12 +89,28 @@ else
   exit 1
 fi
 
-if [ -h $BLACKLIST/$file ] ; then
-  echo "Blacklisted: $file"
+if [ -h $BLACKLIST/*$builder ] ; then
+  echo "Blacklisted: $BLACKLIST/*$builder"
+  sed -i "${line_num}s/ C / s /" $RUN_REPO_LIST || exit 1
+  sed -i "${line_num}s/ N / s /" $RUN_REPO_LIST || exit 1
+  sed -i "${line_num}s/ M / s /" $RUN_REPO_LIST || exit 1
+  sed -i "${line_num}s/ B / s /" $RUN_REPO_LIST || exit 1
+  CHECK_REL=0
+  DECODE_SOURCES=0
+  RUN_MAKER=0
+  RUN_BUILDER=0
+  RUN_PACKAGE=0
+fi
+if [ -h $BLACKLIST/*$package ] ; then
+  echo "Blacklisted: $BLACKLIST/*$package"
   sed -i "${line_num}s/ C / S /" $RUN_REPO_LIST || exit 1
   sed -i "${line_num}s/ M / S /" $RUN_REPO_LIST || exit 1
-  sed -i "${line_num}s/ B / S /" $RUN_REPO_LIST || exit 1
   sed -i "${line_num}s/ I / S /" $RUN_REPO_LIST || exit 1
+  CHECK_REL=0
+  DECODE_SOURCES=0
+  RUN_MAKER=0
+  RUN_BUILDER=0
+  RUN_PACKAGE=0
 fi
 
 if [ $CHECK_REL -eq 1 ] ; then
@@ -139,21 +156,42 @@ if [ $RUN_BUILDER -eq 1 ] ; then
 fi
 if [ $RUN_PACKAGE -eq 1 ] ; then 
   #echo "bash $package_full_path $PACKAGE_ARG"
-  bash $package_full_path $PACKAGE_ARG
-  if [ $? -eq 0 ] ; then
-    sed -i "${line_num}s/ I /   /" $RUN_REPO_LIST || exit 1
-  else exit 1 ; fi
-
   # find libs needed 
   cat /pkg/installed/*/index | grep "\.so$" | rev | cut -d / -f1 | rev | sort -u >/tmp/installed1
   cat /pkg/installed/*/index | grep "\.so\." | rev | cut -d / -f1 | rev | sort -u >/tmp/installed2
   cat /pkg/installed/*/needed-libs | cut -d':' -f2 | sed 's/,/\n/g' | sort -u > /tmp/needed
   cat /tmp/installed1 /tmp/installed2 | sort -u >/tmp/installed
-  comm -13 /tmp/installed /tmp/needed
+  comm -13 /tmp/installed /tmp/needed > /tmp/needed.libs.not.found.${pkg_name}.before
+
+  # install
+  bash $package_full_path $PACKAGE_ARG
+  if [ $? -eq 0 ] ; then
+    sed -i "${line_num}s/ I /   /" $RUN_REPO_LIST || exit 1
+  else exit 1 ; fi
 
   # remove old pkg
+  if ls -1d /pkg/installed/$name-[0-9]* >/dev/null ; then 
+    echo "Packages installed!"
+    ls -1d /pkg/installed/$name-[0-9]*
+    for p in $(ls -1d /pkg/installed/$name-[0-9]*-$arch-${rel}* | grep -v "$name-$ver" ) ; do
+      remove_pkg=${p##/}
+      echo " --> Removing old package $p"
+      echo "bash  /pkg/tools/scripts/removepkg.sh $p || exit 1"
+    done
+  fi
   
   # then find needed libs again.
+  cat /pkg/installed/*/index | grep "\.so$" | rev | cut -d / -f1 | rev | sort -u >/tmp/installed1
+  cat /pkg/installed/*/index | grep "\.so\." | rev | cut -d / -f1 | rev | sort -u >/tmp/installed2
+  cat /pkg/installed/*/needed-libs | cut -d':' -f2 | sed 's/,/\n/g' | sort -u > /tmp/needed
+  cat /tmp/installed1 /tmp/installed2 | sort -u >/tmp/installed
+  comm -13 /tmp/installed /tmp/needed > /tmp/needed.libs.not.found.${pkg_name}.after
+
+  if diff /tmp/needed.libs.not.found.${pkg_name}.before /tmp/needed.libs.not.found.${pkg_name}.after | grep "^>" ; then
+    echo "New lost needed_libs found. Exiting."
+    exit 1
+  fi
+
 fi
 
 

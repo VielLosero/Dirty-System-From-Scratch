@@ -59,6 +59,17 @@ chmod +x /etc/rc.d/init.d/udev-retry
 
 # install some fonts
 
+# add to ~/.bash_profile  maybe? see rustc path and env profile 
+# https://glfs-book.github.io/glfs/introduction/bash-profile.html
+# 
+source /etc/profile
+source /etc/profile.d/rustc.sh
+# after that we have /opt/rust in path
+
+# blacklist some pkg like shadow MLFS 
+ln -s /pkg/repository/dirty-0.0/makers/s/shadow/make.buildpkg.shadow-4.18.0-x86_64-1_MLFS_current_Viel.sh /pkg/blacklist/
+
+
 
 # todo:
 Check failed Updates, change v4 v5 to v6, decide multi repo or single, and multi config files or single.
@@ -73,14 +84,14 @@ Done. v1 on installpkg Check needed libs --> external libs and pkg libs
 add some check for rsync if not installed.
 Change run.repo.list format from # D M B I to eq exit of repo-status.sh
 first boot and machine-id --> dbus-uuidgen --ensure
+apply patch /pkg/tools/patches/patch_tar-exclude-from-file  
+skip install kernel packages or remove old when run repo list.
 
-
-# add to ~/.bash_profile  maybe? see rustc path and env profile 
-# https://glfs-book.github.io/glfs/introduction/bash-profile.html
-# 
-source /etc/profile
-source /etc/profile.d/rustc.sh
-# after that we have /opt/rust in path
-
+When update glibc the etc/profile are overwrited ... need reinstall bash-shell-startup-files to get pathappend pathremove ...
+bash-5.3# grep -rwn /pkg/installed/* -e "etc/profile$"
+/pkg/installed/bash-shell-startup-files-0.0.1-all-1_GLFS_CONFIG_Viel/index:2:etc/profile
+/pkg/installed/glibc-2.41-x86_64-1_MLFS_current_Viel/index:6:etc/profile
+/pkg/installed/glibc-2.42-x86_64-1_MLFS_current_Viel/index:6:etc/profile
+need a think
 
 

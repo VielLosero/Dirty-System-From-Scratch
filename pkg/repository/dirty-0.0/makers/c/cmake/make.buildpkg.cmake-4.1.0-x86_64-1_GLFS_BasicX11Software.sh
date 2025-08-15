@@ -98,13 +98,13 @@ version_url=https://cmake.org/files/LatestRelease/
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.gz
-file1_sum=8d3537b7b7732660ea247398f166be892fe6131d63cc291944b45b91279f3ffb
+file1_sum=81ee8170028865581a8e10eaf055afb620fa4baa0beb6387241241a975033508
 file2_url=$file1_url
 file2=${name}-${ver}-SHA-256.txt
-file2_sum=3d674ea9e3c6314591f29ec51f46ddd87efdd79305e5b5258003c9a4977e16b6
+file2_sum=10961d2da9df12d99c710c7535343a1135979690eab29518939fb0309300a6c4
 file3_url=$file1_url
 file3=${file2}.asc
-file3_sum=5fc6a25d7ad38ad003b163e8aa2201a9446f0b4cf03cc22a53c9df1ffc82e6da
+file3_sum=6eecc6c3e05efcc1e5ccebb943a3603bb0dc456fc86a37a11c196182093176fa
 cmake_gpgkey=C6C265324BBEBDC350B513D02D2CEF1034921684 
 
 # Check for new releases.

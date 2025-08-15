@@ -83,10 +83,10 @@ version_url=https://www.gnupg.org/ftp/gcrypt/libgcrypt
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.bz2
-file1_sum=24e91c9123a46c54e8371f3a3a2502f1198f2893fbfbf59af95bc1c21499b00e
+file1_sum=6ba59dd192270e8c1d22ddb41a07d95dcdbc1f0fb02d03c4b54b235814330aac
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=d0bd508cd75843171c841bd980f12c179a5fc1254b86abbb018d4d6341433795
+file2_sum=a813004218be8f126beafb11368898898ee952f41fa48fafd3d8a6ca88491970
 libgcrypt_gpgkey=6DAA6E64A76D2840571B4902528897B826403ADA
 
 # Check for new releases.

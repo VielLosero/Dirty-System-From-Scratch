@@ -1,37 +1,59 @@
-#         iana-etc-20250618-x86_64-1_MLFS_current_Viel
-#     B I pkgconf-2.5.1-x86_64-1_MLFS_current_Viel
-#     B I libffi-3.5.1-x86_64-1_MLFS_current_Viel
-#     B I Python-3.13.5-x86_64-1_MLFS_current_Viel
-#     B I ninja-1.13.0-x86_64-1_MLFS_current_Viel
-#     B I meson-1.8.2-x86_64-1_MLFS_current_Viel
-#     B I vim-9.1.1498-x86_64-1_MLFS_current_Viel
-#     B I linux-headers-6.15.4-x86_64-1_MLFS_current_Viel
-#     B I linux-6.15.4-x86_64-1_MLFS_current_Viel
-#     B I linux-mainline-6.16_rc4-x86_64-1_MLFS_current_Viel
-#     B I make-ca-1.16.1-x86_64-1_GLFS_Networking
-#     B I curl-8.14.1-x86_64-1_GLFS_Networking
-#     B I git-manpages-2.50.0-x86_64-1_GLFS_Networking_Dirty01
-#     B I git-2.50.0-x86_64-1_GLFS_Networking_Dirty01
-#     B I linux-pam-1.7.1-x86_64-1_GLFS_Security
-#     B I glib-2.85.1-x86_64-1_GLFS_Security
-#     B I glib-2.85.1-x86_64-1_GLFS_Security
-#     B I libxml2-2.14.4-x86_64-1_GLFS_Security
-#     B I libpng-1.6.49-x86_64-1_GLFS_BasicX11Software
-#     B I cmake-4.0.3-x86_64-1_GLFS_BasicX11Software
-#     B I pixman-0.46.2-x86_64-1_GLFS_BasicX11Software
-#     B I wayland-1.23.93-x86_64-1_GLFS_Wayland
-#     B I wayland-protocols-1.45-x86_64-1_GLFS_Wayland
-#     B I libdrm-2.4.125-x86_64-1_GLFS_GraphicsDrivers
-#     B I llvm-20.1.7-x86_64-1_GLFS_Dirty01_Viel
-#     B I rust-bindgen-0.72.0-x86_64-1_GLFS_GraphicsDrivers
-#     B I libclc-20.1.7-x86_64-1_GLFS_GraphicsDrivers
-#     B I mesa-25.1.4-x86_64-1_GLFS_GraphicsDrivers_i915
-#     B I xkeyboard-config-2.45-x86_64-1_GLFS_X11
-#     B I xorg-server-21.1.18-x86_64-1_GLFS_X11
-#     B I dhcpcd-10.2.4-x86_64-1_BLFS_sysV_r12.2
-#     B I gnupg-2.5.8-x86_64-1_BLFS_sysV_r12.2
-#     B I docutils-0.22rc5-x86_64-1_BLFS_12.3_PythonModules
-#     B I libjpeg-turbo-3.1.1-x86_64-1_BLFS_12.3
-#     B I gdk-pixbuf-2.43.3-x86_64-1_BLFS_12.3
-#     B I LVM2-2.03.33-x86_64-1_BLFS_12.3
-#     B I cryptsetup-2.8.0-x86_64-1_BLFS_12.3
+#               V - gcc-15.2.0-x86_64-1_MLFS_current_Viel
+#               V - gettext-0.26-x86_64-1_MLFS_current_Viel
+#               V - bash-5.3-x86_64-1_MLFS_current_Viel
+#               V - gdbm-1.26-x86_64-1_MLFS_current_Viel
+#               V - less-679-x86_64-1_MLFS_current_Viel
+#               V - perl-5.42.0-x86_64-1_MLFS_current_Viel
+#               V - automake-1.18.1-x86_64-1_MLFS_current_Viel
+#               V - openssl-3.5.2-x86_64-1_MLFS_current_Viel
+#               V - libffi-3.5.2-x86_64-1_MLFS_current_Viel
+#               V - Python-3.13.6-x86_64-1_MLFS_current_Viel
+#               V - ninja-1.13.1-x86_64-1_MLFS_current_Viel
+#               V - meson-1.8.3-x86_64-1_MLFS_current_Viel
+#               V - iproute2-6.16.0-x86_64-1_MLFS_current_Viel
+#               V - vim-9.1.1623-x86_64-1_MLFS_current_Viel
+#               V - util-linux-2.41.1-x86_64-1_MLFS_current_Viel
+#               V - e2fsprogs-1.47.3-x86_64-1_MLFS_current_Viel
+#               V - linux-headers-6.16-x86_64-1_MLFS_current_Viel
+#               V - linux-6.16-x86_64-1_MLFS_current_Viel
+#               V - nspr-4.37-x86_64-1_GLFS_Networking
+#               V - curl-8.15.0-x86_64-1_GLFS_Networking
+#               V - git-manpages-2.50.1-x86_64-1_GLFS_Networking_Dirty01
+#               V - git-2.50.1-x86_64-1_GLFS_Networking_Dirty01
+#               V - shadow-4.18.0-x86_64-1_GLFS_Security
+#               V - glib-2.85.3-x86_64-1_GLFS_Security
+#               V - glib-2.85.3-x86_64-1_GLFS_Security
+#               V - libxml2-2.14.5-x86_64-1_GLFS_Security
+#               V - libpng-1.6.50-x86_64-1_GLFS_BasicX11Software
+#               V - harfbuzz-11.3.3-x86_64-1_GLFS_BasicX11Software
+#     B   I     V - fontconfig-2.17.1-x86_64-1_GLFS_BasicX11Software
+#     B   I     V - cmake-4.1.0-x86_64-1_GLFS_BasicX11Software
+#     B   I     V - nettle-3.10.2-x86_64-1_GLFS_BasicX11Software
+#     B   I     V - gnutls-3.8.10-x86_64-1_GLFS_BasicX11Software
+#     B   I     V - pixman-0.46.4-x86_64-1_GLFS_BasicX11Software
+#     B   I     V - wayland-1.24.0-x86_64-1_GLFS_Wayland
+#     B   I     V - pciutils-3.14.0-x86_64-1_GLFS_GraphicsDrivers
+#     B   I     V - SPIRV-Headers-vulkan-sdk-1.4.321.0-x86_64-1_GLFS_GraphicsDrivers
+#     B   I     V - SPIRV-Tools-vulkan-sdk-1.4.321.0-x86_64-1_GLFS_GraphicsDrivers
+#     B   I     V - glslang-15.4.0-x86_64-1_GLFS_GraphicsDrivers
+#     B   I     V - llvm-20.1.8-x86_64-1_GLFS_Dirty01_Viel
+#     B   I     V - SPIRV-LLVM-Translator-21.1.0-x86_64-1_GLFS_GraphicsDrivers
+#     B   I     V - libclc-20.1.8-x86_64-1_GLFS_GraphicsDrivers
+#     B   I     V - mesa-25.2.0-x86_64-1_GLFS_GraphicsDrivers_i915
+#     B   I     V - xdpyinfo-1.4.0-x86_64-1_GLFS_X11_XorgApplications
+#     B   I     V - xdriinfo-1.0.8-x86_64-1_GLFS_X11_XorgApplications
+#     B   I     V - xgamma-1.0.8-x86_64-1_GLFS_X11_XorgApplications
+#     B   I     V - xkbcommon-1.11.0-x86_64-1_GLFS_Wine
+#     B   I     V - libgcrypt-1.11.2-x86_64-1_BLFS_sysV_r12.2
+#     B   I     V - gnupg-2.5.11-x86_64-1_BLFS_sysV_r12.2
+#     B   I     V - docutils-0.22-x86_64-1_BLFS_PythonModules
+#     B   I     V - pango-1.56.4-x86_64-1_BLFS_12.3
+#     B   I     V - gtk-3.24.50-x86_64-1_BLFS_12.3
+#     B   I     V - dwm-6.6-x86_64-1_DIRTY_current_Viel
+#     B   I     V - dmenu-5.4-x86_64-1_DIRTY_current_Viel
+#     B   I     V - st-0.9.3-x86_64-1_DIRTY_current_Viel
+#     B   I     V - pinentry-1.3.2-x86_64-1_BLFS_sysV_r12.2
+#     B   I     V - oath-toolkit-2.6.13-x86_64-1_DIRTY_current_Viel
+#     B   I     V - LVM2-2.03.34-x86_64-1_BLFS_12.3
+#     B   I     V - libnftnl-1.3.0-x86_64-1_DIRTY_current_Viel
+#     B   I     V - nftables-1.1.4-x86_64-1_DIRTY_current_Viel

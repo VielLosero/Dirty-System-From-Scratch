@@ -92,10 +92,10 @@ version_url=https://mj.ucw.cz/download/linux/pci
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.gz
-file1_sum=a03c88a0aab709b1697ca1753766f443e78297f84c7bcd80a82c1422edd7cb42
+file1_sum=e31c79722dbbe9d2906b92996ce295268e54d4342fefe3ff476caa613e51be2a
 file2_url=$file1_url
 file2=${file1}.sign
-file2_sum=bd802a7c4ffc885eec44efbb6053dbdb8e509a7b2883104d046a16473eed4ac7
+file2_sum=5f660c294674898f409d35d2d39a137fd804a18eedb5df1286a3cbbb081985f7
 pciutils_gpgkey=33DD421633C5FFACC2D21C52157FF24D47EEA720
 
 # Check for new releases.

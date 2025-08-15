@@ -83,10 +83,10 @@ version_url=https://dl.suckless.org/st
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.gz
-file1_sum=6b215d4f472b21d6232f30f221117a777e24bcfee68955ddefb7426467f9494b
+file1_sum=9ed9feabcded713d4ded38c8cebf36a3b08f0042ef7934a0e2b2409da56e649b
 file2_url=$file1_url
 file2=st-sha256sums.txt
-file2_sum=8b6cb462ef7ab81adafcf15806730ab91538ce50e6b7f940404b9d48189f2af2
+file2_sum=e73712f9f527711a98d860d2018fe5bc633675c4ac723f9d8bfc8bd23474382b
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

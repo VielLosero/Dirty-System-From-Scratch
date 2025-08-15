@@ -83,10 +83,10 @@ version_url=https://github.com/Mic92/iana-etc/releases/latest
 sum="sha256sum"
 file1_url=https://github.com/Mic92/iana-etc/releases/download/$ver
 file1=$name-$ver.tar.gz
-file1_sum=432d475ea36aa3f18fe709878e6f1e4e894efc5e92a8ee0bee0756b792ac2160
+file1_sum=4f88470a2cac2a2f9568285aaff9aeaee0ab66c6ba3c12bba51adca915fa92b1
 file2_url=$file1_url
 file2=${file1}.sha256
-file2_sum=18bdc7058e793f70514f53cb339357444fc2e154844633d3e9d3a5ddcef17e4b
+file2_sum=0ebd1d3f9bfc07dc4d41ffe4aee9e4925a07836d18d0ab0c65a52ed0f438ca0d
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

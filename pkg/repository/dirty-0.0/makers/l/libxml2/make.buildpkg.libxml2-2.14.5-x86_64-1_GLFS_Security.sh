@@ -87,10 +87,10 @@ version_url=https://gitlab.gnome.org/GNOME/libxml2/-/releases.atom
 sum="sha256sum"
 file1_url=https://download.gnome.org/sources/libxml2/$sub_ver
 file1=$name-$ver.tar.xz
-file1_sum=24175ec30a97cfa86bdf9befb7ccf4613f8f4b2713c5103e0dd0bc9c711a2773
+file1_sum=03d006f3537616833c16c53addcdc32a0eb20e55443cba4038307e3fa7d8d44b
 file2_url=$file1_url
 file2=${name}-${ver}.sha256sum
-file2_sum=9e95d0099c6b49987f0f72f248b1d060dd4142b5e6775692833eef526f6f4be7
+file2_sum=1524d525e474514b2887e08f8cdca7ed57b5503caa9787557ff01fc755308b11
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

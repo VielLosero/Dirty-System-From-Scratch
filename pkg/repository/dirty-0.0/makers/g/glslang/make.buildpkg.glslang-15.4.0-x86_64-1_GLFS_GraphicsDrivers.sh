@@ -92,7 +92,7 @@ version_url=https://github.com/KhronosGroup/glslang/releases/latest
 sum="sha256sum"
 file1_url=https://github.com/KhronosGroup/glslang/archive/refs/tags
 file1=$name-$ver.tar.gz
-file1_sum=c6c21fe1873c37e639a6a9ac72d857ab63a5be6893a589f34e09a6c757174201
+file1_sum=b16c78e7604b9be9f546ee35ad8b6db6f39bbbbfb19e8d038b6fe2ea5bba4ff4
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

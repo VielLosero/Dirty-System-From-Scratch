@@ -92,10 +92,10 @@ version_url=https://www.x.org/pub/individual/app
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=dd838bae9d2b19ddd71fe6d30ed33abc7c85e19d223e79d35600db3fa44bf734
+file1_sum=00463056435b82261c227ad0de1873fd4536101607fbc57540e28e4a0a9b71f7
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=44e42b6bf51e26859fb3a0b4a79a9ade78092904961f213b38f416d9e2a3e2d6
+file2_sum=9e4c7008d914aed6d1b8f69f12b8e77b489b2fe55c8d9d7344f12a8b8d6109ab
 gpgkey=4A193C06D35E7C670FA4EF0BA2FB9E081F2D130E 
 
 # Check for new releases.

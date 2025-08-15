@@ -94,7 +94,7 @@ version_url=https://github.com/harfbuzz/harfbuzz/releases/latest
 sum="sha256sum"
 file1_url=https://github.com/harfbuzz/harfbuzz/releases/download/$ver
 file1=$name-$ver.tar.xz
-file1_sum=093714c8548a285094685f0bdc999e202d666b59eeb3df2ff921ab68b8336a49
+file1_sum=e1fbca6b32a91ae91ecd9eb2ca8d47a5bfe2b1cb2e54855ab7a0b464919ef358
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

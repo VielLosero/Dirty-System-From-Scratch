@@ -83,7 +83,7 @@ version_url=https://github.com/vim/vim/tags
 sum="md5sum"
 file1_url=https://github.com/vim/vim/archive/refs/tags
 file1=v$ver.tar.gz
-file1_sum=611a3e99a434e51af7f2dc08df70c28b
+file1_sum=d934ef64bf0d822d6cac701be5d1e750
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

@@ -84,14 +84,14 @@ version_url=https://www.netfilter.org/pub/nftables
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=9c8a64b59c90b0825e540a9b8fcb9d2d942c636f81ba50199f068fde44f34ed8
+file1_sum=3444f0012af0472399eeae89a758b9c6dc5f311f6c67a48988fa1600fc4bac86
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=2b0a3d029a03b90e64e342cdaf34b196cc359e21dedb1f18ede091ede1d8fc59
+file2_sum=3f433bf70f786632ced9cd08f6102d2e52df26b120eab1a18a686da2f4e21780
 file2_gpgkey=8C5F7146A1757A65E2422A94D70D1A666ACF2B21
 file3_url=$file1_url
 file3=${file1}.sha256sum
-file3_sum=539365089997efd5171502fbe06c0856ae7aa8cbae516df66291a8ae025a9e00
+file3_sum=987261a2b92ff2ba2430c15de90734459faf3fea2af8ca3660af593b09f3e57f
 
 
 # Check for new releases.

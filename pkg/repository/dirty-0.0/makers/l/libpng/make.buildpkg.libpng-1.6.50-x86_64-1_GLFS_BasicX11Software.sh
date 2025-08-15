@@ -94,10 +94,10 @@ version_url=https://sourceforge.net/projects/libpng/files/libpng16
 sum="sha256sum"
 file1_url=$version_url/$ver
 file1=$name-$ver.tar.xz
-file1_sum=43182aa48e39d64b1ab4ec6b71ab3e910b67eed3a0fff3777cf8cf40d6ef7024
+file1_sum=4df396518620a7aa3651443e87d1b2862e4e88cad135a8b93423e01706232307
 file2_url=https://downloads.sourceforge.net/sourceforge/libpng-apng
 file2=libpng-$ver-apng.patch.gz
-file2_sum=66676d827e32ee17347b39a353e91b5b8b0547b440aeb13f023cd4fa2ad78d32
+file2_sum=687ddc0c7cb128a3ea58e159b5129252537c27ede0c32a93f11f03127f0c0165
 libpng_gpgkey=2F7DBCAD5B30E668BBD516C1CFDF148828C642A7 
 
 # Check for new releases.

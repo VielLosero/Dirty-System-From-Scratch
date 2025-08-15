@@ -83,7 +83,7 @@ version_url=https://github.com/ninja-build/ninja/releases/latest
 sum="md5sum"
 file1_url=https://github.com/ninja-build/ninja/archive/v$ver
 file1=$name-$ver.tar.gz
-file1_sum=a0f2016b736ee640b0473a679485e22e
+file1_sum=c35f8f55f4cf60f1a916068d8f45a0f8
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -305,7 +305,7 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD ---
-  python3 configure.py --bootstrap || exit 1
+  python3 configure.py --bootstrap --verbose || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))

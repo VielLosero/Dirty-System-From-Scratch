@@ -82,13 +82,13 @@ else echo "Needed wget or curl to download files or check for new versions." && 
 gnu_mirror=https://ftpmirror.gnu.org
 version_url=$gnu_mirror/gcc
 sum="md5sum"
-file1_url=https://ftp.gnu.org/gnu/gcc/$name-$ver
+file1_url=$version_url/$name-$ver
 file1=$name-$ver.tar.xz
-file1_sum=e55d13c55428bca27b4d2ea02f883135
+file1_sum=b861b092bf1af683c46a8aa2e689a6fd
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=7681d3849199f62cd75e59053b6d90f4
-file2_gpgkey=D3A93CAD751C2AF4F8C7AD516C35B99309B5FA62
+file2_sum=abf7511ba5298f227b04691d539b8232
+file2_gpgkey=7F74F97C103468EE5D750B583AB00996FC26A641
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

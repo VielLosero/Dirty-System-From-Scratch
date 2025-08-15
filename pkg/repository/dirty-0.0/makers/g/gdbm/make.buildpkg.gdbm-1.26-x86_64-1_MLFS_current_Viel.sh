@@ -84,10 +84,10 @@ version_url=$gnu_mirror/gdbm
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.gz
-file1_sum=d02db3c5926ed877f8817b81cd1f92f53ef74ca8c6db543fbba0271b34f393ec
+file1_sum=6a24504a14de4a744103dcb936be976df6fbe88ccff26065e54c1c47946f4a5e
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=efa1c5945e04ad92a856a71233b03a5393e2893df8be9d7debda89a5480c4e26
+file2_sum=a5660cca0b1d1947f99343e2c1f1efef8e9614f0aaa4da4245d4aedbe2f5496c
 gdbm_gpgkey=79FFD94BFCE230B1
 
 # Check for new releases.

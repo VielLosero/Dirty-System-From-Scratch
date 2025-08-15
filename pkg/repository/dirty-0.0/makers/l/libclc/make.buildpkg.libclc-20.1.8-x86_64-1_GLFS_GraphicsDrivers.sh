@@ -84,10 +84,10 @@ version_url=https://github.com/llvm/llvm-project/releases/latest
 sum="sha256sum"
 file1_url=https://github.com/llvm/llvm-project/releases/download/llvmorg-$ver
 file1=$name-$ver.src.tar.xz
-file1_sum=22b29c1a9f18d8744e5a24f36ce6d4f198d523c126cd7182569c73806e1e1854
+file1_sum=ecd83a52859742f71f4c332538f8bee54a6743374a233b5a85017de22d75c227
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=954f6ea6adfcfd37b93185f5e83797d460e4cfd1208b1a474ef106e9bb4c98f4
+file2_sum=e748e0bad4b85f8c12c45973de78541ec302fdba8cf7cf4cc5c3e4b5a91bfc46
 llvm_gpgkey=474E22316ABF4785A88C6E8EA2C794A986419D8A
 
 

@@ -84,10 +84,10 @@ version_url=$gnu_mirror/nettle/
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.gz
-file1_sum=b0fcdd7fc0cdea6e80dcf1dd85ba794af0d5b4a57e26397eee3bc193272d9132
+file1_sum=fe9ff51cb1f2abb5e65a6b8c10a92da0ab5ab6eaf26e7fc2b675c45f1fb519b5
 file2_url=$file1_url
 file2=${file1}.sig
-file2_sum=7542775e1fe0404ee7807c8669b105e18c417e4cb3d5e8aa808dafb246b9ec23
+file2_sum=9cc1319ede378148f4c729ad889e3c0bd461d974ea590916f3480b93257a1d0b
 nettle_gpgkey=343C2FF0FBEE5EC2EDBEF399F3599FF828C67298
 
 # Check for new releases.
@@ -137,7 +137,7 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --receive-keys $nettle_gpgkey
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $nettle_gpgkey
 gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.

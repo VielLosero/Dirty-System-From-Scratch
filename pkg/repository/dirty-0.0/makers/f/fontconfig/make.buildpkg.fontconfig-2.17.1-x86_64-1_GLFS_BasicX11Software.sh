@@ -91,11 +91,11 @@ else echo "Needed wget or curl to download files or check for new versions." && 
 version_url=https://gitlab.freedesktop.org/fontconfig/fontconfig/-/tags?format=atom
 sum="sha256sum"
 file1_url=https://gitlab.freedesktop.org/fontconfig/fontconfig/-/archive/$ver
-file1=$name-$ver.tar.xz
-file1_sum=165b8fd2a119864c87464b233986c4a1bc09efb09c65de1ca40cc1e85ffb77e2
+file1=$name-$ver.tar.gz
+file1_sum=82e73b26adad651b236e5f5d4b3074daf8ff0910188808496326bd3449e5261d
 file2_url=$file1_url
 file2=${file1}.sha256sum
-file2_sum=874988545206efac6849780223816393d33969e672420e6d71211ffb0ed94b9e
+file2_sum=0856cb9e9e1ab45b58b0f235b0029fa400d0b87a25b8eebada4daa28c1ddfa7e
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

@@ -94,7 +94,7 @@ version_url=https://github.com/KhronosGroup/SPIRV-Tools/tags
 sum="sha256sum"
 file1_url=https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags
 file1=$name-$ver.tar.gz
-file1_sum=6b60f723345ceed5291cceebbcfacf7fea9361a69332261fa08ae57e2a562005
+file1_sum=8327fb8f3e9472346a004c91dbb83a6e5f3b36c3846c142cf8c0dc8fac8710f3
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}

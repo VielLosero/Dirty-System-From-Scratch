@@ -83,10 +83,10 @@ version_url=https://dl.suckless.org/dwm
 sum="sha256sum"
 file1_url=$version_url
 file1=$name-$ver.tar.gz
-file1_sum=21d79ebfa9f2fb93141836c2666cb81f4784c69d64e7f1b2352f9b970ba09729
+file1_sum=7cfc2c6d9386c07c49e2c906f209c18ba3364ce0b4872eae39f56efdb7fc00a3
 file2_url=$file1_url
 file2=dwm-sha256sums.txt
-file2_sum=2dd70384f416a3e8e520da27e86355016d3735e2d61a39eee388236b21351645
+file2_sum=f1b786e7457fdfdce0dacaace1f11b1e2f5cddfac3aa4aad946581c17ee02ff4
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
