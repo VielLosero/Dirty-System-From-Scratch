@@ -4,7 +4,7 @@ This git repository have the makers scripts for build my Dirty system from scrat
 It is recomended to run on a virtual machine the first time you try it.
 Be care if you don't know what are you doing.
 Know how to build LFS BLFS MLFS and GLFS are recomended. Take a look.
-This can destroy your system, you are warned.
+This can break your installed system, you are warned.
 
 ## How to install the repository and build from sources.
 Clone the repository and move it to the / root dir.
@@ -83,7 +83,7 @@ menuentry "LFS" {
 }
 ```
 ## What next?
-Boot your new MLFS nad check your repo status.
+Boot your new MLFS and check your repo status.
 ```
 bash /pkg/tools/scripts/repo-status.sh
 ```
