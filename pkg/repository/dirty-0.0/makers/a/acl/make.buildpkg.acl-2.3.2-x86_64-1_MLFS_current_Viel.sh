@@ -136,7 +136,7 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --receive-keys $acl_gpgkey
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $acl_gpgkey
 gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.

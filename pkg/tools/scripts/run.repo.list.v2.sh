@@ -37,7 +37,8 @@ PKG_DB="$ROOT/pkg/installed"
 BLACKLIST="$ROOT/pkg/blacklist"
 
 line_num=0
-cat $RUN_REPO_LIST | while read line ; do 
+#cat $RUN_REPO_LIST | while read line ; do 
+while IFS= read -r line; do
 CHECK_REL=0
 DECODE_SOURCES=0
 RUN_MAKER=0
@@ -199,8 +200,10 @@ fi
 
 # Todo: Sound alert when done a line
 echo "++++++++++++++++++++++++++++++"                  
-done
+done < $RUN_REPO_LIST
 
+
+while [[ $(jobs -pr | wc -l) -gt 0 ]] ; do wait ; done
 
 
 

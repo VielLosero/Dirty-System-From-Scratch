@@ -82,8 +82,8 @@ else echo "Needed wget or curl to download files or check for new versions." && 
 #version_url=https://sourceforge.net/projects/tcl/files/Tcl
 version_url=https://www.tcl-lang.org/software/tcltk/download.html
 sum="md5sum"
-#file1_url=https://downloads.sourceforge.net/tcl
-file1_url=$version_url
+file1_url=http://prdownloads.sourceforge.net/tcl
+#file1_url=$version_url
 file1=$name$ver-src.tar.gz
 file1_sum=eaef5d0a27239fb840f04af8ec608242
 

@@ -29,12 +29,12 @@ if [ $# -eq 2 ] ; then
       sed -i "${line_num}s/ C / S /" $RUN_REPO_LIST || exit 1
     else
 		#CHECK_RELEASE=1 bash $1
-    last=$(CHECK_RELEASE=1 bash $2)
+    last=$(CHECK_RELEASE=1 bash $2 )
 		result=$?
 		case "$result" in
 			0)
 				echo "Up to date: $file"
-				ln -s $1 $UPDATEDIR_REPO_MAKERS_UP_TO_DATE/$file
+				ln -s $2 $UPDATEDIR_REPO_MAKERS_UP_TO_DATE/$file
 				if [ -h $UPDATEDIR_REPO_MAKERS_WITH_NEW_VER/$file ] ; then
 					rm $UPDATEDIR_REPO_MAKERS_WITH_NEW_VER/$file
 				fi
@@ -47,7 +47,7 @@ if [ $# -eq 2 ] ; then
 				echo "Failed: $file"
 				if [ ! -h $UPDATEDIR_REPO_MAKERS_WITH_NEW_VER/$file ] ; then
 					if [ ! -h $UPDATEDIR_REPO_MAKERS_FAILED/$file ] ; then
-						ln -s $1 $UPDATEDIR_REPO_MAKERS_FAILED/$file
+						ln -s $2 $UPDATEDIR_REPO_MAKERS_FAILED/$file
 					fi
 				fi
         sed -i "${line_num}s/ C / F /" $RUN_REPO_LIST || exit 1
@@ -56,7 +56,7 @@ if [ $# -eq 2 ] ; then
 				echo "Need upgrade: $file --> $(echo "$last" | grep "Version check" | cut -d' ' -f4)"
         #echo "CHECK_RELEASE=1 NEW=0 bash $1"
 				if [ ! -h $UPDATEDIR_REPO_MAKERS_WITH_NEW_VER/$file ] ; then
-					ln -s $1 $UPDATEDIR_REPO_MAKERS_WITH_NEW_VER/$file
+					ln -s $2 $UPDATEDIR_REPO_MAKERS_WITH_NEW_VER/$file
 				fi
 				if [ -h $UPDATEDIR_REPO_MAKERS_FAILED/$file ] ; then
 					rm $UPDATEDIR_REPO_MAKERS_FAILED/$file
@@ -70,4 +70,5 @@ if [ $# -eq 2 ] ; then
 		fi
 	fi
 fi
+
 
