@@ -2,9 +2,7 @@
 # My Dirty system from scratch
 It is a system based on MLFS and GLFS Linux from scratch books.
 
-![Dirty system from scratch - Chapter 1](videos/Dirty.system.from.scratch.chapter.1.gif)
-
-<img src="videos/Dirty.system.from.scratch.chapter.1.gif" alt="Dirty system from scratch - Chapter 1" width="250"/>
+<img src="videos/Dirty.system.from.scratch.chapter.1.gif" alt="Dirty system from scratch - Chapter 1" width="1024"/>
 
 This is a work in progress, sure some changes will be ... stay up.
 
