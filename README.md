@@ -4,7 +4,6 @@ It is a system based on MLFS and GLFS Linux from scratch books.
 
 ![Disrty system from scratch - Chapter 1](videos/Dirty.system.from.scratch.chapter.1.gif)
 
-
 This is a work in progress, sure some changes will be ... stay up.
 
 ## Thanks to:
