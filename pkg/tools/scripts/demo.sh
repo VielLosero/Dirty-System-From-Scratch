@@ -181,7 +181,7 @@ if [ $CH4 -eq 1 ] ; then
 write "Chapter 4."
 write "How to update the makers source hashes."
 write "When we copy the old maker *tcl-8.6.16* to create the new maker script version *tcl-8.6.17* it have the old sources hashes for tcl8.6.16-src.tar.gz."
-write "So we need update with the new source hash for the files the new maker will download, like tcl8.6.17-src.tar.gz."
+write "So we need update with the new source hashes for the files the new maker will download, like tcl8.6.17-src.tar.gz."
 write "Let go. Inspect the /tmp/run.repo.list"
 run 'head -30 /tmp/run.repo.list'
 write "Then run the run.repo.list.sh script, the M will run the maker that will try download the sources under /tmp/sources-all/"
@@ -194,13 +194,14 @@ write "Then rerun the run.repo.list.sh script, the M will stay because the first
 run 'head -30 /tmp/run.repo.list'
 run 'bash /pkg/tools/scripts/run.repo.list.v2.sh'
 write "Doing it for lot of files it becomes a repetitive and tiring task."
-write "Because it is needed manual verification I recoment to update all makers in a row and do not build B and package P at same time."
-write "Maybe it will be automated but I don't know if it is a good idea if you can share or compare with the hash other users will have."
-write "We can share all our hashes, because time, as example we will show only the t subdir."
+write "MLFS and GLFS have it hashes and lists to download files."
+write "I prefer to do mannual verification, for now."
+write "I recoment to update all makers in a row and do not build B and package P at same time."
+write "To help and check we share all our hashes too."
+write "Because time, as example we will do only the t subdir."
 run 'grep "sha256sum -c" /pkg/repository/*/builders/t/*/* | cut -d \" -f2 | sort -u -k2 | head -30'
 write "Take a look at /pkg/tools/scripts/CHECKSUMS-generate.sh"
-write "Anyway MLFS and GLFS have theys hashes and lists to download files."
-write "Maybe I will add an option to print the URL on the makers to make a full download list. Will see."
+write "Maybe I will add an option to print the URL on the makers to make a full download list and automate the hash check. Will see."
 fi
 
 

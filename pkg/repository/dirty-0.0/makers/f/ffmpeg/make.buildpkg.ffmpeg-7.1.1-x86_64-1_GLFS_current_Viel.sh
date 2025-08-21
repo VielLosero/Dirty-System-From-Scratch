@@ -49,8 +49,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Commands for Manipulating POSIX Access Control Lists"
-url="https://www.gnu.org/software/tar/"
+short_desc=" FFmpeg is a solution to record, convert and stream audio and video."
+url="https://ffmpeg.org/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -72,28 +72,31 @@ LFS=/mnt/lfs
 LFS_TGT=$(uname -m)-lfs-linux-gnu
 
 # --- END CAT SEED ---
-
+ 
 # Config get tool.
 if wget --help >/dev/null 2>&1 ; then GETVER="wget --output-document - --quiet" GETFILE="wget -c " SPIDER="wget -q --method=HEAD"
 elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --silent" GETFILE="curl -C - -O --silent" SPIDER="curl -L --head --fail --silent"
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
-# package vars.
-version_url="https://download.savannah.nongnu.org/releases/acl"
+# Package vars.
+version_url=https://ffmpeg.org/releases/
 sum="md5sum"
-file1_url="$version_url"
+file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=590765dee95907dbc3c856f7255bd669
-file2_url="$file1_url"
-file2=${file1}.sig
-file2_sum=cb1a8da8d801c2d430062add8e5949b7
-acl_gpgkey=B902B5271325F892AC251AD441633B9FE837F581
+file1_sum=26f2bd7d20c6c616f31d7130c88d7250
+file2_url=$version_url
+file2=${file1}.asc
+file2_sum=726f45ea4935ebc1bdb0b263f5dec7d8
+file2_gpgkey=FCF986EA15E6E293A5644F10B4322F04D67658D8
+file3_url=https://glfs-book.github.io/glfs/download/ffmpeg
+file3=ffmpeg-7.1.1-chromium_method-1.patch
+file3_sum=e1972cc809fe72a8b8a711c8896ffa41
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*[0-9].tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -134,9 +137,11 @@ cd $SOURCESDIR || exit 1
 [ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
 [ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
+[ ! -e $file3 ] && $GETFILE ${file3_url}/${file3}
+[ -e $file3 ] && if echo "$file3_sum $file3" | $sum -c ; then ln -v $SOURCESDIR/$file3 $SOURCESPPDIR/ ; else $sum $file3 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $acl_gpgkey
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $file2_gpgkey
 gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
@@ -278,6 +283,11 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
+  # First, apply a patch that adds an API necessary for some packages to build.
+  patch -Np1 -i $SOURCESDIR/ffmpeg-7.1.1-chromium_method-1.patch || exit 1
+  #  Now fix an issue caused by the latest version of x265-4.1.
+  sed -e 's/X265_BUILD >= 210/(&) \&\& (X265_BUILD < 213)/' \
+    -i libavcodec/libx265.c || exit 1
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -292,9 +302,40 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  ./configure --prefix=/usr         \
-              --disable-static      \
-              --docdir=/usr/share/doc/$name-$ver || exit 1
+  ## ./configure --prefix=/usr        \
+  ##           --enable-gpl         \
+  ##           --enable-version3    \
+  ##           --enable-nonfree     \
+  ##           --disable-static     \
+  ##           --enable-shared      \
+  ##           --disable-debug      \
+  ##           --enable-libaom      \
+  ##           --enable-libfdk-aac  \
+  ##           --enable-libfreetype \
+  ##           --enable-libmp3lame  \
+  ##           --enable-libopus     \
+  ##           --enable-libvorbis   \
+  ##           --enable-libvpx      \
+  ##           --enable-libx264     \
+  ##           --enable-libx265     \
+  ##           --enable-openssl     \
+  ##           --docdir=/usr/share/doc/$name-$ver || exit 1
+  ./configure --prefix=/usr        \
+            --enable-gpl         \
+            --enable-version3    \
+            --disable-static     \
+            --enable-shared      \
+            --disable-debug      \
+            --enable-libaom      \
+            --enable-libfreetype \
+            --enable-libmp3lame  \
+            --enable-libopus     \
+            --enable-libvorbis   \
+            --enable-libvpx      \
+            --enable-libx264     \
+            --enable-libx265     \
+            --enable-openssl     \
+            --docdir=/usr/share/doc/$name-$ver || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -310,6 +351,7 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   # --- LFS_CMD_BUILD ---
   NUMJOBS="-j $(nproc)"
   make $NUMJOBS || exit 1
+  gcc tools/qt-faststart.c -o tools/qt-faststart || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -324,7 +366,13 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
+  #mkdir -vp $PKGDIR/usr/bin || exit 1
+  #mkdir -vp $PKGDIR/usr/share/doc/$name-$ver || exit 1
   make DESTDIR=$PKGDIR install || exit 1
+  install -v -m755 -d                    $PKGDIR/usr/bin &&
+  install -v -m755    tools/qt-faststart $PKGDIR/usr/bin &&
+  install -v -m755 -d                    $PKGDIR/usr/share/doc/$name-$ver &&
+  install -v -m644    doc/*.txt          $PKGDIR/usr/share/doc/$name-$ver || exit 1
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -354,12 +402,47 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG32 ---
-  CC="gcc -m32" ./configure \
-      --prefix=/usr         \
-      --disable-static      \
-      --libdir=/usr/lib32   \
-      --libexecdir=/usr/lib32   \
-      --host=i686-pc-linux-gnu || exit 1
+  ## ./configure --prefix=/usr                             \
+  ##           --libdir=/usr/lib32                       \
+  ##           --shlibdir=/usr/lib32                     \
+  ##           --cc="gcc -m32"                           \
+  ##           --pkg-config=i686-pc-linux-gnu-pkg-config \
+  ##           --enable-gpl                              \
+  ##           --enable-version3                         \
+  ##           --enable-nonfree                          \
+  ##           --disable-static                          \
+  ##           --enable-shared                           \
+  ##           --disable-debug                           \
+  ##           --enable-libaom                           \
+  ##           --enable-libfdk-aac                       \
+  ##           --enable-libfreetype                      \
+  ##           --enable-libmp3lame                       \
+  ##           --enable-libopus                          \
+  ##           --enable-libvorbis                        \
+  ##           --enable-libvpx                           \
+  ##           --enable-libx264                          \
+  ##           --enable-libx265                          \
+  ##           --enable-openssl || exit 1
+  ./configure --prefix=/usr                             \
+            --libdir=/usr/lib32                       \
+            --shlibdir=/usr/lib32                     \
+            --cc="gcc -m32"                           \
+            --pkg-config=i686-pc-linux-gnu-pkg-config \
+            --enable-gpl                              \
+            --enable-version3                         \
+            --enable-nonfree                          \
+            --disable-static                          \
+            --enable-shared                           \
+            --disable-debug                           \
+            --enable-libaom                           \
+            --enable-libfreetype                      \
+            --enable-libmp3lame                       \
+            --enable-libopus                          \
+            --enable-libvorbis                        \
+            --enable-libvpx                           \
+            --enable-libx264                          \
+            --enable-libx265                          \
+            --enable-openssl || exit 1
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
   config32_time=$(($end_config32_date - $start_config32_date))
@@ -389,10 +472,10 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL32 ---
-  mkdir -vp $PKGDIR/usr/lib32
-  make DESTDIR=$PWD/DESTDIR install
-  cp -Rv DESTDIR/usr/lib32/* $PKGDIR/usr/lib32
-  rm -rf DESTDIR
+  mkdir -vp $PKGDIR/usr/lib32 || exit 1
+  make DESTDIR=$PWD/DESTDIR install     &&
+  cp -vr DESTDIR/usr/lib32/* $PKGDIR/usr/lib32 &&
+  rm -rf DESTDIR                        || exit 1
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
   install32_time=$(($end_install32_date - $start_install32_date))
@@ -417,7 +500,6 @@ fi
 if [ $STRIP -eq 1 ] ; then echo "Skipping STRIP elf." ; else 
   # strip ELF
   start_strip_date=$(date +"%s")
-  echo "Stripping ELF files."
   find $PKGDIR | xargs file | grep "ELF.*executable" | cut -f 1 -d : \
                | xargs strip --strip-unneeded 2> /dev/null
   end_strip_date=$(date +"%s")
@@ -431,7 +513,7 @@ if [ $SHARED -eq 1 ] ; then echo "Skipping find SHARED libs." ; else
   start_shared_date=$(date +"%s")
   echo "Find ELF files and extract needed shared libs"
   trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
-  cd $PKGDIR || exit 1
+  cd $PKGDIR
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; | grep -E "^./|NEEDED" |\
     # change ': file format elf64-x86-64' to :
     sed -e 's/:.*$/:/' |\
@@ -565,7 +647,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
   # pkg checksums
   PKG_CHECKSUMS_FILE="$PKG_DIR/checksums"
   # Tar exclude-from file.
-  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-$INSTALLDIR/pkg/config/tar-exclude-from-file.txt}
+  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-/pkg/config/tar-exclude-from-file.txt}
   
   if [[ $INSTALL -eq 1 ]] ; then 
     [ -d $PKG_DIR ] || mkdir -p $PKG_DIR 
@@ -582,11 +664,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
     echo "Decoding b64 package files."
       # --keep-directory-symlink Don't replace existing symlinks to directories when extracting.
       # tested tar (GNU tar) 1.35 || exit
-      if [ -e TAR_EXCLUDE_FROM ] ; then
-        echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
-      else
-        echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink
-      fi
+      echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
     echo "$(date +"%a %b %d %T %Z %Y") Installed $pkg_name in $INSTALLDIR" >> $LOGFILE 
   elif [[ $COMPARE -eq 1 ]] ; then
     echo "Comparing pkg with files in $INSTALLDIR"

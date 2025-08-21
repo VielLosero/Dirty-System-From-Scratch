@@ -1,7 +1,7 @@
 #order list for make_dirty_0.0.1.raw.disk.for.qemu.sh script.
 # cat list.txt | grep -v "#" | while read line ; do ls /pkg/repository/*/*/*/*$line ; done
 # _DIRTY_
-.make_buildpkg_dirty_package_manager-[0-9]*_DIRTY_*
+#.make_buildpkg_dirty_package_manager-[0-9]*_DIRTY_*
 .dirty-repository-manager-[0-9]*_DIRTY_*
 .filesystem_hierarchy-[0-9]*_DIRTY_*
 #.lfschroot-[0-9]*_MLFSCHROOT_*
@@ -338,14 +338,14 @@
 .MinGW-w64-GCC-[0-9]*_GLFS_*
 .xkbcommon-[0-9]*_GLFS_*
 .SDL2-[0-9]*_GLFS_*
-.NASM-[0-9]*_GLFS_*
+.nasm-[0-9]*_GLFS_*
 .libaom-[0-9]*_GLFS_*
 .fdk-aac-[0-9]*_GLFS_*
-.LAME-[0-9]*_GLFS_*
+.lame-[0-9]*_GLFS_*
 .libvpx-[0-9]*_GLFS_*
 .x264-[0-9]*_GLFS_*
 .x265-[0-9]*_GLFS_*
-.FFmpeg-[0-9]*_GLFS_*
+.ffmpeg-[0-9]*_GLFS_*
 .gstreamer-[0-9]*_GLFS_*
 .gst-plugins-base-[0-9]*_GLFS_*
 .gst-plugins-good-[0-9]*_GLFS_*
@@ -417,4 +417,5 @@
 .libnftnl-[0-9]*_DIRTY_*
 #.libedit-[0-9]*_DIRTY_* used readline
 .nftables-[0-9]*_DIRTY_*
+.nftables-dirtycfg-[0-9]*_DIRTY_*
 # next tool

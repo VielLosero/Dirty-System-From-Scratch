@@ -49,8 +49,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Commands for Manipulating POSIX Access Control Lists"
-url="https://www.gnu.org/software/tar/"
+short_desc="x265 package provides a library for encoding video streams into the H.265/HEVC format."
+url="https://www.videolan.org/developers/x265.html"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -79,21 +79,17 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # package vars.
-version_url="https://download.savannah.nongnu.org/releases/acl"
-sum="md5sum"
+version_url="http://ftp.videolan.org/pub/videolan/x265"
+sum="sha256sum"
 file1_url="$version_url"
-file1=$name-$ver.tar.xz
-file1_sum=590765dee95907dbc3c856f7255bd669
-file2_url="$file1_url"
-file2=${file1}.sig
-file2_sum=cb1a8da8d801c2d430062add8e5949b7
-acl_gpgkey=B902B5271325F892AC251AD441633B9FE837F581
+file1=${name}_${ver}.tar.gz
+file1_sum=a31699c6a89806b74b0151e5e6a7df65de4b49050482fe5ebf8a4379d7af8f29
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}_[0-9].*tar.*z | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'_' -f2 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -132,12 +128,8 @@ fi
 cd $SOURCESDIR || exit 1
 [ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
 [ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
-[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
-[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $acl_gpgkey
-gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
@@ -209,7 +201,7 @@ echo "" >> $OUTBUILD
 echo "# Decode base64 source files." >> $OUTBUILD
 echo 'echo "Decoding b64 source files."' >> $OUTBUILD
 for file in $(find . -type f | sort ) ; do
-  if [ -z $(echo "$file" | grep -v "buildpkg.$name-$ver" ) ] ; then
+  if [ -z $(echo "$file" | grep -v "buildpkg.${name}_${ver}" ) ] ; then
     echo "  Excluding $file"
   else
     echo "  Added: $file"
@@ -257,12 +249,12 @@ if [ $EXTRACT -eq 1 ] ; then echo "Skipping EXTRACT sources." ; else
   echo "Preparing sources."
   cd $BUILDDIR || exit 1
   # deleting source dirs if exist.
-  if [ -d $name-$ver ] ; then rm -rf $name-$ver ; fi
+  if [ -d ${name}_${ver} ] ; then rm -rf ${name}_${ver} ; fi
   if [ -d $PKGDIR ] ; then rm -rf $PKGDIR && mkdir $PKGDIR ; fi
 EOF_OUTBUILD
   echo '  tar xf $SOURCESDIR'/$file1 >> $OUTBUILD 
   cat << 'EOF_OUTBUILD' >> $OUTBUILD
-  cd $name-$ver || exit 1
+  cd ${name}_${ver} || exit 1
   # --- LFS_CMD_EXTRACT ---
   # --- END_LFS_CMD_EXTRACT ---
   end_extract_date=$(date +"%s")
@@ -276,8 +268,11 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   start_patch_date=$(date +"%s")
   echo "Applying patches."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd ${name}_${ver} || exit 1
   # --- LFS_CMD_PATCH ---
+  # First, change the CMake policy to allow building with CMake-4.0 and newer.
+  sed -r '/cmake_policy.*(0025|0054)/d' \
+  -i source/CMakeLists.txt || exit 1
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -290,11 +285,14 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd ${name}_${ver} || exit 1
   # --- LFS_CMD_CONFIG ---
-  ./configure --prefix=/usr         \
-              --disable-static      \
-              --docdir=/usr/share/doc/$name-$ver || exit 1
+  rm -rf bld
+  mkdir bld && cd bld || exit 1
+  cmake -D CMAKE_INSTALL_PREFIX=/usr        \
+      -D GIT_ARCHETYPE=1                  \
+      -D CMAKE_POLICY_VERSION_MINIMUM=3.5 \
+      -W no-dev ../source || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -306,8 +304,9 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   start_build_date=$(date +"%s")
   echo "Compiling sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd ${name}_${ver} || exit 1
   # --- LFS_CMD_BUILD ---
+  cd bld || exit 1
   NUMJOBS="-j $(nproc)"
   make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD ---
@@ -322,9 +321,11 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   #Installing sources.
   echo "Installing sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd ${name}_${ver} || exit 1
   # --- LFS_CMD_INSTALL ---
+  cd bld || exit 1
   make DESTDIR=$PKGDIR install || exit 1
+  rm -vf $PKGDIR/usr/lib/libx265.a
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -337,9 +338,8 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   start_post_date=$(date +"%s")
   echo "Post compilation tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd ${name}_${ver} || exit 1
   # --- LFS_CMD_POST ---
-  make distclean
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
@@ -352,14 +352,17 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   start_config32_date=$(date +"%s")
   echo "Configuring 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd ${name}_${ver} || exit 1
   # --- LFS_CMD_CONFIG32 ---
-  CC="gcc -m32" ./configure \
-      --prefix=/usr         \
-      --disable-static      \
-      --libdir=/usr/lib32   \
-      --libexecdir=/usr/lib32   \
-      --host=i686-pc-linux-gnu || exit 1
+  rm -rf bld
+  mkdir bld && cd bld || exit 1
+  CC="gcc -m32" CXX="g++ -m32"              \
+  PKG_CONFIG_PATH=/usr/lib32/pkgconfig      \
+  cmake -D CMAKE_INSTALL_PREFIX=/usr        \
+      -D LIB_INSTALL_DIR=lib32            \
+      -D GIT_ARCHETYPE=1                  \
+      -D CMAKE_POLICY_VERSION_MINIMUM=3.5 \
+      -W no-dev ../source || exit 1
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
   config32_time=$(($end_config32_date - $start_config32_date))
@@ -371,8 +374,9 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   start_build32_date=$(date +"%s")
   echo "Compiling 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd ${name}_${ver} || exit 1
   # --- LFS_CMD_BUILD32 ---
+  cd bld || exit 1
   NUMJOBS="-j $(nproc)"
   make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD32 ---
@@ -387,11 +391,13 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   start_install32_date=$(date +"%s")
   echo "Installing 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd ${name}_${ver} || exit 1
   # --- LFS_CMD_INSTALL32 ---
-  mkdir -vp $PKGDIR/usr/lib32
-  make DESTDIR=$PWD/DESTDIR install
-  cp -Rv DESTDIR/usr/lib32/* $PKGDIR/usr/lib32
+  cd bld || exit 1
+  mkdir -vp $PKGDIR/usr/lib32 || exit 1
+  make DESTDIR=$PWD/DESTDIR install || exit 1
+  cp -vr DESTDIR/usr/lib32/* $PKGDIR/usr/lib32 || exit 1
+  rm -vf $PKGDIR/usr/lib32/libx265.a 
   rm -rf DESTDIR
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
@@ -405,7 +411,7 @@ if [ $POST32 -eq 1 ] ; then echo "Skipping POST32 bits compilation tasks." ; els
   start_post32_date=$(date +"%s")
   echo "Post compilation 32bits tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd ${name}_${ver} || exit 1
   # --- LFS_CMD_POST32 ---
   # --- END_LFS_CMD_POST32 ---
   end_post32_date=$(date +"%s")
@@ -565,7 +571,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
   # pkg checksums
   PKG_CHECKSUMS_FILE="$PKG_DIR/checksums"
   # Tar exclude-from file.
-  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-$INSTALLDIR/pkg/config/tar-exclude-from-file.txt}
+  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-/pkg/config/tar-exclude-from-file.txt}
   
   if [[ $INSTALL -eq 1 ]] ; then 
     [ -d $PKG_DIR ] || mkdir -p $PKG_DIR 
@@ -582,11 +588,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
     echo "Decoding b64 package files."
       # --keep-directory-symlink Don't replace existing symlinks to directories when extracting.
       # tested tar (GNU tar) 1.35 || exit
-      if [ -e TAR_EXCLUDE_FROM ] ; then
-        echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
-      else
-        echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink
-      fi
+      echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
     echo "$(date +"%a %b %d %T %Z %Y") Installed $pkg_name in $INSTALLDIR" >> $LOGFILE 
   elif [[ $COMPARE -eq 1 ]] ; then
     echo "Comparing pkg with files in $INSTALLDIR"

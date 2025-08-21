@@ -49,8 +49,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Commands for Manipulating POSIX Access Control Lists"
-url="https://www.gnu.org/software/tar/"
+short_desc="Dirty config file for nftables package."
+url=""
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -70,30 +70,30 @@ OUTPKG=${OUTPKG:-$REPODIR/packages/$first_pkg_char/${name}/${pkg_name}.sh}
 # Other need vars for example to change the default INSTALLDIR=$LFS.
 LFS=/mnt/lfs
 LFS_TGT=$(uname -m)-lfs-linux-gnu
+# maker Source date epoch for reporduce the tar file.
+#MAKER_SOURCE_DATE_EPOCH="${MAKER_SOURCE_DATE_EPOCH:-$(date +%s)}"
+#BUILD_DATE="$(date --utc --date="@${MAKER_SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d)"
+MAKER_SOURCE_DATE_EPOCH="1747391248"
 
 # --- END CAT SEED ---
-
+ 
 # Config get tool.
 if wget --help >/dev/null 2>&1 ; then GETVER="wget --output-document - --quiet" GETFILE="wget -c " SPIDER="wget -q --method=HEAD"
 elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --silent" GETFILE="curl -C - -O --silent" SPIDER="curl -L --head --fail --silent"
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
-# package vars.
-version_url="https://download.savannah.nongnu.org/releases/acl"
+# Package vars.
+version_url=https://example.org
 sum="md5sum"
-file1_url="$version_url"
+file1_url=$version_url
 file1=$name-$ver.tar.xz
-file1_sum=590765dee95907dbc3c856f7255bd669
-file2_url="$file1_url"
-file2=${file1}.sig
-file2_sum=cb1a8da8d801c2d430062add8e5949b7
-acl_gpgkey=B902B5271325F892AC251AD441633B9FE837F581
+file1_sum=
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=0.0.1
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -130,19 +130,285 @@ fi
 
 # Get sources and check.
 cd $SOURCESDIR || exit 1
-[ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
-[ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
-[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
-[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
+# We don't need download sources, we made it, so only set var for compres the files.
+file1=$name-$ver-$MAKER_SOURCE_DATE_EPOCH.tar.xz
 
 # Check signaure if needed
-gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $acl_gpgkey
-gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
 cd $SOURCESPPDIR || exit 1
-# Do something if needed.
+
+if [ -e $file1 ] ; then rm $file1 ; fi
+TMP_MAKE_DIR=$(mktemp -d /tmp/mbp-tmp-make-dir-XXXXXX)
+trap "rm -rf $TMP_MAKE_DIR" EXIT
+cd $TMP_MAKE_DIR || exit 1
+  # put all files inside name-ver dir.
+  mkdir -vp $name-$ver-$MAKER_SOURCE_DATE_EPOCH && cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
+  #mkdir {bin,boot,dev,etc,home,lib,lib64,media,mnt,opt,root,run,sbin,srv,tmp,usr,var}
+  #mkdir -pv home
+  mkdir -pv etc/nftables
+  mkdir -pv etc/rc.d/init.d
+  mkdir -pv etc/rc.d/{rc2.d,rc3.d,rc4.d,rc5.d}
+
+
+cat << 'EOF' > etc/rc.d/init.d/nftables
+#!/bin/sh
+########################################################################
+# Begin nftables
+#
+# Description : Start nftables
+#
+# Authors     : Ken Moffat - ken@linuxfromscratch.org
+#               Bruce Dubbs - bdubbs@linuxfromscratch.org
+#               Viel Losero - viel.losero@gmail.com
+#
+# Version     : BLFS 7.0
+#
+########################################################################
+
+### BEGIN INIT INFO
+# Provides:          nftables
+# Required-Start:
+# Should-Start:      $syslog
+# Required-Stop:
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: Loads nftables rules.
+# Description:       Nftables provides firewall for Linux systems.
+# X-LFS-Provided-By: BLFS
+### END INIT INFO
+
+. /lib/lsb/init-functions
+
+case "$1" in
+    start)
+        if [ -f /etc/nftables/simple.firewall.dirtycfg.nft ] && [ -r /etc/nftables/simple.firewall.dirtycfg.nft ]; then
+          log_info_msg "Starting nftables..."
+          nft -f /etc/nftables/simple.firewall.dirtycfg.nft
+          evaluate_retval
+        fi
+        ;;
+
+    lock)
+        if [ -f /etc/nftables/block.and.count.dirtycfg.nft ] && [ -r /etc/nftables/block.and.count.dirtycfg.nft ]; then
+          log_info_msg "Locking system nftables..."
+          #nft -f /etc/nftables/block.and.log.dirtycfg.nft
+          nft -f /etc/nftables/block.and.count.dirtycfg.nft
+          evaluate_retval
+        fi
+        ;;
+
+    clear)
+        log_info_msg "Clearing system nftables..."
+        nft flush ruleset
+        evaluate_retval
+        ;;
+
+    status)
+        nft list ruleset
+        ;;
+
+    *)
+        echo "Usage: $0 {start|clear|lock|status}"
+        exit 1
+        ;;
+esac
+
+# End /etc/rc.d/init.d/nftables
+EOF
+
+cat << 'EOF' > etc/nftables/simple.firewall.dirtycfg.nft
+#!/usr/sbin/nft -f
+# Simple nftables firewal config.
+# to set up run nft -f (this file)
+
+# clean rules before restore from a file (ex: nft -f /etc/nftables.conf).
+# nft flush ruleset
+# nft -a list ruleset
+flush ruleset
+
+# nft list tables [<family>]
+# [<family>] = [<ip, arp, ip6, bridge, inet, netdev>]
+# nft [-n] [-a] list table [<family>] <name>
+# nft (add | delete | flush) table [<family>] <name>
+# bash-5.3# nft list tables inet
+# bash-5.3# nft -n -a list table inet fw
+
+# nft (delete | list | flush) chain [<family>] <table> <name>
+# bash-5.3# nft list chain inet fw input
+
+# Definitions, dns host, router
+#define LOOP = "lo"
+#define UNBOUND_PORT = 53
+#define DNS_ADDR = 127.0.0.1
+# define ROUTER_ADDR =
+# there is a good idea to implement dns on openwrt with unbound and cache for all desktops.
+
+table inet fw {
+  chain input {
+    # Default policy for input packets on chain. DROP
+    type filter hook input priority 0; policy drop;
+
+    # Accept all connections related to connections made by us
+    #ct state { established, related } log prefix "IN-related: " accept
+    udp sport 67 ct state established counter accept
+    udp sport 67 ct state related counter accept
+    udp sport 53 ct state established counter accept
+    udp sport 53 ct state related counter accept
+    tcp sport { http, https } ct state established counter accept
+    tcp sport { http, https } ct state related counter accept
+
+    # Enable loopback but drop connections to loopback not from lo
+    iif lo ip daddr 127.0.0.1 ct state new,established,related log accept
+    iif lo ip6 daddr ::1 ct state new accept
+    iif != lo ip daddr 127.0.0.1 counter log prefix "FW-IN-lo-dropped: " drop
+    iif != lo ip6 daddr ::1 counter log prefix "FW-IN-lo6-dropped: " drop
+
+    # Accept ssh. If there is not a server we don't need remote access.
+    tcp dport 22 ct state new limit rate 3/minute counter accept
+    tcp dport 22 ct state established,related counter accept
+
+    # Accept ICMP.
+    # icmp type { echo-request } limit rate 4/second log prefix "IN-icmp: " accept
+
+    # Accept ICMPv6.
+    # icmpv6 type { echo-request } limit rate 4/second log prefix "IN-icmpv6: " accept
+
+    # Log all the rest droped by policy.
+    ip protocol { tcp } counter log prefix "FW-IN-tcp-dropped: " drop
+    ip protocol { udp } counter log prefix "FW-IN-udp-dropped: " drop
+    counter log prefix "FW-IN-dropped: " drop
+  }
+
+  chain forward {
+    # Default policy for forwarded packets on chain. DROP
+    type filter hook forward priority 0; policy drop;
+
+    # Log all forward dropped packets.
+    counter log prefix "FW-FWD-dropped: " drop
+  }
+
+  chain output {
+    # Default policy for output packets on chain. DROP
+    type filter hook output priority 0; policy drop;
+
+    # Accept all connections related to connections made by us
+    #ct state { established, related } log prefix "OUT-related: " accept
+    tcp sport 22 ct state established,related counter accept
+
+    # Accept output to lopback.
+    oif lo ip saddr 127.0.0.1 ip daddr 127.0.0.1 ct state new,established,related accept
+    oif lo ip6 saddr ::1 ip6 daddr ::1 ct state new accept
+
+    # Accept output ping, if the RAT C2 use icmp we are fucked.
+    # icmp type { echo-request } limit rate 4/second log prefix "OUT-icmp: " accept
+
+    # Accept output dhcp request.
+    udp sport 68 udp dport 67 ct state new counter accept
+    udp sport 68 udp dport 67 ct state established counter accept
+    udp sport 68 udp dport 67 ct state related counter accept
+
+    # Accept dns output connections, if the RAT C2 use dns we are fucked.
+    # Limit to router ip if we implement openwrt dns.
+    #ip daddr 208.67.222.222 tcp dport 53 ct state new counter log prefix "OUT-dns-new: " accept
+    ip daddr 208.67.222.222 udp dport 53 ct state new counter accept
+    ip daddr 208.67.222.222 udp dport 53 ct state established counter accept
+    ip daddr 208.67.222.222 udp dport 53 ct state related counter accept
+    ip daddr 208.67.222.220 udp dport 53 ct state new counter accept
+    ip daddr 208.67.222.220 udp dport 53 ct state established,related counter accept
+    #ip daddr 8.8.8.8 tcp dport 53 ct state new counter log prefix "OUT-dns-new: " accept
+    ip daddr 8.8.8.8 udp dport 53 ct state new counter accept
+    ip daddr 8.8.8.8 udp dport 53 ct state established,related counter accept
+    # we have local dns because lopback permited.
+
+    # Accept ssh output connection only to router.
+    # ip daddr $ROUTER_ADDR tcp dport 22 ct state new log prefix "OUT-ssh: " accept
+
+    # Accept web output connections, if the RAT C2 use http/s we are fucked.
+    # Limit to a proxy?
+    tcp dport { http, https } ct state new counter accept
+    tcp dport { http, https } ct state established counter accept
+    tcp dport { http, https } ct state related counter accept
+
+    # We need mail or other services?
+
+    # Log all the rest droped by policy.
+    ip protocol { tcp } counter log prefix "FW-OUT-tcp-dropped: " drop
+    ip protocol { udp } counter log prefix "FW-OUT-udp-dropped: " drop
+    counter log prefix "FW-OUT-dropped: " drop
+  }
+}
+EOF
+
+cat << 'EOF' > etc/nftables/block.and.count.dirtycfg.nft
+#!/usr/sbin/nft -f
+# Simple nftables firewal config.
+# to set up run nft -f (this file)
+
+# clean rules before restore from a file (ex: nft -f /etc/nftables.conf).
+# nft flush ruleset
+# nft -a list ruleset
+flush ruleset
+
+# nft list tables [<family>]
+# [<family>] = [<ip, arp, ip6, bridge, inet, netdev>]
+# nft [-n] [-a] list table [<family>] <name>
+# nft (add | delete | flush) table [<family>] <name>
+# bash-5.3# nft list tables inet
+# bash-5.3# nft -n -a list table inet fw
+
+# nft (delete | list | flush) chain [<family>] <table> <name>
+# bash-5.3# nft list chain inet fw input
+
+# Definitions, dns host, router
+#define LOOP = "lo"
+#define UNBOUND_PORT = 53
+#define DNS_ADDR = 127.0.0.1
+# define ROUTER_ADDR =
+# there is a good idea to implement dns on openwrt with unbound and cache for all desktops.
+
+table inet fw {
+  chain input {
+    # Default policy for input packets on chain. DROP
+    type filter hook input priority 0; policy drop;
+
+    # Count all the rest droped by policy.
+    ip protocol { tcp } counter log prefix "FW-IN-tcp-dropped: " drop
+    ip protocol { udp } counter log prefix "FW-IN-udp-dropped: " drop
+    counter log prefix "FW-IN-dropped: " drop
+  }
+
+  chain forward {
+    # Default policy for forwarded packets on chain. DROP
+    type filter hook forward priority 0; policy drop;
+
+    # Count all forward dropped packets.
+    counter log prefix "FW-FWD-dropped: " drop
+  }
+
+  chain output {
+    # Default policy for output packets on chain. DROP
+    type filter hook output priority 0; policy drop;
+
+    # Count all the rest droped by policy.
+    ip protocol { tcp } counter log prefix "FW-OUT-tcp-dropped: " drop
+    ip protocol { udp } counter log prefix "FW-OUT-udp-dropped: " drop
+    counter log prefix "FW-OUT-dropped: " drop
+  }
+}
+EOF
+
+  #tar -Jcf $SOURCESDIR/$file1 ../$name-$ver
+  LC_ALL=POSIX tar --sort=name \
+  --mtime="@${MAKER_SOURCE_DATE_EPOCH}" \
+  --owner=0 --group=0 --numeric-owner \
+  --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
+  -Jcf $SOURCESDIR/$file1 ../$name-$ver-$MAKER_SOURCE_DATE_EPOCH
+
+# link sources to sources per package to code it.
+ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ || exit 1 
 
 # Making Buildpkg.sh $OUTBUILD (The builder)
 echo "Making buildpkg."
@@ -191,6 +457,7 @@ EOF_OUTBUILD
 # The coding base64 part.
 # echo dirs to builder.
 echo "Coding dirs to builder."
+cd $SOURCESPPDIR || exit 1
 cat << 'EOF_OUTBUILD' >> $OUTBUILD
 echo ""
 if [ $DECODE -eq 1 ] ; then echo "Skipping DECODE sources." ; else
@@ -257,12 +524,12 @@ if [ $EXTRACT -eq 1 ] ; then echo "Skipping EXTRACT sources." ; else
   echo "Preparing sources."
   cd $BUILDDIR || exit 1
   # deleting source dirs if exist.
-  if [ -d $name-$ver ] ; then rm -rf $name-$ver ; fi
+  if [ -d $name-$ver-$MAKER_SOURCE_DATE_EPOCH ] ; then rm -rf $name-$ver-$MAKER_SOURCE_DATE_EPOCH ; fi
   if [ -d $PKGDIR ] ; then rm -rf $PKGDIR && mkdir $PKGDIR ; fi
 EOF_OUTBUILD
   echo '  tar xf $SOURCESDIR'/$file1 >> $OUTBUILD 
   cat << 'EOF_OUTBUILD' >> $OUTBUILD
-  cd $name-$ver || exit 1
+  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
   # --- LFS_CMD_EXTRACT ---
   # --- END_LFS_CMD_EXTRACT ---
   end_extract_date=$(date +"%s")
@@ -276,7 +543,7 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   start_patch_date=$(date +"%s")
   echo "Applying patches."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
   # --- LFS_CMD_PATCH ---
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
@@ -290,11 +557,8 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
   # --- LFS_CMD_CONFIG ---
-  ./configure --prefix=/usr         \
-              --disable-static      \
-              --docdir=/usr/share/doc/$name-$ver || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -306,10 +570,8 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   start_build_date=$(date +"%s")
   echo "Compiling sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
   # --- LFS_CMD_BUILD ---
-  NUMJOBS="-j $(nproc)"
-  make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -322,9 +584,17 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   #Installing sources.
   echo "Installing sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
   # --- LFS_CMD_INSTALL ---
-  make DESTDIR=$PKGDIR install || exit 1
+  # Check if dir exist or will remove pwd because PKGDIR unset.
+  if [ -d $PKGDIR ] ; then rm -rf $PKGDIR/* ; fi || exit 1
+  cp -rv * $PKGDIR
+  cd $PKGDIR || exit 1
+  ln -sfv rc.d/init.d etc/init.d
+  ln -sfv ../init.d/nftables etc/rc.d/rc2.d/S19nftables
+  ln -sfv ../init.d/nftables etc/rc.d/rc3.d/S19nftables
+  ln -sfv ../init.d/nftables etc/rc.d/rc4.d/S19nftables
+  ln -sfv ../init.d/nftables etc/rc.d/rc5.d/S19nftables
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -337,9 +607,8 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   start_post_date=$(date +"%s")
   echo "Post compilation tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
   # --- LFS_CMD_POST ---
-  make distclean
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
@@ -352,14 +621,8 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   start_config32_date=$(date +"%s")
   echo "Configuring 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
   # --- LFS_CMD_CONFIG32 ---
-  CC="gcc -m32" ./configure \
-      --prefix=/usr         \
-      --disable-static      \
-      --libdir=/usr/lib32   \
-      --libexecdir=/usr/lib32   \
-      --host=i686-pc-linux-gnu || exit 1
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
   config32_time=$(($end_config32_date - $start_config32_date))
@@ -371,10 +634,8 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   start_build32_date=$(date +"%s")
   echo "Compiling 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
   # --- LFS_CMD_BUILD32 ---
-  NUMJOBS="-j $(nproc)"
-  make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD32 ---
   end_build32_date=$(date +"%s")
   build32_time=$(($end_build32_date - $start_build32_date))
@@ -387,12 +648,8 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   start_install32_date=$(date +"%s")
   echo "Installing 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
   # --- LFS_CMD_INSTALL32 ---
-  mkdir -vp $PKGDIR/usr/lib32
-  make DESTDIR=$PWD/DESTDIR install
-  cp -Rv DESTDIR/usr/lib32/* $PKGDIR/usr/lib32
-  rm -rf DESTDIR
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
   install32_time=$(($end_install32_date - $start_install32_date))
@@ -405,7 +662,7 @@ if [ $POST32 -eq 1 ] ; then echo "Skipping POST32 bits compilation tasks." ; els
   start_post32_date=$(date +"%s")
   echo "Post compilation 32bits tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH  || exit 1
   # --- LFS_CMD_POST32 ---
   # --- END_LFS_CMD_POST32 ---
   end_post32_date=$(date +"%s")
@@ -417,7 +674,6 @@ fi
 if [ $STRIP -eq 1 ] ; then echo "Skipping STRIP elf." ; else 
   # strip ELF
   start_strip_date=$(date +"%s")
-  echo "Stripping ELF files."
   find $PKGDIR | xargs file | grep "ELF.*executable" | cut -f 1 -d : \
                | xargs strip --strip-unneeded 2> /dev/null
   end_strip_date=$(date +"%s")
@@ -431,7 +687,7 @@ if [ $SHARED -eq 1 ] ; then echo "Skipping find SHARED libs." ; else
   start_shared_date=$(date +"%s")
   echo "Find ELF files and extract needed shared libs"
   trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
-  cd $PKGDIR || exit 1
+  cd $PKGDIR
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; | grep -E "^./|NEEDED" |\
     # change ': file format elf64-x86-64' to :
     sed -e 's/:.*$/:/' |\
@@ -565,7 +821,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
   # pkg checksums
   PKG_CHECKSUMS_FILE="$PKG_DIR/checksums"
   # Tar exclude-from file.
-  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-$INSTALLDIR/pkg/config/tar-exclude-from-file.txt}
+  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-/pkg/config/tar-exclude-from-file.txt}
   
   if [[ $INSTALL -eq 1 ]] ; then 
     [ -d $PKG_DIR ] || mkdir -p $PKG_DIR 
@@ -582,11 +838,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
     echo "Decoding b64 package files."
       # --keep-directory-symlink Don't replace existing symlinks to directories when extracting.
       # tested tar (GNU tar) 1.35 || exit
-      if [ -e TAR_EXCLUDE_FROM ] ; then
-        echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
-      else
-        echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink
-      fi
+      echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
     echo "$(date +"%a %b %d %T %Z %Y") Installed $pkg_name in $INSTALLDIR" >> $LOGFILE 
   elif [[ $COMPARE -eq 1 ]] ; then
     echo "Comparing pkg with files in $INSTALLDIR"

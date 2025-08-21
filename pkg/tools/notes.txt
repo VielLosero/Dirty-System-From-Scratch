@@ -86,6 +86,7 @@ Change run.repo.list format from # D M B I to eq exit of repo-status.sh
 first boot and machine-id --> dbus-uuidgen --ensure
 apply patch /pkg/tools/patches/patch_tar-exclude-from-file  
 skip install kernel packages or remove old when run repo list.
+the ffmpeg can be shiped with non-free libs be care like --> fdk-aac
 
 When update glibc the etc/profile are overwrited ... need reinstall bash-shell-startup-files to get pathappend pathremove ...
 bash-5.3# grep -rwn /pkg/installed/* -e "etc/profile$"
@@ -93,5 +94,7 @@ bash-5.3# grep -rwn /pkg/installed/* -e "etc/profile$"
 /pkg/installed/glibc-2.41-x86_64-1_MLFS_current_Viel/index:6:etc/profile
 /pkg/installed/glibc-2.42-x86_64-1_MLFS_current_Viel/index:6:etc/profile
 need a think
+
+
 
 

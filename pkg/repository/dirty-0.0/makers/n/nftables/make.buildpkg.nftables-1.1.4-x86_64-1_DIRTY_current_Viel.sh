@@ -299,7 +299,9 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  ./configure --prefix=/usr \
+  ./configure --prefix=/usr         \
+              --disable-static      \
+              --sysconfdir=/etc     \
               --with-cli=readline || exit 1                            \
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")

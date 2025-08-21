@@ -49,8 +49,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Commands for Manipulating POSIX Access Control Lists"
-url="https://www.gnu.org/software/tar/"
+short_desc="The libvorbis package contains a general purpose audio and music encoding format. This is useful for creating (encoding) and playing (decoding) sound in an open (patent free) format."
+url="https://xiph.org/vorbis/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -79,15 +79,14 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # package vars.
-version_url="https://download.savannah.nongnu.org/releases/acl"
-sum="md5sum"
+version_url="https://ftp.osuosl.org/pub/xiph/releases/vorbis/"
+sum="sha256sum"
 file1_url="$version_url"
 file1=$name-$ver.tar.xz
-file1_sum=590765dee95907dbc3c856f7255bd669
+file1_sum=b33cc4934322bcbf6efcbacf49e3ca01aadbea4114ec9589d1b1e9d20f72954b
 file2_url="$file1_url"
-file2=${file1}.sig
-file2_sum=cb1a8da8d801c2d430062add8e5949b7
-acl_gpgkey=B902B5271325F892AC251AD441633B9FE837F581
+file2=vorbis_SHA256SUMS.txt
+file2_sum=7e498de9af5867f0918fd608f972bd13f37eed18e9d1cde761a757d3d5f67924
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -132,12 +131,10 @@ fi
 cd $SOURCESDIR || exit 1
 [ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
 [ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
-[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
+[ ! -e $file2 ] && $GETFILE ${file2_url}/SHA256SUMS -O ${file2}
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $acl_gpgkey
-gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
@@ -292,9 +289,7 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  ./configure --prefix=/usr         \
-              --disable-static      \
-              --docdir=/usr/share/doc/$name-$ver || exit 1
+  ./configure --prefix=/usr --disable-static || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -325,6 +320,8 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
   make DESTDIR=$PKGDIR install || exit 1
+  install -v -m755 -d $PKGDIR/usr/share/doc/$name-$ver || exit 1
+  install -v -m644 doc/Vorbis* $PKGDIR/usr/share/doc/$name-$ver
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -339,7 +336,7 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_POST ---
-  make distclean
+  make distclean || exit 1
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
@@ -354,12 +351,11 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG32 ---
-  CC="gcc -m32" ./configure \
-      --prefix=/usr         \
-      --disable-static      \
-      --libdir=/usr/lib32   \
-      --libexecdir=/usr/lib32   \
-      --host=i686-pc-linux-gnu || exit 1
+  CC="gcc -m32" CXX="g++ -m32"         \
+  ./configure --prefix=/usr            \
+            --libdir=/usr/lib32      \
+            --host=i686-pc-linux-gnu \
+            --disable-static || exit 1
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
   config32_time=$(($end_config32_date - $start_config32_date))
@@ -389,9 +385,9 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL32 ---
-  mkdir -vp $PKGDIR/usr/lib32
-  make DESTDIR=$PWD/DESTDIR install
-  cp -Rv DESTDIR/usr/lib32/* $PKGDIR/usr/lib32
+  mkdir -vp $PKGDIR/usr/lib32 || exit 1
+  make DESTDIR=$PWD/DESTDIR install || exit 1
+  cp -vr DESTDIR/usr/lib32/* $PKGDIR/usr/lib32 || exit 1
   rm -rf DESTDIR
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
@@ -565,7 +561,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
   # pkg checksums
   PKG_CHECKSUMS_FILE="$PKG_DIR/checksums"
   # Tar exclude-from file.
-  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-$INSTALLDIR/pkg/config/tar-exclude-from-file.txt}
+  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-/pkg/config/tar-exclude-from-file.txt}
   
   if [[ $INSTALL -eq 1 ]] ; then 
     [ -d $PKG_DIR ] || mkdir -p $PKG_DIR 
@@ -582,11 +578,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
     echo "Decoding b64 package files."
       # --keep-directory-symlink Don't replace existing symlinks to directories when extracting.
       # tested tar (GNU tar) 1.35 || exit
-      if [ -e TAR_EXCLUDE_FROM ] ; then
-        echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
-      else
-        echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink
-      fi
+      echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
     echo "$(date +"%a %b %d %T %Z %Y") Installed $pkg_name in $INSTALLDIR" >> $LOGFILE 
   elif [[ $COMPARE -eq 1 ]] ; then
     echo "Comparing pkg with files in $INSTALLDIR"
