@@ -49,8 +49,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="System configuration file for dirty system from scratch."
-url="https://example.org"
+short_desc="pm-utils is a small collection of scripts that handle suspend and resume on behalf of HAL."
+url="https://pm-utils.freedesktop.org/wiki/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -72,20 +72,27 @@ LFS=/mnt/lfs
 LFS_TGT=$(uname -m)-lfs-linux-gnu
 
 # --- END CAT SEED ---
- 
+
 # Config get tool.
 if wget --help >/dev/null 2>&1 ; then GETVER="wget --output-document - --quiet" GETFILE="wget -c " SPIDER="wget -q --method=HEAD"
 elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --silent" GETFILE="curl -C - -O --silent" SPIDER="curl -L --head --fail --silent"
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
-# Package vars.
-version_url=https://example.org
+# package vars.
+version_url="https://pm-utils.freedesktop.org/releases/"
+sum="md5sum"
+file1_url="$version_url"
+file1=$name-$ver.tar.gz
+file1_sum=1742a556089c36c3a89eb1b957da5a60
+file2_url=https://www.linuxfromscratch.org/patches/blfs/12.3/
+file2=pm-utils-1.4.1-bugfixes-1.patch
+file2_sum=8300238f676426c3b7eb594d5170e967
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=0.0.1
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -94,15 +101,15 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        #if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 4
           else
             cp $0 $NEWMAKE && echo "Created: $NEWMAKE" && exit 3 || exit 1
           fi
-        #else
-        #  echo "Failed: new version file not found." ; exit 1 
-        #fi
+        else
+          echo "Failed: new version file not found." ; exit 1 
+        fi
       else
         echo "Version check: $name $last_version  $version_url" ; exit 2
       fi
@@ -122,108 +129,17 @@ fi
 
 # Get sources and check.
 cd $SOURCESDIR || exit 1
-# We don't need download sources, we made it, so only set var for compres the files.
-file1=$name-$ver.tar.xz 
+[ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
+[ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
+[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
+[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
 
 # Prepare sources or patches.
 echo "Preparing sources."
 cd $SOURCESPPDIR || exit 1
-
-if [ -e $file1 ] ; then rm $file1 ; fi
-TMP_BUILD_SYSTEMCONFIG_DIR=$(mktemp -d /tmp/make.buildpkg-dirty-systemconfig-XXXXXX)
-trap "rm -rf $TMP_BUILD_SYSTEMCONFIG_DIR" EXIT
-cd $TMP_BUILD_SYSTEMCONFIG_DIR || exit 1
-  #Create a start system config script.
-  mkdir -pv etc/init.d
-
-  echo "Creating systemconfig start script."
-cat << 'EOF' > etc/init.d/systemconfig
-#!/bin/sh
-########################################################################
-# Begin sysconfig
-#
-# Description : Load initial system config.
-#
-# Author      : Viel Losero - viel.loser@gmail.com
-#
-########################################################################
-
-### BEGIN INIT INFO
-# Provides:            systemconfig
-# Required-Start:      
-# Should-Start:        
-# Required-Stop:
-# Should-Stop:         
-# Default-Start:       S
-# Default-Stop:        0 1 6
-# Short-Description:   Load initial system config.
-# Description:         Configure system with custom files.
-### END INIT INFO
-
-. /lib/lsb/init-functions
-
-case "$1" in
-   start)
-      log_info_msg "Configuring system..."
-      # Check if there are certificates (make-ca).  
-      MAKE_CA_CONF="/etc/make-ca.conf"
-      if test -f "${MAKE_CA_CONF}"; then
-        . "${MAKE_CA_CONF}"
-      else
-        SSLDIR="/etc/ssl"
-      fi
-      if [ -z "$(ls -A $SSLDIR/certs 2>/dev/null)" ] ; then
-        echo "No certs found... Runing make-ca -g"
-        # NOTE need net maybe pre and post.
-        make-ca -g
-      fi
-
-      
-      
-      
-      evaluate_retval
-      ;;
-
-   *)
-      echo "Usage: $0 {start}"
-      exit 1
-      ;;
-esac
-
-# End sysconfig
-
-
-
-EOF
-
-  tar -Jcf $SOURCESDIR/$file1 {bin,etc,lib,lib64,lib32,sbin,usr,var,tools,tmp}
-
-# add some files 
-#cat << 'EOF' > root/4.2.set-up-Limited-Directory-Layout.sh 
-##To get root dir where this is installed 
-#cd $(dirname $0) && cd ..
-## Added Limited Directory Layout in the LFS Filesystem
-#mkdir -pv $LFS/{etc,var} $LFS/usr/{bin,lib,sbin}
-#
-#for i in bin lib sbin; do
-#  ln -sv usr/$i $LFS/$i
-#done
-#
-#case $(uname -m) in
-#  x86_64) mkdir -pv $LFS/lib64 ;;
-#esac
-#
-#mkdir -pv $LFS/usr/lib{,x}32
-#ln -sv usr/lib32 $LFS/lib32
-#ln -sv usr/libx32 $LFS/libx32
-#
-#mkdir -pv $LFS/tools
-#EOF
-
-# link sources to sources per package to code it.
-ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ || exit 1 
+# Do something if needed.
 
 # Making Buildpkg.sh $OUTBUILD (The builder)
 echo "Making buildpkg."
@@ -324,12 +240,6 @@ if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
   # Check tasks needed to build.
   start_checks_date=$(date +"%s")
   echo "Checking needs to build."
-  # Check if needed packages are installed.
-  if ls /pkg/installed/make_buildpkg_dirty_package_manager-* >/dev/null ; then
-  	echo "OK: required packages found."
-  else
-  	echo "ERROR: required packages not found." && exit 1
-  fi
   # --- LFS_CMD_CHECKS ---
   # --- END_LFS_CMD_CHECKS ---
   end_checks_date=$(date +"%s")
@@ -349,6 +259,7 @@ if [ $EXTRACT -eq 1 ] ; then echo "Skipping EXTRACT sources." ; else
 EOF_OUTBUILD
   echo '  tar xf $SOURCESDIR'/$file1 >> $OUTBUILD 
   cat << 'EOF_OUTBUILD' >> $OUTBUILD
+  cd $name-$ver || exit 1
   # --- LFS_CMD_EXTRACT ---
   # --- END_LFS_CMD_EXTRACT ---
   end_extract_date=$(date +"%s")
@@ -356,13 +267,16 @@ EOF_OUTBUILD
   echo "Extract time: $extract_time" >> $TMP_PKG_TIMINGS_FILE
   echo "Extract time: $extract_time seconds" 
 fi
-
+  
 if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else 
   # Apply patches here.
   start_patch_date=$(date +"%s")
   echo "Applying patches."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
+  # patch from LFS
+  patch -Np1 -i $SOURCESDIR/pm-utils-1.4.1-bugfixes-1.patch || exit 1
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -375,7 +289,11 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
+  ./configure --prefix=/usr     \
+            --sysconfdir=/etc \
+            --docdir=/usr/share/doc/$name-$ver || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -387,7 +305,10 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   start_build_date=$(date +"%s")
   echo "Compiling sources."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD ---
+  NUMJOBS="-j $(nproc)"
+  make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -400,10 +321,16 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   #Installing sources.
   echo "Installing sources."
   cd $BUILDDIR || exit 1
-  echo "  Cleaning $PKGDIR"
-  if [ -d $PKGDIR ] ; then rm -rf $PKGDIR/* ; fi || exit 1
-  cp -rv * $PKGDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
+  make DESTDIR=$PKGDIR install || exit 1
+  install -v -m755 -d $PKGDIR/usr/share/man/man1 &&
+  install -v -m755 -d $PKGDIR/usr/share/man/man8 &&
+  install -v -m644 man/*.1 $PKGDIR/usr/share/man/man1 &&
+  install -v -m644 man/*.8 $PKGDIR/usr/share/man/man8 &&
+  ln -sv pm-action.8 $PKGDIR/usr/share/man/man8/pm-suspend.8 &&
+  ln -sv pm-action.8 $PKGDIR/usr/share/man/man8/pm-hibernate.8 &&
+  ln -sv pm-action.8 $PKGDIR/usr/share/man/man8/pm-suspend-hybrid.8
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -416,7 +343,25 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   start_post_date=$(date +"%s")
   echo "Post compilation tasks."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_POST ---
+  # patch RUNDIR  
+  # mkdir: cannot create directory ‘/var/run’: Too many levels of symbolic links
+  cat << EOF > ./patch_RUNDIR
+--- /usr/lib/pm-utils/pm-functions	2025-08-25 10:22:15.074930092 +0000
++++ /tmp/pm-functions	2025-08-25 10:28:15.609011601 +0000
+@@ -16,7 +16,8 @@
+ set -a
+ PM_UTILS_LIBDIR="/usr/lib/pm-utils"
+ PM_UTILS_ETCDIR="/etc/pm"
+-PM_UTILS_RUNDIR="/var/run/pm-utils"
++#PM_UTILS_RUNDIR="/var/run/pm-utils"
++PM_UTILS_RUNDIR="/run/pm-utils"
+ 
+ PATH=/sbin:/usr/sbin:/bin:/usr/bin:"${PM_UTILS_LIBDIR}"/bin
+ PM_LOGFILE="/var/log/${STASHNAME}.log"
+EOF
+  patch $PKGDIR/usr/lib/pm-utils/pm-functions -i ./patch_RUNDIR || exit 1
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
@@ -429,6 +374,7 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   start_config32_date=$(date +"%s")
   echo "Configuring 32bits sources."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG32 ---
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
@@ -441,6 +387,7 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   start_build32_date=$(date +"%s")
   echo "Compiling 32bits sources."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD32 ---
   # --- END_LFS_CMD_BUILD32 ---
   end_build32_date=$(date +"%s")
@@ -454,6 +401,7 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   start_install32_date=$(date +"%s")
   echo "Installing 32bits sources."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL32 ---
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
@@ -467,6 +415,7 @@ if [ $POST32 -eq 1 ] ; then echo "Skipping POST32 bits compilation tasks." ; els
   start_post32_date=$(date +"%s")
   echo "Post compilation 32bits tasks."
   cd $BUILDDIR || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_POST32 ---
   # --- END_LFS_CMD_POST32 ---
   end_post32_date=$(date +"%s")
@@ -478,6 +427,7 @@ fi
 if [ $STRIP -eq 1 ] ; then echo "Skipping STRIP elf." ; else 
   # strip ELF
   start_strip_date=$(date +"%s")
+  echo "Stripping ELF files."
   find $PKGDIR | xargs file | grep "ELF.*executable" | cut -f 1 -d : \
                | xargs strip --strip-unneeded 2> /dev/null
   end_strip_date=$(date +"%s")
@@ -491,7 +441,7 @@ if [ $SHARED -eq 1 ] ; then echo "Skipping find SHARED libs." ; else
   start_shared_date=$(date +"%s")
   echo "Find ELF files and extract needed shared libs"
   trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
-  cd $PKGDIR
+  cd $PKGDIR || exit 1
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; | grep -E "^./|NEEDED" |\
     # change ': file format elf64-x86-64' to :
     sed -e 's/:.*$/:/' |\

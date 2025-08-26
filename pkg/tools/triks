@@ -2,6 +2,8 @@
 rsync -avn -e ssh pkg root@10.10.10.21:/
 #rsync -avn --delete -e ssh  root@10.10.10.18:/pkg/repository pkg/
 rsync -av --delete --exclude installed --exclude blacklist -e ssh  root@10.10.10.21:/pkg .
+rsync -av --delete --exclude installed --exclude blacklist /pkg .
+
 
 
 # Use of package echo to list package files
@@ -156,4 +158,12 @@ cat /pkg/installed/*/index | grep "\.so\." | rev | cut -d / -f1 | rev | sort -u 
 cat /pkg/installed/*/needed-libs | cut -d':' -f2 | sed 's/,/\n/g' | sort -u > /tmp/needed
 cat /tmp/installed1 /tmp/installed2 | sort -u >/tmp/installed
 comm -13 /tmp/installed /tmp/needed
+
+
+
+# show todo from CHANGELOG
+# sure with awk can be done easy.
+grep -B $(grep "Todo:" /pkg/tools/CHANGELOG.txt | cut -d: -f2) -A $(grep "Todo:" /pkg/tools/CHANGELOG.txt | cut -d: -f3) Todo: /pkg/tools/CHANGELOG.txt
+
+
 

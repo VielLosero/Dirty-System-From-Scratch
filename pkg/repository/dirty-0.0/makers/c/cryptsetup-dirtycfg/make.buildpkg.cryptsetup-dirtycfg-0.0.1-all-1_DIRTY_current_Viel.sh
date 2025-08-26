@@ -49,8 +49,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Filesystem Hierarchy for the system. Following the Filesystem Hierarchy Standard (FHS)"
-url="https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html"
+short_desc="Dirty config file for cryptsetup package."
+url=""
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -70,7 +70,9 @@ OUTPKG=${OUTPKG:-$REPODIR/packages/$first_pkg_char/${name}/${pkg_name}.sh}
 # Other need vars for example to change the default INSTALLDIR=$LFS.
 LFS=/mnt/lfs
 LFS_TGT=$(uname -m)-lfs-linux-gnu
-# date for tar file
+# maker Source date epoch for reporduce the tar file.
+#MAKER_SOURCE_DATE_EPOCH="${MAKER_SOURCE_DATE_EPOCH:-$(date +%s)}"
+#BUILD_DATE="$(date --utc --date="@${MAKER_SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d)"
 MAKER_SOURCE_DATE_EPOCH="1747391248"
 
 # --- END CAT SEED ---
@@ -81,13 +83,17 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://refspecs.linuxfoundation.org/fhs.shtml
+version_url=https://example.org
+sum="md5sum"
+file1_url=$version_url
+file1=$name-$ver.tar.xz
+file1_sum=
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | grep "^<h2>" | head -1 | cut -d'"' -f2 | sed 's/FHS_//' )
+  last_version=0.0.1
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -96,15 +102,15 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        #if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 4
           else
             cp $0 $NEWMAKE && echo "Created: $NEWMAKE" && exit 3 || exit 1
           fi
-        #else
-        #  echo "Failed: new version file not found." ; exit 1 
-        #fi
+        else
+          echo "Failed: new version file not found." ; exit 1 
+        fi
       else
         echo "Version check: $name $last_version  $version_url" ; exit 2
       fi
@@ -125,7 +131,6 @@ fi
 # Get sources and check.
 cd $SOURCESDIR || exit 1
 # We don't need download sources, we made it, so only set var for compres the files.
-#file1=$name-$ver.tar.xz 
 file1=$name-$ver-$MAKER_SOURCE_DATE_EPOCH.tar.xz
 
 # Check signaure if needed
@@ -135,152 +140,151 @@ echo "Preparing sources."
 cd $SOURCESPPDIR || exit 1
 
 if [ -e $file1 ] ; then rm $file1 ; fi
-TMP_BUILDFILESYSTEM_HIERARCHY_DIR=$(mktemp -d /tmp/make.buildpkg-filesystem-hierarchy-XXXXXX)
-trap "rm -rf $TMP_BUILDFILESYSTEM_HIERARCHY_DIR" EXIT
-cd $TMP_BUILDFILESYSTEM_HIERARCHY_DIR || exit 1
+TMP_MAKE_DIR=$(mktemp -d /tmp/mbp-tmp-make-dir-XXXXXX)
+trap "rm -rf $TMP_MAKE_DIR" EXIT
+cd $TMP_MAKE_DIR || exit 1
+  # put all files inside name-ver dir.
   mkdir -vp $name-$ver-$MAKER_SOURCE_DATE_EPOCH && cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
-  #4.2. Creating a Limited Directory Layout in the LFS Filesystem
-  #mkdir {bin,boot,dev,etc,home,lib,lib64,media,mnt,opt,root,run,sbin,srv,tmp,usr,var}
-  #mkdir -pv home
-  mkdir -pv {etc,var,tmp}
-  mkdir -pv usr/{bin,lib,sbin}
 
-  for i in bin lib sbin; do
-    ln -sv usr/$i $i
-  done
-  case $(uname -m) in
-    x86_64) mkdir -pv lib64 ;;
-  esac
-  mkdir -pv usr/lib32
-  ln -sv usr/lib32 lib32
-  mkdir -pv tools
-
-  # add perms to temp
-  chmod 1777 tmp
-
-# Now use the /pkt/tools/lfs-user script.
-#  echo "Creating LFS auto script."
-#cat << 'EOF' > tmp/LFS_autoconfig_user_lfs.sh 
-#echo "2.6.Setting.The.LFS.Variable.sh"
-#export LFS=/mnt/lfs
-#echo $LFS
-#echo "2.7 Mounting the New Partition"
-#mkdir -pv $LFS
-##mount -v -t ext4 /dev/<xxx> $LFS
-#echo "4.2. Creating a Limited Directory Layout in the LFS Filesystem"
-#chown root:root $LFS
-#chmod 755 $LFS
-#echo "4.3 Adding LFS user"
-#groupadd lfs
-#useradd -s /bin/bash -g lfs -m -k /dev/null lfs
-#passwd lfs
-#chown -v lfs $LFS/{usr{,/*},lib,var,etc,bin,sbin,tools}
-#case $(uname -m) in
-#  x86_64) chown -v lfs $LFS/lib64 ;;
-#esac
-#chown -v lfs $LFS/lib32
-#echo "4.4. Setting Up the Environment"
-#mv  $LFS/tmp/.bash_profile /home/lfs/.bash_profile
-#mv  $LFS/tmp/.bashrc /home/lfs/.bashrc 
-#chmod 1777 /$LFS/tmp
-#su - lfs
-#EOF
+  # Start dir and files here.
+  mkdir -pv etc/rc.d/init.d
+  cat << 'EOF' > etc/rc.d/init.d/mountfs
+#!/bin/sh
+########################################################################
+# Begin mountfs
 #
-#cat > tmp/.bash_profile << "EOF"
-#exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\$ ' /bin/bash
-#EOF
+# Description : File System Mount Script
 #
-#cat > tmp/.bashrc << "EOF"
-#set +h
-#umask 022
-#LFS=/mnt/lfs
-#LC_ALL=POSIX
-#LFS_TGT=x86_64-lfs-linux-gnu
-#LFS_TGT32=i686-lfs-linux-gnu
-#LFS_TGTX32=x86_64-lfs-linux-gnux32
-#PATH=/usr/bin
-#if [ ! -L /bin ]; then PATH=/bin:$PATH; fi
-#PATH=$LFS/tools/bin:$PATH
-#CONFIG_SITE=$LFS/usr/share/config.site
-#export LFS LC_ALL LFS_TGT LFS_TGT32 LFS_TGTX32 PATH
-#export MAKEFLAGS=-j$(nproc) 
-#EOF
+# Authors     : Gerard Beekmans - gerard@linuxfromscratch.org
+#               DJ Lucas - dj@linuxfromscratch.org
+# Update      : Bruce Dubbs - bdubbs@linuxfromscratch.org
+#
+# Version     : LFS 7.0
+#
+########################################################################
 
-# Add files from MLFSCHROOT lfschroot because we dont install this package in dirty-0.0
-  # 7.3. Preparing Virtual Kernel File Systems
-  mkdir -pv {dev,proc,sys,run}
-  # 7.5. Creating Directories
-  mkdir -pv {boot,home,mnt,opt,srv}
-  mkdir -pv etc/{opt,sysconfig}
-  mkdir -pv lib/firmware
-  mkdir -pv media/{floppy,cdrom}
-  mkdir -pv usr/{,local/}{include,src}
-  mkdir -pv usr/lib/locale
-  mkdir -pv usr/local/{bin,lib,sbin}
-  mkdir -pv usr/{,local/}share/{color,dict,doc,info,locale,man}
-  mkdir -pv usr/{,local/}share/{misc,terminfo,zoneinfo}
-  mkdir -pv usr/{,local/}share/man/man{1..8}
-  mkdir -pv var/{cache,local,log,mail,opt,spool}
-  mkdir -pv var/lib/{color,misc,locate}
-  
-  ln -sfv run var/run
-  ln -sfv run/lock var/lock
-  
-  install -dv -m 0750 root
-  install -dv -m 1777 tmp var/tmp
-  # 7.6. Creating Essential Files and Symlinks
-  ln -sv proc/self/mounts etc/mtab
-cat > etc/hosts << EOF
-127.0.0.1  localhost $(hostname)
-::1        localhost
+### BEGIN INIT INFO
+# Provides:            $local_fs
+# Required-Start:      udev checkfs
+# Should-Start:        modules
+# Required-Stop:       localnet
+# Should-Stop:
+# Default-Start:       S
+# Default-Stop:        0 6
+# Short-Description:   Mounts/unmounts local filesystems defined in /etc/fstab.
+# Description:         Remounts root filesystem read/write and mounts all
+#                      remaining local filesystems defined in /etc/fstab on
+#                      start.  Remounts root filesystem read-only and unmounts
+#                      remaining filesystems on stop.
+# X-LFS-Provided-By:   LFS
+### END INIT INFO
+
+. /lib/lsb/init-functions
+
+case "${1}" in
+   start)
+      log_info_msg "Remounting root file system in read-write mode..."
+      mount --options remount,rw / >/dev/null
+      evaluate_retval
+
+      # Remove fsck-related file system watermarks.
+      rm -f /fastboot /forcefsck
+
+      # Make sure /dev/pts exists
+      mkdir -p /dev/pts
+
+      # Try to find and mount crypted disks after root.
+      if [ -x /sbin/cryptsetup ]; then
+        # get key for cryptsetup
+    	  LUKSKEY="LABEL=USB_BAR:/nix.key"
+        if [ ! -z $LUKSKEY ] ; then
+          mkdir  /mountkey
+          KEYPART=$(echo $LUKSKEY |cut -f1 -d:)
+          KEYNAME=$(echo $KEYPART |cut -f2 -d=)
+          LUKSPATH="/mountkey$(echo $LUKSKEY |cut -f2 -d:)"
+          # Catch possible mount failure:
+          if blkid |grep "TYPE=\"vfat\"" |grep $KEYNAME 1>/dev/null 2>&1 ; then
+            MOUNTOPTS="-t vfat -o shortname=mixed"
+          else
+            MOUNTOPTS="-t auto"
+          fi
+          mount $MOUNTOPTS $(findfs $KEYPART) /mountkey 
+          # Check if we can actually use this file:
+          if [ ! -f $LUKSPATH ]; then
+            LUKSKEY=""
+          else
+            echo ">>> Using LUKS key file: '$LUKSKEY'"
+            LUKSKEY="-d $LUKSPATH"
+          fi
+        fi
+        if [ -r /etc/crypttab ] ; then
+          # check cryptsetup devices
+          cat /etc/crypttab | grep -v "^#" | grep -v '^$' | \
+          while IFS= read -r line; do
+            mapper=$(echo $line | awk '{print $1}')
+            device=$(echo $line | awk '{print $2}')
+            if cryptsetup isLuks $device >/dev/null 2>&1 ; then
+                echo "/sbin/cryptsetup ${LUKSKEY} open ${device} ${mapper}"
+                /sbin/cryptsetup ${LUKSKEY} open ${device} ${mapper} </dev/tty0 >/dev/tty0 2>&1
+            fi
+          done
+        fi
+        # close KEY
+        umount /mountkey 
+      fi
+
+
+      # This will mount all filesystems that do not have _netdev in
+      # their option list.  _netdev denotes a network filesystem.
+
+      log_info_msg "Mounting remaining file systems..."
+      failed=0
+      mount --all --test-opts no_netdev >/dev/null || failed=1
+      evaluate_retval
+      exit $failed
+      ;;
+
+   stop)
+      # Don't unmount virtual file systems like /run
+      log_info_msg "Unmounting all other currently mounted file systems..."
+      # Ensure any loop devices are removed
+      losetup -D
+      umount --all --detach-loop --read-only \
+             --types notmpfs,nosysfs,nodevtmpfs,noproc,nodevpts >/dev/null
+      evaluate_retval
+
+      # Close crypted devices.
+      dmsetup ls --target crypt | \
+      while IFS= read -r line; do
+        dmsetup remove $(echo $line | cut -d' ' -f1)
+      done
+
+      # Make sure / is mounted read only (umount bug)
+      mount --options remount,ro /
+
+      # Make all LVM volume groups unavailable, if appropriate
+      # This fails if swap or / are on an LVM partition
+      #if [ -x /sbin/vgchange ]; then /sbin/vgchange -an > /dev/null; fi
+      if [ -r /etc/mdadm.conf ]; then
+         log_info_msg "Mark arrays as clean..."
+         mdadm --wait-clean --scan
+         evaluate_retval
+      fi
+      ;;
+
+   *)
+      echo "Usage: ${0} {start|stop}"
+      exit 1
+      ;;
+esac
+
+# End mountfs
 EOF
 
-cat > etc/passwd << "EOF"
-root:x:0:0:root:/root:/bin/bash
-bin:x:1:1:bin:/dev/null:/usr/bin/false
-daemon:x:6:6:Daemon User:/dev/null:/usr/bin/false
-messagebus:x:18:18:D-Bus Message Daemon User:/run/dbus:/usr/bin/false
-uuidd:x:80:80:UUID Generation Daemon User:/dev/null:/usr/bin/false
-nobody:x:65534:65534:Unprivileged User:/dev/null:/usr/bin/false
-EOF
+  # change to correct perms.
+  chmod 754 etc/rc.d/init.d/mountfs
 
-cat > etc/group << "EOF"
-root:x:0:
-bin:x:1:daemon
-sys:x:2:
-kmem:x:3:
-tape:x:4:
-tty:x:5:
-daemon:x:6:
-floppy:x:7:
-disk:x:8:
-lp:x:9:
-dialout:x:10:
-audio:x:11:
-video:x:12:
-utmp:x:13:
-cdrom:x:15:
-adm:x:16:
-messagebus:x:18:
-input:x:24:
-mail:x:34:
-kvm:x:61:
-uuidd:x:80:
-wheel:x:97:
-users:x:999:
-nogroup:x:65534:
-EOF
-
-#echo "tester:x:101:101::/home/tester:/bin/bash" >> etc/passwd
-#echo "tester:x:101:" >> etc/group
-#install -o tester -d home/tester
-
-  touch var/log/{btmp,lastlog,faillog,wtmp}
-  chgrp -v utmp var/log/lastlog
-  chmod -v 664  var/log/lastlog
-  chmod -v 600  var/log/btmp
-
-# make tar file
+  #tar -Jcf $SOURCESDIR/$file1 ../$name-$ver
   LC_ALL=POSIX tar --sort=name \
   --mtime="@${MAKER_SOURCE_DATE_EPOCH}" \
   --owner=0 --group=0 --numeric-owner \
@@ -390,12 +394,6 @@ if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
   # Check tasks needed to build.
   start_checks_date=$(date +"%s")
   echo "Checking needs to build."
-  # Check if needed packages are installed.
-  if ls /pkg/installed/dirty-repository-manager-* >/dev/null ; then
-  	echo "OK: required packages found."
-  else
-  	echo "ERROR: required packages not found." && exit 1
-  fi
   # --- LFS_CMD_CHECKS ---
   # --- END_LFS_CMD_CHECKS ---
   end_checks_date=$(date +"%s")
@@ -423,7 +421,7 @@ EOF_OUTBUILD
   echo "Extract time: $extract_time" >> $TMP_PKG_TIMINGS_FILE
   echo "Extract time: $extract_time seconds" 
 fi
-
+  
 if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else 
   # Apply patches here.
   start_patch_date=$(date +"%s")
@@ -471,11 +469,11 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   echo "Installing sources."
   cd $BUILDDIR || exit 1
   cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
-  echo "  Cleaning $PKGDIR"
-  if [ -d $PKGDIR ] ; then rm -rf $PKGDIR/* ; fi || exit 1
-  cp -rv * $PKGDIR || exit 1
-  chmod 1777 $PKGDIR/tmp || exit 1
   # --- LFS_CMD_INSTALL ---
+  # Check if dir exist or will remove pwd because PKGDIR unset.
+  if [ -d $PKGDIR ] ; then rm -rf $PKGDIR/* ; fi || exit 1
+  cp -rv * $PKGDIR
+  cd $PKGDIR || exit 1
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -543,7 +541,7 @@ if [ $POST32 -eq 1 ] ; then echo "Skipping POST32 bits compilation tasks." ; els
   start_post32_date=$(date +"%s")
   echo "Post compilation 32bits tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
+  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH  || exit 1
   # --- LFS_CMD_POST32 ---
   # --- END_LFS_CMD_POST32 ---
   end_post32_date=$(date +"%s")

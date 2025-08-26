@@ -1,10 +1,8 @@
 #order list for make_dirty_0.0.1.raw.disk.for.qemu.sh script.
 # cat list.txt | grep -v "#" | while read line ; do ls /pkg/repository/*/*/*/*$line ; done
 # _DIRTY_
-#.make_buildpkg_dirty_package_manager-[0-9]*_DIRTY_*
 .dirty-repository-manager-[0-9]*_DIRTY_*
 .filesystem_hierarchy-[0-9]*_DIRTY_*
-#.lfschroot-[0-9]*_MLFSCHROOT_*
 #
 # cat ordered.txt | grep -v "#" | while read line ; do ls /pkg/repository/*/*/*/*$line ; done
 # _MLFS_
@@ -410,6 +408,7 @@
 .libaio-[0-9]*_BLFS_*
 .LVM2-[0-9]*_BLFS_*
 .cryptsetup-[0-9]*_BLFS_*
+.cryptsetup-dirtycfg-[0-9]*_BLFS_*
 #for mail
 .mutt-[0-9]*_BLFS_*
 #nftables
@@ -418,4 +417,11 @@
 #.libedit-[0-9]*_DIRTY_* used readline
 .nftables-[0-9]*_DIRTY_*
 .nftables-dirtycfg-[0-9]*_DIRTY_*
+#acpid not work
+.acpid-[0-9]*_BLFS_*
+.acpid-dirtycfg-[0-9]*_DIRTY_*
+.pm-utils-[0-9]*_BLFS_*
+# add feh
+.imlib2-[0-9]*_BLFS_*
+.feh-[0-9]*_BLFS_*
 # next tool

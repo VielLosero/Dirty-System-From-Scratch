@@ -1,0 +1,149 @@
+AUTHOR: Viel.losero <vuel.losero@gmail.com>
+
+#When starts a new dirty vm.
+
+# make a new cert for ssh 
+ssh-keygen -A
+
+# Generate certificates for https etc.
+make-ca -g
+
+# log dmesg
+dmesg --follow > /var/log/dmesg.log
+
+# check lib32 build create missed link
+ ln -s /usr/lib32/ld-linux.so.2 /lib/ld-linux.so.2
+
+
+# recreate The Info documentation system uses a plain text file to hold its list of menu entries. The file is located at /usr/share/info/dir. Unfortunately, due to occasional problems in the Makefiles of various packages, it can sometimes get out of sync with the info pages installed on the system. If the /usr/share/info/dir file ever needs to be recreated, the following optional commands will accomplish the task.
+pushd /usr/share/info
+  rm -v dir
+  for f in *
+    do install-info $f dir 2>/dev/null
+  done
+popd
+
+# make link to udevadm to load udev at start, this will be done on the pkg.
+ln -s /usr/sbin/udevadm /bin/
+
+# start desired services
+chmod +x /etc/rc.d/init.d/network
+chmod +x /etc/rc.d/init.d/sshd
+chmod +x /etc/rc.d/init.d/udev
+chmod +x /etc/rc.d/init.d/udev-retry
+
+# cp the repository from backup to system.
+
+# cp root/.tmux.cfg an set color 14
+
+# cp root/.vimrc 
+
+# install some fonts
+
+# add to ~/.bash_profile  maybe? see rustc path and env profile 
+# https://glfs-book.github.io/glfs/introduction/bash-profile.html
+# 
+source /etc/profile
+source /etc/profile.d/rustc.sh
+# after that we have /opt/rust in path
+
+# blacklist some pkg like shadow MLFS 
+ln -s /pkg/repository/dirty-0.0/makers/s/shadow/make.buildpkg.shadow-4.18.0-x86_64-1_MLFS_current_Viel.sh /pkg/blacklist/
+
+
+BUGS AKA:TODO
+-------------
+Beauty the exit of scripts.
+Remove LFS License part from my packages.
+Revise automake release version if script exist ... lot of scripts ... manually best?
+add some check for rsync if not installed.
+Change run.repo.list format from # D M B I to eq exit of repo-status.sh
+first boot and machine-id --> dbus-uuidgen --ensure
+skip install kernel packages or remove old when run repo list.
+the ffmpeg can be shiped with non-free libs be care like --> fdk-aac
+Suspend hivernation works need look at acpid
+keyboard Xmodmap
+build ntp
+
+When update glibc the etc/profile are overwrited ... need reinstall bash-shell-startup-files to get pathappend pathremove ...
+bash-5.3# grep -rwn /pkg/installed/* -e "etc/profile$"
+/pkg/installed/bash-shell-startup-files-0.0.1-all-1_GLFS_CONFIG_Viel/index:2:etc/profile
+/pkg/installed/glibc-2.41-x86_64-1_MLFS_current_Viel/index:6:etc/profile
+/pkg/installed/glibc-2.42-x86_64-1_MLFS_current_Viel/index:6:etc/profile
+need a think
+
+CHANGELOG
+---------
+[2025-08-26]
+* Started changelog from notes.txt
+* Added imlib2-1.12.5-x86_64-1_BLFS_current_Viel
+  Required by feh
+* Added feh-3.10.3-x86_64-1_BLFS_current_Viel
+* Added cryptsetup-dirtycfg-0.0.1
+  Custom crypted home.
+* Added lfs-sysconfig-0.0.1-all-1_DIRTY_current_Viel
+  Set up KEYMAP and DISTRO.
+[2025-08-25]
+* Added acpid-2.0.34-x86_64-1_BLFS_current_Viel
+* Added acpid-dirtycfg-0.0.1-all-1_DIRTY_current_Viel
+* Added pm-utils-1.4.1 
+* Rebuild pm-utils-1.4.1 
+  Changed PM_UTILS_RUNDIR="/run/pm-utils"
+  in file /usr/lib/pm-utils/pm-functions
+  becasue fail with to may links.
+* Updated filesystem_hierarchy-3.0-all-1_DIRTY_current_Viel
+  Removed old lfschroot-0.0.1-all-1_LFSCHROOT_r12.2_multilib package. 
+  Added needed files made by old lfschroot in MLFSCHROOT, like etc/passwd
+  Note: Others needed files are created by runing the lfs-user script.
+[2025-08-24]
+* Added nftables-dirtycfg-0.0.1-all-1_DIRTY_current_Viel
+* Rebuild dwm-6.6-x86_64-1_DIRTY_current_Viel
+  with custom config.
+[Old changes]
+*Rewrited updates to work with run.repo.list.
+* Disabled predictable network interfaces
+  in file /lib/udev/rules.d/80-net-name-slot.rules
+  # bypass this
+  GOTO="net_name_slot_end"
+* Added to .bashrc
+  GPG_TTY=$(tty) 
+  export GPG_TTY
+  because mutt pinentry-tty fail with tmux, wrong tty.
+  Todo:4:1: # grep -B 4 -A 2 lines
+  Update .bashrc from packages, not mannually.
+* Switched from virtual machine to real disk.
+  change etc/fstab from sda1 to sda4.
+  edited grub mannually.
+* Switched from disk image file to real partition.
+  From IMGFILE="dirty-0.1.server.img" to sda4
+  with fake mbr to simulate only one disk with loop.
+  #  VIRTUAL_MBR=/tmp/virtual/mbr
+  #  mkdir -vp /tmp/virtual
+  #  dd if=/dev/zero of=$VIRTUAL_MBR count=2048
+  pkg/tools/scripts/qemu-device-mapper.sh
+* Added installpkg v0.0.1
+  Check needed libs --> external libs and pkg libs.
+  Updated: Now run.repo.list search needed libs.
+* Added TAGS in a more standard way.
+  pkgname-ver-arch-build_repository_Tag2_Tag3
+  Tag2 and Tag3 to help find GLFS packages.
+  Tag2 and Tag3 use as needed.
+* Added /pkg/config/tar-exclude-from-file.txt
+  To exclude files to be extracted/installed.
+* Changed run.repo.list format # D M B I
+  to show like repo-status.sh sort.
+* Set up eudev to load modules.
+  Load the modules by hand, because eudev not udev from systemd,
+  need to see the startup scripts. 
+  Need the sound to alert when build is finished.
+  modprobe pcnet32 --> net
+  modprobe virtio -->
+  modprobe virtio-snd --> sound
+  modprobe virtio-gpu --> video
+  modprobe bochs --> video too use lspci -vk and dmesg pci 00:03:0
+  modprobe psmouse 
+  # done set up udev udev-retry start scripts.
+* Configured locales from glibc
+  Todo:1:2: # grep -B 1 -A 2 lines ;)
+  Leave glibc with default locales and
+  config locales from a separated package.

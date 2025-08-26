@@ -259,6 +259,10 @@ table inet fw {
     udp sport 53 ct state related counter accept
     tcp sport { http, https } ct state established counter accept
     tcp sport { http, https } ct state related counter accept
+    tcp sport 995 ct state established counter accept
+    tcp sport 995 ct state related counter accept
+    tcp sport 465 ct state established counter accept
+    tcp sport 465 ct state related counter accept
 
     # Enable loopback but drop connections to loopback not from lo
     iif lo ip daddr 127.0.0.1 ct state new,established,related log accept
@@ -331,6 +335,17 @@ table inet fw {
     tcp dport { http, https } ct state new counter accept
     tcp dport { http, https } ct state established counter accept
     tcp dport { http, https } ct state related counter accept
+
+    # Accept mail POP3-SSL
+    # https://www.speedguide.net/port.php?port=995
+    tcp dport 995 ct state new counter accept
+    tcp dport 995 ct state established counter accept
+    tcp dport 995 ct state related counter accept
+    # Accept mail SMTP-SSL
+    # https://www.speedguide.net/port.php?port=465
+    tcp dport 465 ct state new counter accept
+    tcp dport 465 ct state established counter accept
+    tcp dport 465 ct state related counter accept
 
     # We need mail or other services?
 

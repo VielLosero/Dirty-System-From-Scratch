@@ -275,6 +275,75 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
+  # Change colors, hide tap numbers, add f12 screencast ...
+cat << EOF > ./dirty.patch1
+--- /tmp/dirty-0.0/build/dwm-6.6-x86_64-1_DIRTY_current_Viel/dwm-6.6/config.def.h	2025-08-09 13:00:55.740267680 +0000
++++ /home/data/configs/dwm/config.h	2025-08-24 15:51:10.261234488 +0000
+@@ -5,13 +5,22 @@
+ static const unsigned int snap      = 32;       /* snap pixel */
+ static const int showbar            = 1;        /* 0 means no bar */
+ static const int topbar             = 1;        /* 0 means bottom bar */
+-static const char *fonts[]          = { "monospace:size=10" };
+-static const char dmenufont[]       = "monospace:size=10";
+-static const char col_gray1[]       = "#222222";
+-static const char col_gray2[]       = "#444444";
+-static const char col_gray3[]       = "#bbbbbb";
+-static const char col_gray4[]       = "#eeeeee";
+-static const char col_cyan[]        = "#005577";
++/* static const char *fonts[]          = { "monospace:size=11" }; */
++/* static const char dmenufont[]       = "monospace:size=11"; */
++/* static const char *fonts[]          = { "JetBrainsMono:size=11" }; */
++/* static const char dmenufont[]       = "JetBrainsMono:size=11"; */
++static const char *fonts[]          = { "Liberation Mono:size=11" };
++static const char dmenufont[]       = "Liberation Mono:size=11";
++static const char col_gray1[] = "#334455";
++static const char col_gray2[] = "#334455";
++static const char col_gray3[] = "#c6c6c6";
++static const char col_gray4[] = "#c6c6c6";
++static const char col_cyan[] = "#223344";
++//static const char col_gray1[]       = "#222222";
++//static const char col_gray2[]       = "#444444";
++//static const char col_gray3[]       = "#bbbbbb";
++//static const char col_gray4[]       = "#eeeeee";
++//static const char col_cyan[]        = "#005577";
+ static const char *colors[][3]      = {
+ 	/*               fg         bg         border   */
+ 	[SchemeNorm] = { col_gray3, col_gray1, col_gray2 },
+@@ -20,6 +29,7 @@
+ 
+ /* tagging */
+ static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
++/* static const char *tags[] = { "1", "2", "3", "4", "5", "6" }; */
+ 
+ static const Rule rules[] = {
+ 	/* xprop(1):
+@@ -29,6 +39,7 @@
+ 	/* class      instance    title       tags mask     isfloating   monitor */
+ 	{ "Gimp",     NULL,       NULL,       0,            1,           -1 },
+ 	{ "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 },
++  { "trayer",   NULL,       NULL,       1 << 8,       False },
+ };
+ 
+ /* layout(s) */
+@@ -59,9 +70,15 @@
+ static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
+ static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
+ static const char *termcmd[]  = { "st", NULL };
++static const char *flamcmd[] = { "flameshot", "gui", NULL };
++static const char *screencastcmd[] = { "screencast", NULL };
++static const char *scrotcmd[] = { "scrot.sh", NULL };
+ 
+ static const Key keys[] = {
+ 	/* modifier                     key        function        argument */
++  { 0,                            XK_F10,  spawn,          {.v = flamcmd } },
++  { 0,                            XK_F11,  spawn,          {.v = scrotcmd } },
++  { 0,                            XK_F12,  spawn,          {.v = screencastcmd } },
+ 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
+ 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
+ 	{ MODKEY,                       XK_b,      togglebar,      {0} },
+EOF
+  cp config.def.h config.h || exit 1
+  patch config.h -i ./dirty.patch1 || exit 1 
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
