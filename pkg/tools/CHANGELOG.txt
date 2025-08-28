@@ -74,6 +74,30 @@ need a think
 
 CHANGELOG
 ---------
+[2025-08-28]
+* Added opendoas-6.8.2-x86_64-1_DIRTY_current_Viel
+[2025-08-27]
+* Added scrot-1.12.1-x86_64-1_DIRTY_current_Viel
+* Added jinja2-3.1.6-x86_64-1_MLFS_current_Viel
+  needed by libplacebo
+* Added glad-2.0.8-x86_64-1_BLFS_current_Viel
+  needed by libplacebo
+* Added libplacebo-7.351.0-x86_64-1_BLFS_current_Viel
+  needed by mpv
+* Added libass-0.17.4-x86_64-1_BLFS_current_Viel
+  needed by mpv
+* Added mpv-0.40.0-x86_64-1_BLFS_current_Viel
+* Added expect-5.45.4-x86_64-1_MLFS_current_Viel
+* Added fuse-3.17.4-x86_64-1_BLFS_current_Viel
+  needed by sshfs
+  gpg .sig file upstream wrong, sha256sum ok
+* Added sshfs-3.7.3-x86_64-1_BLFS_current_Viel
+* Added openldap-LMDB-0.9.33-x86_64-1_BLFS_current.Viel
+  needed by cyrus-sasl
+* Added cyrus-sasl-2.1.28-x86_64-1_BLFS_current_Viel
+  needed by mutt because no auth available, need libsasl2
+* Rebuild mutt
+  with --with-sasl
 [2025-08-26]
 * Started changelog from notes.txt
 * Added imlib2-1.12.5-x86_64-1_BLFS_current_Viel
@@ -87,6 +111,7 @@ CHANGELOG
 * Added acpid-2.0.34-x86_64-1_BLFS_current_Viel
 * Added acpid-dirtycfg-0.0.1-all-1_DIRTY_current_Viel
 * Added pm-utils-1.4.1 
+  needed by acpid
 * Rebuild pm-utils-1.4.1 
   Changed PM_UTILS_RUNDIR="/run/pm-utils"
   in file /usr/lib/pm-utils/pm-functions
@@ -100,7 +125,7 @@ CHANGELOG
 * Rebuild dwm-6.6-x86_64-1_DIRTY_current_Viel
   with custom config.
 [Old changes]
-*Rewrited updates to work with run.repo.list.
+* Rewrited updates to work with run.repo.list.
 * Disabled predictable network interfaces
   in file /lib/udev/rules.d/80-net-name-slot.rules
   # bypass this

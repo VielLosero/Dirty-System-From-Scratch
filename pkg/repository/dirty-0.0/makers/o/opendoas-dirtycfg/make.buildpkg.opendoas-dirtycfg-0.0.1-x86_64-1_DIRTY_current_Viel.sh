@@ -49,8 +49,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="This maker.buildpkg will cover the most common MLFS and GLFS sysconfig files."
-url="https://www.linuxfromscratch.org/~thomas/multilib-m32/"
+short_desc="Dirty config file for nftables package."
+url=""
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -146,112 +146,58 @@ cd $TMP_MAKE_DIR || exit 1
   # put all files inside name-ver dir.
   mkdir -vp $name-$ver-$MAKER_SOURCE_DATE_EPOCH && cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
 
-  # Directories and files creation start here.
-  install -v -m755 -d etc/sysconfig
-  cat << 'EOF' > etc/sysconfig/rc.site
-# rc.site
-# Optional parameters for boot scripts.
-#  The optional /etc/sysconfig/rc.site file contains settings that are automatically set for each SystemV boot script. It can alternatively set the values specified in the hostname, console, and clock files in the /etc/sysconfig/ directory. If the associated variables are present in both these separate files and rc.site, the values in the script-specific files take effect.
-#
-#  rc.site also contains parameters that can customize other aspects of the boot process. Setting the IPROMPT variable will enable selective running of bootscripts. Other options are described in the file comments.
-
-# Distro Information
-# These values, if specified here, override the defaults
-DISTRO="Dirty System From Scratch" # The distro name
-#DISTRO_CONTACT="lfs-dev@lists.linuxfromscratch.org" # Bug report address
-#DISTRO_MINI="LFS" # Short name used in filenames for distro config
-
-# Define custom colors used in messages printed to the screen
-
-# Please consult `man console_codes` for more information
-# under the "ECMA-48 Set Graphics Rendition" section
-#
-# Warning: when switching from a 8bit to a 9bit font,
-# the linux console will reinterpret the bold (1;) to
-# the top 256 glyphs of the 9bit font.  This does
-# not affect framebuffer consoles
-
-# These values, if specified here, override the defaults
-#BRACKET="\\033[1;34m" # Blue
-#FAILURE="\\033[1;31m" # Red
-#INFO="\\033[1;36m"    # Cyan
-#NORMAL="\\033[0;39m"  # Grey
-#SUCCESS="\\033[1;32m" # Green
-#WARNING="\\033[1;33m" # Yellow
-
-# Use a colored prefix
-# These values, if specified here, override the defaults
-#BMPREFIX="      "
-#SUCCESS_PREFIX="${SUCCESS}  *  ${NORMAL} "
-#FAILURE_PREFIX="${FAILURE}*****${NORMAL} "
-#WARNING_PREFIX="${WARNING} *** ${NORMAL} "
-
-# Manually set the right edge of message output (characters)
-# Useful when resetting console font during boot to override
-# automatic screen width detection
-#COLUMNS=120
-
-# Interactive startup
-#IPROMPT="yes" # Whether to display the interactive boot prompt
-#itime="3"    # The amount of time (in seconds) to display the prompt
-
-# The total length of the distro welcome string, without escape codes
-#wlen=$(echo "Welcome to ${DISTRO}" | wc -c )
-#welcome_message="Welcome to ${INFO}${DISTRO}${NORMAL}"
-
-# The total length of the interactive string, without escape codes
-#ilen=$(echo "Press 'I' to enter interactive startup" | wc -c )
-#i_message="Press '${FAILURE}I${NORMAL}' to enter interactive startup"
-
-# Set scripts to skip the file system check on reboot
-#FASTBOOT=yes
-
-# Skip reading from the console
-#HEADLESS=yes
-
-# Write out fsck progress if yes
-#VERBOSE_FSCK=no
-
-# Speed up boot without waiting for settle in udev
-#OMIT_UDEV_SETTLE=y
-
-# Speed up boot without waiting for settle in udev_retry
-#OMIT_UDEV_RETRY_SETTLE=yes
-
-# Skip cleaning /tmp if yes
-#SKIPTMPCLEAN=no
-
-# For setclock
-#UTC=1
-#CLOCKPARAMS=
-
-# For consolelog (Note that the default, 7=debug, is noisy)
-#LOGLEVEL=7
-
-# For network
-#HOSTNAME=mylfs
-
-# Delay between TERM and KILL signals at shutdown
-#KILLDELAY=3
-
-# Optional sysklogd parameters
-#SYSKLOGD_PARMS="-m 0"
-
-# Console parameters
-#UNICODE=1
-KEYMAP="qwerty/es"
-#KEYMAP_CORRECTIONS="euro2"
-#FONT="lat0-16 -m 8859-15"
-#LEGACY_CHARSET=
+  # Start dirs and files from here.
+  install -v -m775 -d etc/pam.d
+  cat << 'EOF' > etc/doas.conf 
+#permit nopass :wheel
+#permit nopass v
+#permit nopass :wheel as root
+#permit nopass v as root cmd id --> WARNING user can make a id file/link that runs before.
+permit nopass v as root cmd /usr/bin/id
+# Best run a closed script that user can't modify.
+permit nopass v cmd /home/data/scripts/bash/ssh-add-pass
 EOF
+  chmod -c 400 ./etc/doas.conf || exit 1
+  # to check from user run: doas -C /etc/doas.conf command
+  # but user need read, set to 444 only for test
+  # no needed for run.
 
-cat > etc/lsb-release << "EOF"
-DISTRIB_ID="Dirty System From Scratch"
-DISTRIB_RELEASE="0.0"
-DISTRIB_CODENAME="Current"
-DISTRIB_DESCRIPTION="Dirty System From Scratch dirty-0.0 current"
+  install -v -m755 -d etc/pam.d
+  cat << 'EOF' > etc/pam.d/doas
+#%PAM-1.0
+#auth            include         system-auth
+#account         include         system-auth
+#session         include         system-auth
+
+# Begin /etc/pam.d/doas
+# Copy from /etc/pam.d/su
+
+# always allow root
+#auth      sufficient  pam_rootok.so
+
+# Allow users in the wheel group to execute su without a password
+# disabled by default
+auth      sufficient  pam_wheel.so trust use_uid
+
+# include system auth settings
+#auth      include     system-auth
+
+# limit su to users in the wheel group
+# disabled by default
+auth      required    pam_wheel.so use_uid
+
+# include system account settings
+account   include     system-account
+
+# Set default environment variables for the service user
+#session   required    pam_env.so
+
+# include system session settings
+session   include     system-session
+
+# End /etc/pam.d/doas
 EOF
-
+  chmod -c 544 ./etc/pam.d/doas || exit 1
 
   #tar -Jcf $SOURCESDIR/$file1 ../$name-$ver
   LC_ALL=POSIX tar --sort=name \
@@ -443,6 +389,11 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   if [ -d $PKGDIR ] ; then rm -rf $PKGDIR/* ; fi || exit 1
   cp -rv * $PKGDIR
   cd $PKGDIR || exit 1
+  ln -sfv rc.d/init.d etc/init.d
+  ln -sfv ../init.d/nftables etc/rc.d/rc2.d/S19nftables
+  ln -sfv ../init.d/nftables etc/rc.d/rc3.d/S19nftables
+  ln -sfv ../init.d/nftables etc/rc.d/rc4.d/S19nftables
+  ln -sfv ../init.d/nftables etc/rc.d/rc5.d/S19nftables
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))

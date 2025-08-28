@@ -49,8 +49,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="This maker.buildpkg will cover the most common MLFS and GLFS sysconfig files."
-url="https://www.linuxfromscratch.org/~thomas/multilib-m32/"
+short_desc="doas is a minimal replacement for the venerable sudo. It was initially written by Ted Unangst of the OpenBSD project to provide 95% of the features of sudo with a fraction of the codebase."
+url="https://github.com/Duncaen/OpenDoas"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -70,10 +70,6 @@ OUTPKG=${OUTPKG:-$REPODIR/packages/$first_pkg_char/${name}/${pkg_name}.sh}
 # Other need vars for example to change the default INSTALLDIR=$LFS.
 LFS=/mnt/lfs
 LFS_TGT=$(uname -m)-lfs-linux-gnu
-# maker Source date epoch for reporduce the tar file.
-#MAKER_SOURCE_DATE_EPOCH="${MAKER_SOURCE_DATE_EPOCH:-$(date +%s)}"
-#BUILD_DATE="$(date --utc --date="@${MAKER_SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d)"
-MAKER_SOURCE_DATE_EPOCH="1747391248"
 
 # --- END CAT SEED ---
  
@@ -83,17 +79,22 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://example.org
-sum="md5sum"
-file1_url=$version_url
+version_url=https://github.com/Duncaen/OpenDoas/releases/latest
+sum="sha256sum"
+file1_url=https://github.com/Duncaen/OpenDoas/releases/download/v$ver
 file1=$name-$ver.tar.xz
-file1_sum=
+file1_sum=4e98828056d6266bd8f2c93e6ecf12a63a71dbfd70a5ea99ccd4ab6d0745adf0
+file2_url=$file1_url
+file2=${file1}.sig
+file2_sum=6e6369e39c370cdd651021719b08f4af7735f2ed3141526cccb43a241ead12a1
+dhcpcd_gpgkey=C4B6FBA98211F7EFF35DEB73335C1D17EC3D6E35
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=0.0.1
+  # Final URL after the redirect.
+  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/v%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/v%%' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -102,7 +103,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
-        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url/$ver/$last_version}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 4
           else
@@ -130,138 +131,19 @@ fi
 
 # Get sources and check.
 cd $SOURCESDIR || exit 1
-# We don't need download sources, we made it, so only set var for compres the files.
-file1=$name-$ver-$MAKER_SOURCE_DATE_EPOCH.tar.xz
+[ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
+[ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
+[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
+[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $dhcpcd_gpgkey
+gpg --verify $file2 $file1 ||  exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
 cd $SOURCESPPDIR || exit 1
-
-if [ -e $file1 ] ; then rm $file1 ; fi
-TMP_MAKE_DIR=$(mktemp -d /tmp/mbp-tmp-make-dir-XXXXXX)
-trap "rm -rf $TMP_MAKE_DIR" EXIT
-cd $TMP_MAKE_DIR || exit 1
-  # put all files inside name-ver dir.
-  mkdir -vp $name-$ver-$MAKER_SOURCE_DATE_EPOCH && cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
-
-  # Directories and files creation start here.
-  install -v -m755 -d etc/sysconfig
-  cat << 'EOF' > etc/sysconfig/rc.site
-# rc.site
-# Optional parameters for boot scripts.
-#  The optional /etc/sysconfig/rc.site file contains settings that are automatically set for each SystemV boot script. It can alternatively set the values specified in the hostname, console, and clock files in the /etc/sysconfig/ directory. If the associated variables are present in both these separate files and rc.site, the values in the script-specific files take effect.
-#
-#  rc.site also contains parameters that can customize other aspects of the boot process. Setting the IPROMPT variable will enable selective running of bootscripts. Other options are described in the file comments.
-
-# Distro Information
-# These values, if specified here, override the defaults
-DISTRO="Dirty System From Scratch" # The distro name
-#DISTRO_CONTACT="lfs-dev@lists.linuxfromscratch.org" # Bug report address
-#DISTRO_MINI="LFS" # Short name used in filenames for distro config
-
-# Define custom colors used in messages printed to the screen
-
-# Please consult `man console_codes` for more information
-# under the "ECMA-48 Set Graphics Rendition" section
-#
-# Warning: when switching from a 8bit to a 9bit font,
-# the linux console will reinterpret the bold (1;) to
-# the top 256 glyphs of the 9bit font.  This does
-# not affect framebuffer consoles
-
-# These values, if specified here, override the defaults
-#BRACKET="\\033[1;34m" # Blue
-#FAILURE="\\033[1;31m" # Red
-#INFO="\\033[1;36m"    # Cyan
-#NORMAL="\\033[0;39m"  # Grey
-#SUCCESS="\\033[1;32m" # Green
-#WARNING="\\033[1;33m" # Yellow
-
-# Use a colored prefix
-# These values, if specified here, override the defaults
-#BMPREFIX="      "
-#SUCCESS_PREFIX="${SUCCESS}  *  ${NORMAL} "
-#FAILURE_PREFIX="${FAILURE}*****${NORMAL} "
-#WARNING_PREFIX="${WARNING} *** ${NORMAL} "
-
-# Manually set the right edge of message output (characters)
-# Useful when resetting console font during boot to override
-# automatic screen width detection
-#COLUMNS=120
-
-# Interactive startup
-#IPROMPT="yes" # Whether to display the interactive boot prompt
-#itime="3"    # The amount of time (in seconds) to display the prompt
-
-# The total length of the distro welcome string, without escape codes
-#wlen=$(echo "Welcome to ${DISTRO}" | wc -c )
-#welcome_message="Welcome to ${INFO}${DISTRO}${NORMAL}"
-
-# The total length of the interactive string, without escape codes
-#ilen=$(echo "Press 'I' to enter interactive startup" | wc -c )
-#i_message="Press '${FAILURE}I${NORMAL}' to enter interactive startup"
-
-# Set scripts to skip the file system check on reboot
-#FASTBOOT=yes
-
-# Skip reading from the console
-#HEADLESS=yes
-
-# Write out fsck progress if yes
-#VERBOSE_FSCK=no
-
-# Speed up boot without waiting for settle in udev
-#OMIT_UDEV_SETTLE=y
-
-# Speed up boot without waiting for settle in udev_retry
-#OMIT_UDEV_RETRY_SETTLE=yes
-
-# Skip cleaning /tmp if yes
-#SKIPTMPCLEAN=no
-
-# For setclock
-#UTC=1
-#CLOCKPARAMS=
-
-# For consolelog (Note that the default, 7=debug, is noisy)
-#LOGLEVEL=7
-
-# For network
-#HOSTNAME=mylfs
-
-# Delay between TERM and KILL signals at shutdown
-#KILLDELAY=3
-
-# Optional sysklogd parameters
-#SYSKLOGD_PARMS="-m 0"
-
-# Console parameters
-#UNICODE=1
-KEYMAP="qwerty/es"
-#KEYMAP_CORRECTIONS="euro2"
-#FONT="lat0-16 -m 8859-15"
-#LEGACY_CHARSET=
-EOF
-
-cat > etc/lsb-release << "EOF"
-DISTRIB_ID="Dirty System From Scratch"
-DISTRIB_RELEASE="0.0"
-DISTRIB_CODENAME="Current"
-DISTRIB_DESCRIPTION="Dirty System From Scratch dirty-0.0 current"
-EOF
-
-
-  #tar -Jcf $SOURCESDIR/$file1 ../$name-$ver
-  LC_ALL=POSIX tar --sort=name \
-  --mtime="@${MAKER_SOURCE_DATE_EPOCH}" \
-  --owner=0 --group=0 --numeric-owner \
-  --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
-  -Jcf $SOURCESDIR/$file1 ../$name-$ver-$MAKER_SOURCE_DATE_EPOCH
-
-# link sources to sources per package to code it.
-ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ || exit 1 
+# Do something if needed.
 
 # Making Buildpkg.sh $OUTBUILD (The builder)
 echo "Making buildpkg."
@@ -310,7 +192,6 @@ EOF_OUTBUILD
 # The coding base64 part.
 # echo dirs to builder.
 echo "Coding dirs to builder."
-cd $SOURCESPPDIR || exit 1
 cat << 'EOF_OUTBUILD' >> $OUTBUILD
 echo ""
 if [ $DECODE -eq 1 ] ; then echo "Skipping DECODE sources." ; else
@@ -377,12 +258,12 @@ if [ $EXTRACT -eq 1 ] ; then echo "Skipping EXTRACT sources." ; else
   echo "Preparing sources."
   cd $BUILDDIR || exit 1
   # deleting source dirs if exist.
-  if [ -d $name-$ver-$MAKER_SOURCE_DATE_EPOCH ] ; then rm -rf $name-$ver-$MAKER_SOURCE_DATE_EPOCH ; fi
+  if [ -d $name-$ver ] ; then rm -rf $name-$ver ; fi
   if [ -d $PKGDIR ] ; then rm -rf $PKGDIR && mkdir $PKGDIR ; fi
 EOF_OUTBUILD
   echo '  tar xf $SOURCESDIR'/$file1 >> $OUTBUILD 
   cat << 'EOF_OUTBUILD' >> $OUTBUILD
-  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_EXTRACT ---
   # --- END_LFS_CMD_EXTRACT ---
   end_extract_date=$(date +"%s")
@@ -396,7 +277,7 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   start_patch_date=$(date +"%s")
   echo "Applying patches."
   cd $BUILDDIR || exit 1
-  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
@@ -410,8 +291,10 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
+  #./configure --prefix=/usr --with-timestamp || exit 1
+  ./configure --prefix=/usr || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -423,8 +306,10 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   start_build_date=$(date +"%s")
   echo "Compiling sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD ---
+  NUMJOBS="-j $(nproc)"
+  make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -437,12 +322,9 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   #Installing sources.
   echo "Installing sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
-  # Check if dir exist or will remove pwd because PKGDIR unset.
-  if [ -d $PKGDIR ] ; then rm -rf $PKGDIR/* ; fi || exit 1
-  cp -rv * $PKGDIR
-  cd $PKGDIR || exit 1
+  make DESTDIR=$PKGDIR install || exit 1
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -455,7 +337,7 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   start_post_date=$(date +"%s")
   echo "Post compilation tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_POST ---
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
@@ -469,7 +351,7 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   start_config32_date=$(date +"%s")
   echo "Configuring 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG32 ---
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
@@ -482,7 +364,7 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   start_build32_date=$(date +"%s")
   echo "Compiling 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD32 ---
   # --- END_LFS_CMD_BUILD32 ---
   end_build32_date=$(date +"%s")
@@ -496,7 +378,7 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   start_install32_date=$(date +"%s")
   echo "Installing 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL32 ---
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
@@ -510,7 +392,7 @@ if [ $POST32 -eq 1 ] ; then echo "Skipping POST32 bits compilation tasks." ; els
   start_post32_date=$(date +"%s")
   echo "Post compilation 32bits tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver-$MAKER_SOURCE_DATE_EPOCH  || exit 1
+  cd $name-$ver || exit 1
   # --- LFS_CMD_POST32 ---
   # --- END_LFS_CMD_POST32 ---
   end_post32_date=$(date +"%s")

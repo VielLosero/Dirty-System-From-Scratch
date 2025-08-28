@@ -300,9 +300,12 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
             --sysconfdir=/etc/$name                     \
             --with-docdir=/usr/share/doc/$name-$ver \
             --with-ssl                               \
+            --with-sasl                              \
             --enable-pop                             \
             --enable-smtp                            \
+            --enable-imap                            \
             --enable-hcache                          \
+            --enable-compressed                      \
             --enable-sidebar      || exit 1
   # LFS
   #./configure --prefix=/usr                            \

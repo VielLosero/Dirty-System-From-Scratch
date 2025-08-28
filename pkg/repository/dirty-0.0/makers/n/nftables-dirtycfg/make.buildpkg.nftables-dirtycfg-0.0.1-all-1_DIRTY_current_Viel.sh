@@ -253,6 +253,8 @@ table inet fw {
 
     # Accept all connections related to connections made by us
     #ct state { established, related } log prefix "IN-related: " accept
+    tcp sport 22 ct state established counter accept
+    tcp sport 22 ct state related counter accept
     udp sport 67 ct state established counter accept
     udp sport 67 ct state related counter accept
     udp sport 53 ct state established counter accept
@@ -271,8 +273,8 @@ table inet fw {
     iif != lo ip6 daddr ::1 counter log prefix "FW-IN-lo6-dropped: " drop
 
     # Accept ssh. If there is not a server we don't need remote access.
-    tcp dport 22 ct state new limit rate 3/minute counter accept
-    tcp dport 22 ct state established,related counter accept
+    # Commented new, we are on real machine now not in virtual, no need accept ssh.
+    #tcp dport 22 ct state new limit rate 3/minute counter accept
 
     # Accept ICMP.
     # icmp type { echo-request } limit rate 4/second log prefix "IN-icmp: " accept
@@ -300,7 +302,13 @@ table inet fw {
 
     # Accept all connections related to connections made by us
     #ct state { established, related } log prefix "OUT-related: " accept
-    tcp sport 22 ct state established,related counter accept
+
+    # Accept output ssh connections.
+    tcp dport 22 ct state new counter accept
+    tcp dport 22 ct state established counter accept
+    tcp dport 22 ct state related counter accept
+    # Accept ssh output connection only to router.
+    # ip daddr $ROUTER_ADDR tcp dport 22 ct state new log prefix "OUT-ssh: " accept
 
     # Accept output to lopback.
     oif lo ip saddr 127.0.0.1 ip daddr 127.0.0.1 ct state new,established,related accept
@@ -326,9 +334,6 @@ table inet fw {
     ip daddr 8.8.8.8 udp dport 53 ct state new counter accept
     ip daddr 8.8.8.8 udp dport 53 ct state established,related counter accept
     # we have local dns because lopback permited.
-
-    # Accept ssh output connection only to router.
-    # ip daddr $ROUTER_ADDR tcp dport 22 ct state new log prefix "OUT-ssh: " accept
 
     # Accept web output connections, if the RAT C2 use http/s we are fucked.
     # Limit to a proxy?

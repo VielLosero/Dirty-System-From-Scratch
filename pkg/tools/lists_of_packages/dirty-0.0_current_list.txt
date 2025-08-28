@@ -23,7 +23,7 @@
 .bc-[0-9]*_MLFS_*
 .flex-[0-9]*_MLFS_*
 .tcl-[0-9]*_MLFS_*
-#.expect-[0-9]*_MLFS_
+.expect-[0-9]*_MLFS_
 #.dejagnu-[0-9]*_MLFS_
 .pkgconf-[0-9]*_MLFS_*
 .binutils-[0-9]*_MLFS_*
@@ -410,6 +410,8 @@
 .cryptsetup-[0-9]*_BLFS_*
 .cryptsetup-dirtycfg-[0-9]*_BLFS_*
 #for mail
+.openldap-LMDB-[0-9]*_BLFS_*
+.cyrus-sasl-[0-9]*_BLFS_*
 .mutt-[0-9]*_BLFS_*
 #nftables
 .libmnl-[0-9]*_DIRTY_*
@@ -424,4 +426,7 @@
 # add feh
 .imlib2-[0-9]*_BLFS_*
 .feh-[0-9]*_BLFS_*
+# openwrt file transfer
+.fuse-[0-9]*_BLFS_*
+.sshfs-[0-9]*_BLFS_*
 # next tool
