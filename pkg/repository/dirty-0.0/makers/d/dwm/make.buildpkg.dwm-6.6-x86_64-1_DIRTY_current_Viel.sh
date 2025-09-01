@@ -40,10 +40,8 @@ pkg_ver="${pkg_name%-*-*}" ; ver="${pkg_ver/$name-/}"
 pkg_arch="${pkg_name%-*}" ; arch=${pkg_arch/$name-$ver-/}
 rel=${pkg_name/$name-$ver-$arch-/}
 first_pkg_char=$(printf %.1s ${name,})
-rel_build=${rel%%_*} ; rel_helper1=${rel/${rel_build}_}
-rel_tag1=${rel_helper1/_*} ; rel_helper2=${rel/${rel_build}_${rel_tag1}_}
-rel_tag2=${rel_helper2/_*} ; rel_helper3=${rel/${rel_build}_${rel_tag1}_${rel_tag2}_}
-rel_tag3=${rel_helper3/_*}
+rel_build=${rel%%_*}
+rel_tag=${rel/${rel_build}_}
 echo "  Package name: $name"
 echo "  Version: $ver"
 echo "  Arch: $arch"
@@ -100,7 +98,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: No new versions found." ; exit 0
     else
       if [ $NEW = 0 ] ; then
-        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
+        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-1_${rel_tag}.sh}
         if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 4
@@ -277,9 +275,9 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   # --- LFS_CMD_PATCH ---
   # Change colors, hide tap numbers, add f12 screencast ...
 cat << EOF > ./dirty.patch1
---- /tmp/dirty-0.0/build/dwm-6.6-x86_64-1_DIRTY_current_Viel/dwm-6.6/config.def.h	2025-08-09 13:00:55.740267680 +0000
-+++ /home/data/configs/dwm/config.h	2025-08-24 15:51:10.261234488 +0000
-@@ -5,13 +5,22 @@
+--- /tmp/dirty-0.0/build/dwm-6.6-x86_64-1_DIRTY_current_Viel/dwm-6.6/config.def.h	2025-08-09 15:00:55.740267680 +0200
++++ /tmp/dirty-0.0/build/dwm-6.6-x86_64-1_DIRTY_current_Viel/dwm-6.6/config.h	2025-08-30 14:14:32.100011479 +0200
+@@ -5,21 +5,31 @@
  static const unsigned int snap      = 32;       /* snap pixel */
  static const int showbar            = 1;        /* 0 means no bar */
  static const int topbar             = 1;        /* 0 means bottom bar */
@@ -296,11 +294,11 @@ cat << EOF > ./dirty.patch1
 +/* static const char dmenufont[]       = "JetBrainsMono:size=11"; */
 +static const char *fonts[]          = { "Liberation Mono:size=11" };
 +static const char dmenufont[]       = "Liberation Mono:size=11";
-+static const char col_gray1[] = "#334455";
-+static const char col_gray2[] = "#334455";
-+static const char col_gray3[] = "#c6c6c6";
-+static const char col_gray4[] = "#c6c6c6";
-+static const char col_cyan[] = "#223344";
++static const char col_gray1[] = "#112211";
++static const char col_gray2[] = "#112211";
++static const char col_gray3[] = "#4DA859";
++static const char col_gray4[] = "#DD5212";
++static const char col_cyan[] = "#223322";
 +//static const char col_gray1[]       = "#222222";
 +//static const char col_gray2[]       = "#444444";
 +//static const char col_gray3[]       = "#bbbbbb";
@@ -309,7 +307,9 @@ cat << EOF > ./dirty.patch1
  static const char *colors[][3]      = {
  	/*               fg         bg         border   */
  	[SchemeNorm] = { col_gray3, col_gray1, col_gray2 },
-@@ -20,6 +29,7 @@
+-	[SchemeSel]  = { col_gray4, col_cyan,  col_cyan  },
++	[SchemeSel]  = { col_gray4, col_cyan,  col_cyan  },
+ };
  
  /* tagging */
  static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
@@ -344,6 +344,60 @@ cat << EOF > ./dirty.patch1
 EOF
   cp config.def.h config.h || exit 1
   patch config.h -i ./dirty.patch1 || exit 1 
+
+ cat << 'EOF' > ./dwm-hide_vacant_tags-6.4.diff
+:100644 100644 f1d86b2 0000000 M	dwm.c
+
+diff --git a/dwm.c b/dwm.c
+index f1d86b2..d41cc14 100644
+--- a/dwm.c
++++ b/dwm.c
+@@ -433,9 +433,15 @@ buttonpress(XEvent *e)
+ 	}
+ 	if (ev->window == selmon->barwin) {
+ 		i = x = 0;
+-		do
++		unsigned int occ = 0;
++		for(c = m->clients; c; c=c->next)
++			occ |= c->tags == TAGMASK ? 0 : c->tags;
++		do {
++			/* Do not reserve space for vacant tags */
++			if (!(occ & 1 << i || m->tagset[m->seltags] & 1 << i))
++				continue;
+ 			x += TEXTW(tags[i]);
+-		while (ev->x >= x && ++i < LENGTH(tags));
++		} while (ev->x >= x && ++i < LENGTH(tags));
+ 		if (i < LENGTH(tags)) {
+ 			click = ClkTagBar;
+ 			arg.ui = 1 << i;
+@@ -715,19 +721,18 @@ drawbar(Monitor *m)
+ 	}
+ 
+ 	for (c = m->clients; c; c = c->next) {
+-		occ |= c->tags;
++		occ |= c->tags == TAGMASK ? 0 : c->tags;
+ 		if (c->isurgent)
+ 			urg |= c->tags;
+ 	}
+ 	x = 0;
+ 	for (i = 0; i < LENGTH(tags); i++) {
++		/* Do not draw vacant tags */
++		if(!(occ & 1 << i || m->tagset[m->seltags] & 1 << i))
++			continue;
+ 		w = TEXTW(tags[i]);
+ 		drw_setscheme(drw, scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
+ 		drw_text(drw, x, 0, w, bh, lrpad / 2, tags[i], urg & 1 << i);
+-		if (occ & 1 << i)
+-			drw_rect(drw, x + boxs, boxs, boxw, boxw,
+-				m == selmon && selmon->sel && selmon->sel->tags & 1 << i,
+-				urg & 1 << i);
+ 		x += w;
+ 	}
+ 	w = TEXTW(m->ltsymbol);
+
+EOF
+  patch dwm.c -i ./dwm-hide_vacant_tags-6.4.diff || exit 1
+
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -387,7 +441,7 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
-  make DESTDIR=$PKGDIR install || exit 1
+  make PREFIX=/usr DESTDIR=$PKGDIR install || exit 1
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -614,7 +668,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
   # pkg checksums
   PKG_CHECKSUMS_FILE="$PKG_DIR/checksums"
   # Tar exclude-from file.
-  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-/pkg/config/tar-exclude-from-file.txt}
+  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-$INSTALLDIR/pkg/config/tar-exclude-from-file.txt}
   
   if [[ $INSTALL -eq 1 ]] ; then 
     [ -d $PKG_DIR ] || mkdir -p $PKG_DIR 
@@ -631,7 +685,11 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
     echo "Decoding b64 package files."
       # --keep-directory-symlink Don't replace existing symlinks to directories when extracting.
       # tested tar (GNU tar) 1.35 || exit
-      echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
+      if [ -e TAR_EXCLUDE_FROM ] ; then
+        echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
+      else
+        echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink
+      fi
     echo "$(date +"%a %b %d %T %Z %Y") Installed $pkg_name in $INSTALLDIR" >> $LOGFILE 
   elif [[ $COMPARE -eq 1 ]] ; then
     echo "Comparing pkg with files in $INSTALLDIR"

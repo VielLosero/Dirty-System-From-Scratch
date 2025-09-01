@@ -40,10 +40,8 @@ pkg_ver="${pkg_name%-*-*}" ; ver="${pkg_ver/$name-/}"
 pkg_arch="${pkg_name%-*}" ; arch=${pkg_arch/$name-$ver-/}
 rel=${pkg_name/$name-$ver-$arch-/}
 first_pkg_char=$(printf %.1s ${name,})
-rel_build=${rel%%_*} ; rel_helper1=${rel/${rel_build}_}
-rel_tag1=${rel_helper1/_*} ; rel_helper2=${rel/${rel_build}_${rel_tag1}_}
-rel_tag2=${rel_helper2/_*} ; rel_helper3=${rel/${rel_build}_${rel_tag1}_${rel_tag2}_}
-rel_tag3=${rel_helper3/_*}
+rel_build=${rel%%_*}
+rel_tag=${rel/${rel_build}_}
 echo "  Package name: $name"
 echo "  Version: $ver"
 echo "  Arch: $arch"
@@ -107,7 +105,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: No new versions found." ; exit 0
     else
       if [ $NEW = 0 ] ; then
-        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${rel}.sh}
+        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-1_${rel_tag}.sh}
         if $SPIDER ${file1_url}/${last_version}.tar.gz >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 4
@@ -578,7 +576,7 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
   # pkg checksums
   PKG_CHECKSUMS_FILE="$PKG_DIR/checksums"
   # Tar exclude-from file.
-  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-/pkg/config/tar-exclude-from-file.txt}
+  TAR_EXCLUDE_FROM=${TAR_EXCLUDE_FROM:-$INSTALLDIR/pkg/config/tar-exclude-from-file.txt}
   
   if [[ $INSTALL -eq 1 ]] ; then 
     [ -d $PKG_DIR ] || mkdir -p $PKG_DIR 
@@ -595,7 +593,11 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
     echo "Decoding b64 package files."
       # --keep-directory-symlink Don't replace existing symlinks to directories when extracting.
       # tested tar (GNU tar) 1.35 || exit
-      echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
+      if [ -e TAR_EXCLUDE_FROM ] ; then
+        echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
+      else
+        echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink
+      fi
     echo "$(date +"%a %b %d %T %Z %Y") Installed $pkg_name in $INSTALLDIR" >> $LOGFILE 
   elif [[ $COMPARE -eq 1 ]] ; then
     echo "Comparing pkg with files in $INSTALLDIR"

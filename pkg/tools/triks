@@ -53,6 +53,12 @@ a=a ; cat /pkg/repository/dirty-0.1/tools/make-order.txt | grep -v "#" | while r
 #patch
 find /pkg/repository/dirty-0.1/makers/ -type f -exec patch --dry-run {} -i /pkg/repository/dirty-0.1/tools/patches/patch_license  \;
 find /pkg/repository/dirty-0.1/makers/ -type f -exec patch --fuzz=20 --dry-run {} -i patch1  \;
+# version 6
+bash-5.2# find /pkg/repository/dirty-0.0/makers/ -type f -exec sh -c 'grep "#:Version:0.0.6" {} &&  patch --fuzz=20 --dry-run {} -i /tmp/patch5 | grep -B3 FAILED'  \; | grep checking
+bash-5.2# find /pkg/repository/dirty-0.0/makers/ -type f -name "*.sh" -exec sh -c 'grep "#:Version:0.0.6" {} &&  patch --fuzz=20 --dry-run {} -i /tmp/patch5 && echo +++++++++++++ && patch --fuzz=20  {} -i /tmp/patch5 ' \;
+# version 6 last
+bash-5.2# cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do ls -1 /pkg/repository/dirty-0.0/makers/*/*/*$(bash /pkg/tools/scripts/repo-status.sh ${pkg} | grep " V " | cut -c19-)* ; done
+
 
 # see sha256sum and files inside buildpkg files
 grep sha256sum /pkg/repository/dirty-0.1/builders/s/sed/buildpkg.sed-4.9-x86_64-1_LFS_r12.2_multilib.sh
@@ -144,12 +150,6 @@ wc -l /pkg/installed/*/index | grep " 0 "
 # config kernel 
 bash-5.2# for line in $(diff -u /pkg/tools/config /pkg/tools/kernel.config.dirty1 | grep +C | cut -c 2- ) ; do echo $line ; bash /pkg/tools/scripts/kernel.config.sh --file /pkg/tools/config  --set-val ${line/=*} ${line/*=} ; done
 
-
-# version 6
-bash-5.2# find /pkg/repository/dirty-0.0/makers/ -type f -exec sh -c 'grep "#:Version:0.0.6" {} &&  patch --fuzz=20 --dry-run {} -i /tmp/patch5 | grep -B3 FAILED'  \; | grep checking
-bash-5.2# find /pkg/repository/dirty-0.0/makers/ -type f -name "*.sh" -exec sh -c 'grep "#:Version:0.0.6" {} &&  patch --fuzz=20 --dry-run {} -i /tmp/patch5 && echo +++++++++++++ && patch --fuzz=20  {} -i /tmp/patch5 ' \;
-# version 6 last
-bash-5.2# cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do ls -1 /pkg/repository/dirty-0.0/makers/*/*/*$(bash /pkg/tools/scripts/repo-status.sh ${pkg} | grep " V " | cut -c19-)* ; done
 
 
 # find libs needed 

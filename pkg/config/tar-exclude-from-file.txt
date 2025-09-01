@@ -2,3 +2,7 @@ usr/local/bin/example.file.that.will.be.excluded
 etc/passwd
 etc/shadow
 etc/group
+var/log/wtmp
+var/log/btmp
+var/log/lastlog
+var/log/faillog

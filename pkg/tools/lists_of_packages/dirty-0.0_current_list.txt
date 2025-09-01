@@ -429,4 +429,23 @@
 # openwrt file transfer
 .fuse-[0-9]*_BLFS_*
 .sshfs-[0-9]*_BLFS_*
+# 
+.logrotate-[0-9]*_BLFS_*
+.logrotate-dirtycfg-[0-9]*_BLFS_*
+#
+.ntp-[0-9]*_BLFS_*
+.opendoas-[0-9]*_DIRTY_*
+.opendoas-dirtycfg-[0-9]*_DIRTY_*
+#
+.scrot-[0-9]*_DIRTY_*
+#
+.jinja2-[0-9]*_MLFS_*
+# needed by libplacebo
+.glad-[0-9]*_BLFS_*
+# needed by libplacebo
+.libplacebo-[0-9]*_BLFS_*
+# needed by mpv
+.libass-[0-9]*_BLFS_*
+# needed by mpv
+.mpv-[0-9]*_BLFS_*
 # next tool

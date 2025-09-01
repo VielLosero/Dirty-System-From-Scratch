@@ -56,14 +56,12 @@ BUGS AKA:TODO
 Beauty the exit of scripts.
 Remove LFS License part from my packages.
 Revise automake release version if script exist ... lot of scripts ... manually best?
+  When make NEW set release to 1, when rebuild set +1. Need path files, will see.
 add some check for rsync if not installed.
-Change run.repo.list format from # D M B I to eq exit of repo-status.sh
 first boot and machine-id --> dbus-uuidgen --ensure
 skip install kernel packages or remove old when run repo list.
 the ffmpeg can be shiped with non-free libs be care like --> fdk-aac
-Suspend hivernation works need look at acpid
 keyboard Xmodmap
-build ntp
 
 When update glibc the etc/profile are overwrited ... need reinstall bash-shell-startup-files to get pathappend pathremove ...
 bash-5.3# grep -rwn /pkg/installed/* -e "etc/profile$"
@@ -72,10 +70,35 @@ bash-5.3# grep -rwn /pkg/installed/* -e "etc/profile$"
 /pkg/installed/glibc-2.42-x86_64-1_MLFS_current_Viel/index:6:etc/profile
 need a think
 
+
 CHANGELOG
 ---------
+[2025-09-01]
+* Patched makers release tags and NEWMAKE release to 1.
+[2025-08-30]
+* Rebuild mpv-0.40.0-x86_64-1_BLFS_current_Viel
+  with STATS builtin script displays information.
+* Added LuaJIT-871db2c84ecefd70a850e03a6c340214a81739f0-x86_64-1_BLFS_current_Viel
+  needed by mvp to build with -Dlua=enabled 
+  to have STATS builtin script displays information.
+[2025-08-29]
+* Added logrotate-3.22.0-x86_64-1_BLFS_current_Viel
+* Added logrotate-dirtycfg-0.0.1-all-1_DIRTY_current_Viel
+  Todo:1:1:
+  Need rotate more files comented inside pkg.
+* Updated filesystem_hierarchy-3.0-all-1_DIRTY_current_Viel
+  var/run --> run liks will be var/run --> /run
+  updated all the links to correct path.
+  Now acpid daemon start well.
+  WARNING: Add wtmp/... files to /pkg/config/tar-exclude-from-file.txt or will be overwrited.
+* Rebuild pm-utils-1.4.1 
+  Regresion PM_UTILS_RUNDIR variable.
+  Now /var/run --> /run work fine.
 [2025-08-28]
+* Added ntp-4.2.8p18-x86_64-1_BLFS_current_Viel
+  needed by OTP sinchronize.
 * Added opendoas-6.8.2-x86_64-1_DIRTY_current_Viel
+* Added opendoas-dirtycfg-0.0.1-x86_64-1_DIRTY_current_Viel
 [2025-08-27]
 * Added scrot-1.12.1-x86_64-1_DIRTY_current_Viel
 * Added jinja2-3.1.6-x86_64-1_MLFS_current_Viel
