@@ -23,8 +23,6 @@ pushd /usr/share/info
   done
 popd
 
-# make link to udevadm to load udev at start, this will be done on the pkg.
-ln -s /usr/sbin/udevadm /bin/
 
 # start desired services
 chmod +x /etc/rc.d/init.d/network
@@ -55,13 +53,11 @@ BUGS AKA:TODO
 -------------
 Beauty the exit of scripts.
 Remove LFS License part from my packages.
-Revise automake release version if script exist ... lot of scripts ... manually best?
-  When make NEW set release to 1, when rebuild set +1. Need path files, will see.
 add some check for rsync if not installed.
 first boot and machine-id --> dbus-uuidgen --ensure
 skip install kernel packages or remove old when run repo list.
 the ffmpeg can be shiped with non-free libs be care like --> fdk-aac
-keyboard Xmodmap
+keyboard F10-F12 dont work Xmodmap dumpkeys showkey xinput xev udev hwdb ...
 
 When update glibc the etc/profile are overwrited ... need reinstall bash-shell-startup-files to get pathappend pathremove ...
 bash-5.3# grep -rwn /pkg/installed/* -e "etc/profile$"
@@ -73,7 +69,42 @@ need a think
 
 CHANGELOG
 ---------
+[2025-09-08]
+* Added jq-1.8.1-x86_64-1_DIRTY_current_Viel
+* Updated tcl-8.6.17-x86_64-1_MLFS_current_Viel 
+  when removed 8.6.16 from the package itself with old remove version,
+  it removes new files installed by 8.6.17, use DRY_RUN omg.
+  reinstalled .16 reinstalled .17 removed with removepkg.sh do the work.
+  Todo:4:5:
+  if this appens with critical files will break the system,
+  (it appened, that's why DRY_RUN exist),
+  slackware have the aaa libs package (redundant critical libs),
+  to don't make a new package, like tar-exclude-from-file.txt
+  maybe needed a critical_files_warning when removing critical core files.
+[2025-09-06]
+* Added nss-3.115.1-x86_64-1_GLFS_Networking
+  needed by icecat or firefox
+* Added sqlite
+  recomended for nss, if not nss build libsqlite3.so :(
+[2025-09-04]
+* Rebuild ranger-1.9.4-x86_64-2_DIRTY_current_Viel
+  apply ncurses-bulkrename.patch
+[2025-09-03]
+* Added cpio-2.15-x86_64-1_BLFS_current_Viel
+  needed to load intel-microcode
+[2025-09-02]
+* Tested mannually firmware load.
+  Todo:1:1:
+  Create make.buildpkg for firmware.
 [2025-09-01]
+* Added udev-lfs-dirtycfg-0.0.1-x86_64-1_MLFS_current_Viel
+  for persistent net rules.
+* Rebuild eudev-3.2.14-x86_64-2_MLFS_current_Viel
+  added needed link for init scripts bin/udevadm -> /usr/sbin/udevadm
+  rebuild with release 2
+  Todo:3:2:
+  need to think about clean big buildpkg files with sources
+  for old release 1 2 3 ... maybe separe sources and build ...
 * Patched makers release tags and NEWMAKE release to 1.
 [2025-08-30]
 * Rebuild mpv-0.40.0-x86_64-1_BLFS_current_Viel

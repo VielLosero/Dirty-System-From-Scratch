@@ -299,7 +299,7 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
              --disable-static              \
              --without-libpsl          \
              --with-openssl                \
-             --enable-threaded-resolver              \
+             --without-ca-bundle           \
              --with-ca-path=/etc/ssl/certs || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")

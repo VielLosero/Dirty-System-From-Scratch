@@ -86,6 +86,7 @@
 #.jinja-[0-9]*_MLFS_*
 .eudev-[0-9]*_MLFS_*
 .udev-lfs-[0-9]*_MLFS_*
+.udev-lfs-dirtycfg-[0-9]*_MLFS_*
 .man-db-[0-9]*_MLFS_*
 .procps-ng-[0-9]*_MLFS_*
 .util-linux-[0-9]*_MLFS_*
@@ -448,4 +449,8 @@
 .libass-[0-9]*_BLFS_*
 # needed by mpv
 .mpv-[0-9]*_BLFS_*
+# cpio for intel microcode
+.cpio-[0-9]*_BLFS_*
+# added jq
+.jq-[0-9]*_DIRTY_*
 # next tool

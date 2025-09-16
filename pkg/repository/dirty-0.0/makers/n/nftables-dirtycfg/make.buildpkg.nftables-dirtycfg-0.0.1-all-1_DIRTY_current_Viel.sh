@@ -149,7 +149,6 @@ cd $TMP_MAKE_DIR || exit 1
   mkdir -pv etc/rc.d/init.d
   mkdir -pv etc/rc.d/{rc2.d,rc3.d,rc4.d,rc5.d}
 
-
 cat << 'EOF' > etc/rc.d/init.d/nftables
 #!/bin/sh
 ########################################################################

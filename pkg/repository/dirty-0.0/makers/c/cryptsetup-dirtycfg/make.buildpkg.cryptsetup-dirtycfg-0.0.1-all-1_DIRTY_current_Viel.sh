@@ -196,7 +196,7 @@ case "${1}" in
         # get key for cryptsetup
     	  LUKSKEY="LABEL=USB_BAR:/nix.key"
         if [ ! -z $LUKSKEY ] ; then
-          mkdir  /mountkey
+          rmdir /mountkey 2>/dev/null ; mkdir  /mountkey
           KEYPART=$(echo $LUKSKEY |cut -f1 -d:)
           KEYNAME=$(echo $KEYPART |cut -f2 -d=)
           LUKSPATH="/mountkey$(echo $LUKSKEY |cut -f2 -d:)"

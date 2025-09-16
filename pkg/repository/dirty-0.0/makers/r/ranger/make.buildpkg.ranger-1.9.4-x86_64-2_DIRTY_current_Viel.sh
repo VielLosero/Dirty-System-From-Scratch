@@ -47,8 +47,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="eudev is a standalone dynamic and persistent device naming support (aka userspace devfs) daemon that runs independently from the init system."
-url="https://github.com/eudev-project/eudev"
+short_desc="Ranger is a console file manager with VI key bindings. It provides a minimalistic and nice curses interface with a view on the directory hierarchy."
+url="https://ranger.github.io/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -70,30 +70,28 @@ LFS=/mnt/lfs
 LFS_TGT=$(uname -m)-lfs-linux-gnu
 
 # --- END CAT SEED ---
- 
+
 # Config get tool.
 if wget --help >/dev/null 2>&1 ; then GETVER="wget --output-document - --quiet" GETFILE="wget -c " SPIDER="wget -q --method=HEAD"
 elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --silent" GETFILE="curl -C - -O --silent" SPIDER="curl -L --head --fail --silent"
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
-# Package vars.
-version_url=https://github.com/eudev-project/eudev/releases/latest
+# package vars.
+version_url="https://ranger.github.io/download.html"
 sum="sha256sum"
-file1_url=https://github.com/eudev-project/eudev/releases/download/v$ver
+file1_url=https://ranger.github.io
 file1=$name-$ver.tar.gz
-file1_sum=8da4319102f24abbf7fff5ce9c416af848df163b29590e666d334cc1927f006f
-file2_url=$file1_url
-file2=${file1}.asc
-file2_sum=515f81eb968c7580fdea3023dee5e1e136aeb77fbef4e8a86ad76b933b1cf722
-file2_gpgkey=BA60BC20F37E59444D6D25001365720913D2F22D 
-
+file1_sum=7ad75e0d1b29087335fbb1691b05a800f777f4ec9cba84faa19355075d7f0f89
+file2_url="$file1_url"
+file2=$file1.sig
+file2_sum=422690d6326c25212a83285b41f20f0020bc3858a417a5a9c213d9cd9b7997ac
+file2_gpgkey=1E9B36EC051FF6F7FFC969A7F08CE1E200FB5CDF
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  # Final URL after the redirect.
-  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/v%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/v%%' )
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -102,7 +100,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-1_${rel_tag}.sh}
-        if $SPIDER ${file1_url/$ver/$last_version}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 4
           else
@@ -278,11 +276,25 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
-  #  Remove two unneeded groups, render and sgx, from the default udev rules.
-  sed -e 's/KERNEL=="renderD*",// ; /.*OPTIONS+="static_node=kvm".*/ s/^/#/ ' \
-    -e 's/GROUP="sgx", //'               \
-    -i rules/50-udev-default.rules || exit 1
-[root@dirty v]# sed '/.*OPTIONS+="static_node=kvm".*/ s/^/#/'
+  # https://github.com/ranger/ranger/pull/2935#issuecomment-2198142497
+  # https://gitweb.gentoo.org/repo/gentoo.git/tree/app-misc/ranger/ranger-1.9.4-r1.ebuild
+  cat << 'EOF' > ncurses-bulkrename.patch
+--- /usr/lib/python3.13/site-packages/ranger/gui/ui.py	2025-09-04 10:49:05.219343551 +0200
++++ /usr/lib/python3.13/site-packages/ranger/gui/ui.py.new	2025-09-04 10:49:05.219343551 +0200
+@@ -157,7 +157,10 @@ def suspend(self):
+             pass
+         if self.settings.mouse_enabled:
+             _setup_mouse(dict(value=False))
+-        curses.endwin()
++        try:
++            curses.endwin()
++        except curses.error:
++            pass
+         self.is_on = False
+ 
+     def set_load_mode(self, boolean):
+EOF
+  patch ranger/gui/ui.py -i ncurses-bulkrename.patch || exit 1
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -297,18 +309,6 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  #./autogen.sh || exit 1
-  ./configure --prefix=/usr           \
-              --bindir=/sbin          \
-              --sbindir=/sbin         \
-              --libdir=/usr/lib       \
-              --sysconfdir=/etc       \
-              --libexecdir=/lib       \
-              --with-rootprefix=      \
-              --with-rootlibdir=/lib  \
-              --enable-hwdb           \
-              --enable-manpages       \
-              --disable-static || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -322,8 +322,6 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD ---
-  NUMJOBS="-j $(nproc)"
-  make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -338,13 +336,7 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
-  make DESTDIR=$PKGDIR install || exit 1
-  # move installed hwdb files under /lib
-  mkdir -vp $PKGDIR/lib/udev/hwdb.d
-  mv $PKGDIR/etc/udev/hwdb.d/* $PKGDIR/lib/udev/hwdb.d
-  # make needed link for init scripts.
-  mkdir -vp $PKGDIR/bin
-  ln -svf /usr/sbin/udevadm $PKGDIR/bin/udevadm
+  make PREFIX=/usr DESTDIR=$PKGDIR install || exit 1
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -424,6 +416,7 @@ fi
 if [ $STRIP -eq 1 ] ; then echo "Skipping STRIP elf." ; else 
   # strip ELF
   start_strip_date=$(date +"%s")
+  echo "Stripping ELF files."
   find $PKGDIR | xargs file | grep "ELF.*executable" | cut -f 1 -d : \
                | xargs strip --strip-unneeded 2> /dev/null
   end_strip_date=$(date +"%s")
@@ -437,7 +430,7 @@ if [ $SHARED -eq 1 ] ; then echo "Skipping find SHARED libs." ; else
   start_shared_date=$(date +"%s")
   echo "Find ELF files and extract needed shared libs"
   trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
-  cd $PKGDIR
+  cd $PKGDIR || exit 1
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; | grep -E "^./|NEEDED" |\
     # change ': file format elf64-x86-64' to :
     sed -e 's/:.*$/:/' |\

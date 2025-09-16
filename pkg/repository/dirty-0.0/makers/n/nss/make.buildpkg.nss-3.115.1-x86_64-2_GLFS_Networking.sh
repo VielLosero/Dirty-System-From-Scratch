@@ -47,11 +47,15 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="eudev is a standalone dynamic and persistent device naming support (aka userspace devfs) daemon that runs independently from the init system."
-url="https://github.com/eudev-project/eudev"
+short_desc="The Network Security Services (NSS) package is a set of libraries designed to support cross-platform development of security-enabled client and server applications. Applications built with NSS can support SSL v2 and v3, TLS, PKCS #5, PKCS #7, PKCS #11, PKCS #12, S/MIME, X.509 v3 certificates, and other security standards."
+url="https://developer.mozilla.org/en-US/docs/Mozilla/Projects/NSS"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
+# sub_name sub_ver for download
+sub_name=${name^^}
+sub_ver=${ver//./_}
+
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
@@ -70,30 +74,31 @@ LFS=/mnt/lfs
 LFS_TGT=$(uname -m)-lfs-linux-gnu
 
 # --- END CAT SEED ---
- 
+
 # Config get tool.
 if wget --help >/dev/null 2>&1 ; then GETVER="wget --output-document - --quiet" GETFILE="wget -c " SPIDER="wget -q --method=HEAD"
 elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --silent" GETFILE="curl -C - -O --silent" SPIDER="curl -L --head --fail --silent"
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
-# Package vars.
-version_url=https://github.com/eudev-project/eudev/releases/latest
-sum="sha256sum"
-file1_url=https://github.com/eudev-project/eudev/releases/download/v$ver
+# package vars.
+version_url="https://archive.mozilla.org/pub/security/nss/releases"
+sum="md5sum"
+file1_url="${version_url}/${sub_name}_${sub_ver}_RTM/src"
 file1=$name-$ver.tar.gz
-file1_sum=8da4319102f24abbf7fff5ce9c416af848df163b29590e666d334cc1927f006f
-file2_url=$file1_url
-file2=${file1}.asc
-file2_sum=515f81eb968c7580fdea3023dee5e1e136aeb77fbef4e8a86ad76b933b1cf722
-file2_gpgkey=BA60BC20F37E59444D6D25001365720913D2F22D 
-
+file1_sum=c9d46d028baa10dbcbac81db1fd95e58
+file2_url="$file1_url"
+file2=${file1}.SHA256SUMS
+file2_sum=25e3193bf25062f457212fe6b9cc637e
+file3_url=https://glfs-book.github.io/glfs/download/nss
+file3=nss-standalone-1.patch
+file3_sum=f8a7ce473bd61792ef182cf0fb2d359a
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
-if [ $CHECK_RELEASE = 1 ] ; then 
-  # Final URL after the redirect.
-  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/v%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/v%%' )
+if [ $CHECK_RELEASE = 1 ] ; then
+  last_sub_ver=$(echo "$($GETVER ${version_url}/)" | tr ' ' '\n' | grep href.*NSS_[0-9] | cut -d'"' -f2 | sed 's,_RTM/$,, ; s,.*/NSS_,,' | sort -t_ -Vr | head -1 )
+  last_version=$(echo "$($GETVER ${file1_url/$sub_ver/$last_sub_ver}/)" | tr ' ' '\n' | grep href.*${name}-[0-9].*.tar.*z | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -102,7 +107,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-1_${rel_tag}.sh}
-        if $SPIDER ${file1_url/$ver/$last_version}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 4
           else
@@ -132,12 +137,12 @@ fi
 cd $SOURCESDIR || exit 1
 [ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
 [ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
-[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
+[ ! -e $file2 ] && $GETFILE ${file2_url}/SHA256SUMS -O $file2
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
+[ ! -e $file3 ] && $GETFILE ${file3_url}/${file3}
+[ -e $file3 ] && if echo "$file3_sum $file3" | $sum -c ; then ln -v $SOURCESDIR/$file3 $SOURCESPPDIR/ ; else $sum $file3 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $file2_gpgkey
-gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
@@ -244,6 +249,20 @@ if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
   start_checks_date=$(date +"%s")
   echo "Checking needs to build."
   # --- LFS_CMD_CHECKS ---
+  # If you're rebuilding NSS and you have not installed SQLite-3.50.4, run the following command to remove a problematic library.
+  sqlite3 --version > /dev/null 2>&1 || 
+  if [ -f /usr/lib/libsqlite3.so ]; then
+    rm -vf /usr/lib/libsqlite3.*
+  fi
+  # If you're rebuilding NSS, run the following command to remove a problematic library.
+  sqlite3 --version > /dev/null 2>&1 || 
+  if [ -f /usr/lib32/libsqlite3.so ]; then
+    rm -vf /usr/lib32/libsqlite3.*
+  fi
+  # My NOTE: sqlite is not shiped with usr/lib32/libsqlite3.so
+  # so we need remove it manually to NSS rebuild it 
+  # if not we end with old usr/lib32/libsqlite3.so
+  rm -vf /usr/lib32/libsqlite3.*
   # --- END_LFS_CMD_CHECKS ---
   end_checks_date=$(date +"%s")
   checks_time=$(($end_checks_date - $start_checks_date))
@@ -278,11 +297,8 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
-  #  Remove two unneeded groups, render and sgx, from the default udev rules.
-  sed -e 's/KERNEL=="renderD*",// ; /.*OPTIONS+="static_node=kvm".*/ s/^/#/ ' \
-    -e 's/GROUP="sgx", //'               \
-    -i rules/50-udev-default.rules || exit 1
-[root@dirty v]# sed '/.*OPTIONS+="static_node=kvm".*/ s/^/#/'
+  # patch from GLFS
+  patch -Np1 -i $SOURCESDIR/nss-standalone-1.patch || exit 1
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -297,18 +313,7 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  #./autogen.sh || exit 1
-  ./configure --prefix=/usr           \
-              --bindir=/sbin          \
-              --sbindir=/sbin         \
-              --libdir=/usr/lib       \
-              --sysconfdir=/etc       \
-              --libexecdir=/lib       \
-              --with-rootprefix=      \
-              --with-rootlibdir=/lib  \
-              --enable-hwdb           \
-              --enable-manpages       \
-              --disable-static || exit 1
+  cd nss || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -322,8 +327,15 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD ---
+  cd nss || exit 1
   NUMJOBS="-j $(nproc)"
-  make $NUMJOBS || exit 1
+  make $NUMJOBS BUILD_OPT=1                     \
+  NSPR_INCLUDE_DIR=/usr/include/nspr \
+  USE_SYSTEM_ZLIB=1                  \
+  ZLIB_LIBS=-lz                      \
+  NSS_ENABLE_WERROR=0                \
+  USE_64=1                           \
+  $([ -f /usr/lib/libsqlite3.so ] && echo NSS_USE_SYSTEM_SQLITE=1) || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -338,13 +350,17 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
-  make DESTDIR=$PKGDIR install || exit 1
-  # move installed hwdb files under /lib
-  mkdir -vp $PKGDIR/lib/udev/hwdb.d
-  mv $PKGDIR/etc/udev/hwdb.d/* $PKGDIR/lib/udev/hwdb.d
-  # make needed link for init scripts.
-  mkdir -vp $PKGDIR/bin
-  ln -svf /usr/sbin/udevadm $PKGDIR/bin/udevadm
+  cd nss || exit 1
+  cd ../dist || exit 1
+  install -v -m755 -d $PKGDIR/usr/lib      &&
+  install -v -m755 Linux*/lib/*.so $PKGDIR/usr/lib              &&
+  install -v -m644 Linux*/lib/{*.chk,libcrmf.a} $PKGDIR/usr/lib &&
+  install -v -m755 -d $PKGDIR/usr/include/nss      &&
+  cp -v -RL {public,private}/nss/* $PKGDIR/usr/include/nss      &&
+  install -v -m755 -d $PKGDIR/usr/bin &&
+  install -v -m755 Linux*/bin/{certutil,nss-config,pk12util} $PKGDIR/usr/bin &&
+  install -v -m755 -d $PKGDIR/usr/lib/pkgconfig &&
+  install -v -m644 Linux*/lib/pkgconfig/nss.pc $PKGDIR/usr/lib/pkgconfig || exit 1
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -359,6 +375,7 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_POST ---
+  cd nss || exit 1
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
@@ -373,6 +390,7 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG32 ---
+  cd nss || exit 1
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
   config32_time=$(($end_config32_date - $start_config32_date))
@@ -386,6 +404,17 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD32 ---
+  cd nss || exit 1
+  find -name "Linux*.OBJ" -type d -exec rm -rf {} + 
+  rm -rf ../dist/* && rmdir ../dist || exit 1
+  NUMJOBS="-j $(nproc)"
+  CC="gcc -m32" CXX="g++ -m32"   \
+  make $NUMJOBS BUILD_OPT=1                      \
+  NSPR_INCLUDE_DIR=/usr/include/nspr  \
+  USE_SYSTEM_ZLIB=1                   \
+  ZLIB_LIBS=-lz                       \
+  NSS_ENABLE_WERROR=0                 \
+  $([ -f /usr/lib32/libsqlite3.so ] && echo NSS_USE_SYSTEM_SQLITE=1) || exit 1
   # --- END_LFS_CMD_BUILD32 ---
   end_build32_date=$(date +"%s")
   build32_time=$(($end_build32_date - $start_build32_date))
@@ -400,6 +429,14 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL32 ---
+  cd nss || exit 1
+  cd ../dist || exit 1
+  install -v -m755 -d $PKGDIR/usr/lib32
+  install -v -m755 Linux*/lib/*.so $PKGDIR/usr/lib32           &&
+  install -v -m644 Linux*/lib/{*.chk,libcrmf.a} $PKGDIR/usr/lib32           &&
+  sed -i 's/lib/lib32/g' Linux*/lib/pkgconfig/nss.pc                 &&
+  install -v -m755 -d $PKGDIR/usr/lib32/pkgconfig || exit 1
+  install -v -m644 Linux*/lib/pkgconfig/nss.pc  $PKGDIR/usr/lib32/pkgconfig || exit 1
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
   install32_time=$(($end_install32_date - $start_install32_date))
@@ -424,6 +461,7 @@ fi
 if [ $STRIP -eq 1 ] ; then echo "Skipping STRIP elf." ; else 
   # strip ELF
   start_strip_date=$(date +"%s")
+  echo "Stripping ELF files."
   find $PKGDIR | xargs file | grep "ELF.*executable" | cut -f 1 -d : \
                | xargs strip --strip-unneeded 2> /dev/null
   end_strip_date=$(date +"%s")
@@ -437,7 +475,7 @@ if [ $SHARED -eq 1 ] ; then echo "Skipping find SHARED libs." ; else
   start_shared_date=$(date +"%s")
   echo "Find ELF files and extract needed shared libs"
   trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
-  cd $PKGDIR
+  cd $PKGDIR || exit 1
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; | grep -E "^./|NEEDED" |\
     # change ': file format elf64-x86-64' to :
     sed -e 's/:.*$/:/' |\

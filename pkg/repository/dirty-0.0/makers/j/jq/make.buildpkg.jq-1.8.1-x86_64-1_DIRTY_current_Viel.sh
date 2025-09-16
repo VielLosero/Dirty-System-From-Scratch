@@ -47,8 +47,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="eudev is a standalone dynamic and persistent device naming support (aka userspace devfs) daemon that runs independently from the init system."
-url="https://github.com/eudev-project/eudev"
+short_desc="Command-line JSON processor."
+url="https://jqlang.github.io/jq/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -77,23 +77,21 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://github.com/eudev-project/eudev/releases/latest
+version_url=https://github.com/jqlang/jq/releases/latest
 sum="sha256sum"
-file1_url=https://github.com/eudev-project/eudev/releases/download/v$ver
+file1_url=https://github.com/jqlang/jq/releases/download/$name-$ver
 file1=$name-$ver.tar.gz
-file1_sum=8da4319102f24abbf7fff5ce9c416af848df163b29590e666d334cc1927f006f
+file1_sum=2be64e7129cecb11d5906290eba10af694fb9e3e7f9fc208a311dc33ca837eb0
 file2_url=$file1_url
-file2=${file1}.asc
-file2_sum=515f81eb968c7580fdea3023dee5e1e136aeb77fbef4e8a86ad76b933b1cf722
-file2_gpgkey=BA60BC20F37E59444D6D25001365720913D2F22D 
-
+file2=${file1}.sha256sum.txt
+file2_sum=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
   # Final URL after the redirect.
-  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/v%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/v%%' )
+  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/jq-%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/jq-%%' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -132,12 +130,10 @@ fi
 cd $SOURCESDIR || exit 1
 [ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
 [ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
-[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
+[ ! -e $file2 ] && $GETFILE ${file2_url}/sha256sum.txt -O ${file2}
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $file2_gpgkey
-gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
@@ -278,11 +274,6 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
-  #  Remove two unneeded groups, render and sgx, from the default udev rules.
-  sed -e 's/KERNEL=="renderD*",// ; /.*OPTIONS+="static_node=kvm".*/ s/^/#/ ' \
-    -e 's/GROUP="sgx", //'               \
-    -i rules/50-udev-default.rules || exit 1
-[root@dirty v]# sed '/.*OPTIONS+="static_node=kvm".*/ s/^/#/'
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -297,18 +288,7 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  #./autogen.sh || exit 1
-  ./configure --prefix=/usr           \
-              --bindir=/sbin          \
-              --sbindir=/sbin         \
-              --libdir=/usr/lib       \
-              --sysconfdir=/etc       \
-              --libexecdir=/lib       \
-              --with-rootprefix=      \
-              --with-rootlibdir=/lib  \
-              --enable-hwdb           \
-              --enable-manpages       \
-              --disable-static || exit 1
+  ./configure --prefix=/usr || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -339,12 +319,6 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
   make DESTDIR=$PKGDIR install || exit 1
-  # move installed hwdb files under /lib
-  mkdir -vp $PKGDIR/lib/udev/hwdb.d
-  mv $PKGDIR/etc/udev/hwdb.d/* $PKGDIR/lib/udev/hwdb.d
-  # make needed link for init scripts.
-  mkdir -vp $PKGDIR/bin
-  ln -svf /usr/sbin/udevadm $PKGDIR/bin/udevadm
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))

@@ -47,8 +47,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="eudev is a standalone dynamic and persistent device naming support (aka userspace devfs) daemon that runs independently from the init system."
-url="https://github.com/eudev-project/eudev"
+short_desc="GNUzilla is the GNU version of the Mozilla suite, and GNU IceCat is the GNU version of the Firefox browser."
+url="https://www.gnu.org/software/gnuzilla/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -70,30 +70,38 @@ LFS=/mnt/lfs
 LFS_TGT=$(uname -m)-lfs-linux-gnu
 
 # --- END CAT SEED ---
- 
+
 # Config get tool.
 if wget --help >/dev/null 2>&1 ; then GETVER="wget --output-document - --quiet" GETFILE="wget -c " SPIDER="wget -q --method=HEAD"
 elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --silent" GETFILE="curl -C - -O --silent" SPIDER="curl -L --head --fail --silent"
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
-# Package vars.
-version_url=https://github.com/eudev-project/eudev/releases/latest
+# package vars.
+version_url=https://cgit.git.savannah.gnu.org/cgit/gnuzilla.git/
+#version_url=https://icecatbrowser.org/all_downloads.html # unofficial
+#https://icecatbrowser.org/diy.html#
+#https://trisquel.info/en/forum/building-gnu-icecat-source-trisquel-11
 sum="sha256sum"
-file1_url=https://github.com/eudev-project/eudev/releases/download/v$ver
-file1=$name-$ver.tar.gz
-file1_sum=8da4319102f24abbf7fff5ce9c416af848df163b29590e666d334cc1927f006f
-file2_url=$file1_url
-file2=${file1}.asc
-file2_sum=515f81eb968c7580fdea3023dee5e1e136aeb77fbef4e8a86ad76b933b1cf722
-file2_gpgkey=BA60BC20F37E59444D6D25001365720913D2F22D 
-
+file1_url=https://cgit.git.savannah.gnu.org/cgit/gnuzilla.git/snapshot
+file1=gnuzilla-$ver-gnu1.tar.gz
+file1_sum=34788edf68b6f0aae790a7636b1ce853ca42c7a800534b74c2512a977c97dab2
+file2_url=https://ftp.mozilla.org/pub/firefox/candidates/${ver}esr-candidates/build1/source
+file2=firefox-${ver}esr.source.tar.xz
+file2_sum=93b9ef6229f41cb22ff109b95bbf61a78395a0fe4b870192eeca22947cb09a53
+file3_url=$file2_url
+file3=${file2}.asc
+file3_sum=c2282fd12771ee5cfb5fbb47d0328ab0532e409dfa7c77fa2e7dfce1914e3f47
+file3_gpgkey='14F26682D0916CDD81E37B6D61B7B526D98F0353'
+file4_url=https://github.com/mozilla-l10n/firefox-l10n/archive
+file4_commit=19cb4fc852dad19b4700c4442bac2d2a280cd66c.tar.gz
+file4=firefox-l10n-${file4_commit}
+file4_sum=137bd8fdd7a930a5532063dab1cf346c737c36b9abfedb2df0256bbc47a8491f
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  # Final URL after the redirect.
-  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/v%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/v%%' )
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -102,7 +110,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-1_${rel_tag}.sh}
-        if $SPIDER ${file1_url/$ver/$last_version}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 4
           else
@@ -134,10 +142,15 @@ cd $SOURCESDIR || exit 1
 [ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
 [ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
+[ ! -e $file3 ] && $GETFILE ${file3_url}/${file3}
+[ -e $file3 ] && if echo "$file3_sum $file3" | $sum -c ; then ln -v $SOURCESDIR/$file3 $SOURCESPPDIR/ ; else $sum $file3 ; exit 1 ; fi
+[ ! -e $file4 ] && $GETFILE ${file4_url}/$file4_commit -O ${file4}
+[ -e $file4 ] && if echo "$file4_sum $file4" | $sum -c ; then ln -v $SOURCESDIR/$file4 $SOURCESPPDIR/ ; else $sum $file4 ; exit 1 ; fi
+
 
 # Check signaure if needed
-gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $file2_gpgkey
-gpg --verify $file2 $file1 || exit 1
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $file3_gpgkey
+gpg --verify $file3 $file2 || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
@@ -257,12 +270,24 @@ if [ $EXTRACT -eq 1 ] ; then echo "Skipping EXTRACT sources." ; else
   echo "Preparing sources."
   cd $BUILDDIR || exit 1
   # deleting source dirs if exist.
-  if [ -d $name-$ver ] ; then rm -rf $name-$ver ; fi
+  if [ -d gnuzilla-${ver}-gnu1 ] ; then rm -rf gnuzilla-${ver}-gnu1 ; fi
   if [ -d $PKGDIR ] ; then rm -rf $PKGDIR && mkdir $PKGDIR ; fi
 EOF_OUTBUILD
   echo '  tar xf $SOURCESDIR'/$file1 >> $OUTBUILD 
   cat << 'EOF_OUTBUILD' >> $OUTBUILD
-  cd $name-$ver || exit 1
+  cd gnuzilla-${ver}-gnu1 || exit 1
+  install -v -m755 -d output
+  cd output || exit 1
+EOF_OUTBUILD
+  echo '  tar xf $SOURCESDIR'/$file2 >> $OUTBUILD 
+  cat << 'EOF_OUTBUILD' >> $OUTBUILD
+  mv -v firefox-$ver icecat-$ver || exit 1 
+  cd icecat-$ver || exit 1
+EOF_OUTBUILD
+  echo '  tar xf $SOURCESDIR'/$file4 >> $OUTBUILD 
+  echo "  mv ${file4/.tar*} l10n" >> $OUTBUILD 
+  cat << 'EOF_OUTBUILD' >> $OUTBUILD
+  cd l10n || exit 1
   # --- LFS_CMD_EXTRACT ---
   # --- END_LFS_CMD_EXTRACT ---
   end_extract_date=$(date +"%s")
@@ -276,13 +301,98 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   start_patch_date=$(date +"%s")
   echo "Applying patches."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd gnuzilla-${ver}-gnu1 || exit 1
+  #cd gnuzilla-${ver}-gnu1 || exit 1
+  #cd output || exit 1
+  #cd icecat-$ver || exit 1
+  #cd l10n || exit 1
   # --- LFS_CMD_PATCH ---
-  #  Remove two unneeded groups, render and sgx, from the default udev rules.
-  sed -e 's/KERNEL=="renderD*",// ; /.*OPTIONS+="static_node=kvm".*/ s/^/#/ ' \
-    -e 's/GROUP="sgx", //'               \
-    -i rules/50-udev-default.rules || exit 1
-[root@dirty v]# sed '/.*OPTIONS+="static_node=kvm".*/ s/^/#/'
+  echo "  Applying gnuzilla patches ..."
+  ## cd ${BUILDDIR}/gnuzilla-${ver}-gnu1 || exit 1
+  ## head -n -18 makeicecat > makeicecat_apply_patches || exit 1 
+  ## echo "apply_patches" >> makeicecat_apply_patches || exit 1 
+  ## cd output || exit 1
+  ## bash ../makeicecat_apply_patches 
+  # fail so do it mannuallly.
+  cd ${BUILDDIR}/gnuzilla-${ver}-gnu1/output/icecat-$ver || exit 1
+  for patch in ../../data/patches/*.patch; do
+      echo Patching with file: $patch
+      patch -p1 --force --no-backup-if-mismatch --input $patch
+  done
+  for file_to_append in $(cd ../../data/files-to-append; find . -type f -print); do
+      echo Appending new data to the end of file: $file_to_append
+      cat ../../data/files-to-append/$file_to_append >> $file_to_append
+  done
+  readonly PREFS_IN_FILE=browser/locales/en-US/browser/preferences/preferences.ftl
+  readonly PREFS_OUT_FILE=browser/browser/preferences/preferences.ftl
+  for dir in $(ls -1d l10n/*) ; do
+      #echo "processing $dir ..."
+      if [[ $dir != l10n/compare-locales ]]; then
+          if [[ ! -e ../../data/files-to-append/${dir}/${PREFS_OUT_FILE} ]]; then
+              #echo " no exist ../../data/files-to-append/${dir}/${PREFS_OUT_FILE}"
+              if [ -e "${dir}/${PREFS_OUT_FILE}" ] ; then 
+                echo "Appending default ${PREFS_IN_FILE} to the end of file: ${dir}/${PREFS_OUT_FILE}"
+                cat ../../data/files-to-append/${PREFS_IN_FILE} >> ${dir}/${PREFS_OUT_FILE}
+              fi
+          fi
+      fi
+  done
+  cp -v ../../data/Changelog.IceCat ../../data/README.IceCat .
+
+  echo "  Applying gnuzilla configure ..."
+  cd ${BUILDDIR}/gnuzilla-${ver}-gnu1 || exit 1
+  head -n -18 makeicecat > makeicecat_configure || exit 1 
+  echo "configure" >> makeicecat_configure || exit 1 
+  cd output/icecat-$ver || exit 1
+  bash ../../makeicecat_configure || exit 1
+  
+  echo "  Applying gnuzilla configure_search ..."
+  cd ${BUILDDIR}/gnuzilla-${ver}-gnu1 || exit 1
+  head -n -18 makeicecat > makeicecat_configure_search || exit 1 
+  echo "configure_search" >> makeicecat_configure_search || exit 1 
+  cd output/icecat-$ver || exit 1
+  bash ../../makeicecat_configure_search || exit 1
+  
+  echo "  Applying gnuzilla branding ..."
+  cd ${BUILDDIR}/gnuzilla-${ver}-gnu1 || exit 1
+  head -n -18 makeicecat > makeicecat_branding || exit 1 
+  echo "apply_branding" >> makeicecat_branding || exit 1 
+  cd output/icecat-$ver || exit 1
+  bash ../../makeicecat_branding || exit 1
+
+  echo "  Applying gnuzilla batch_branding ..."
+  cd ${BUILDDIR}/gnuzilla-${ver}-gnu1 || exit 1
+  head -n -18 makeicecat > makeicecat_batch_branding || exit 1 
+  echo "apply_batch_branding" >> makeicecat_batch_branding || exit 1 
+  cd output/icecat-$ver || exit 1
+  bash ../../makeicecat_batch_branding || exit 1
+
+  echo "  Applying gnuzilla icons_branding ..."
+  cd ${BUILDDIR}/gnuzilla-${ver}-gnu1 || exit 1
+  head -n -18 makeicecat > makeicecat_icons_branding || exit 1 
+  echo "apply_icons_branding" >> makeicecat_icons_branding || exit 1 
+  cd output/icecat-$ver || exit 1
+  bash ../../makeicecat_icons_branding || exit 1
+
+  exit 1 
+  #validate_env || exit 1
+  #prepare_env
+  #fetch_source
+  #verify_sources
+  #extract_sources
+  #fetch_l10n
+  #apply_patches
+  #configure
+  #configure_search
+  ## configure_mobile
+  #apply_branding
+  #apply_batch_branding
+  #apply_icons_branding
+  #prepare_macos_packaging
+  #configure_extensions
+  #configure_onboarding
+  #apply_bugfixes
+  #finalize_sourceball
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -295,20 +405,11 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd gnuzilla-${ver}-gnu1 || exit 1
   # --- LFS_CMD_CONFIG ---
-  #./autogen.sh || exit 1
-  ./configure --prefix=/usr           \
-              --bindir=/sbin          \
-              --sbindir=/sbin         \
-              --libdir=/usr/lib       \
-              --sysconfdir=/etc       \
-              --libexecdir=/lib       \
-              --with-rootprefix=      \
-              --with-rootlibdir=/lib  \
-              --enable-hwdb           \
-              --enable-manpages       \
-              --disable-static || exit 1
+  ./configure --prefix=/usr         \
+              --disable-static      \
+              --docdir=/usr/share/doc/$name-$ver || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -320,7 +421,7 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   start_build_date=$(date +"%s")
   echo "Compiling sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd gnuzilla-${ver}-gnu1 || exit 1
   # --- LFS_CMD_BUILD ---
   NUMJOBS="-j $(nproc)"
   make $NUMJOBS || exit 1
@@ -336,15 +437,9 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   #Installing sources.
   echo "Installing sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd gnuzilla-${ver}-gnu1 || exit 1
   # --- LFS_CMD_INSTALL ---
   make DESTDIR=$PKGDIR install || exit 1
-  # move installed hwdb files under /lib
-  mkdir -vp $PKGDIR/lib/udev/hwdb.d
-  mv $PKGDIR/etc/udev/hwdb.d/* $PKGDIR/lib/udev/hwdb.d
-  # make needed link for init scripts.
-  mkdir -vp $PKGDIR/bin
-  ln -svf /usr/sbin/udevadm $PKGDIR/bin/udevadm
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -357,8 +452,9 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   start_post_date=$(date +"%s")
   echo "Post compilation tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd gnuzilla-${ver}-gnu1 || exit 1
   # --- LFS_CMD_POST ---
+  make distclean
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
@@ -371,8 +467,14 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   start_config32_date=$(date +"%s")
   echo "Configuring 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd gnuzilla-${ver}-gnu1 || exit 1
   # --- LFS_CMD_CONFIG32 ---
+  CC="gcc -m32" ./configure \
+      --prefix=/usr         \
+      --disable-static      \
+      --libdir=/usr/lib32   \
+      --libexecdir=/usr/lib32   \
+      --host=i686-pc-linux-gnu || exit 1
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
   config32_time=$(($end_config32_date - $start_config32_date))
@@ -384,8 +486,10 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   start_build32_date=$(date +"%s")
   echo "Compiling 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd gnuzilla-${ver}-gnu1 || exit 1
   # --- LFS_CMD_BUILD32 ---
+  NUMJOBS="-j $(nproc)"
+  make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD32 ---
   end_build32_date=$(date +"%s")
   build32_time=$(($end_build32_date - $start_build32_date))
@@ -398,8 +502,12 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   start_install32_date=$(date +"%s")
   echo "Installing 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd gnuzilla-${ver}-gnu1 || exit 1
   # --- LFS_CMD_INSTALL32 ---
+  mkdir -vp $PKGDIR/usr/lib32
+  make DESTDIR=$PWD/DESTDIR install
+  cp -Rv DESTDIR/usr/lib32/* $PKGDIR/usr/lib32
+  rm -rf DESTDIR
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
   install32_time=$(($end_install32_date - $start_install32_date))
@@ -412,7 +520,7 @@ if [ $POST32 -eq 1 ] ; then echo "Skipping POST32 bits compilation tasks." ; els
   start_post32_date=$(date +"%s")
   echo "Post compilation 32bits tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd gnuzilla-${ver}-gnu1 || exit 1
   # --- LFS_CMD_POST32 ---
   # --- END_LFS_CMD_POST32 ---
   end_post32_date=$(date +"%s")
@@ -424,6 +532,7 @@ fi
 if [ $STRIP -eq 1 ] ; then echo "Skipping STRIP elf." ; else 
   # strip ELF
   start_strip_date=$(date +"%s")
+  echo "Stripping ELF files."
   find $PKGDIR | xargs file | grep "ELF.*executable" | cut -f 1 -d : \
                | xargs strip --strip-unneeded 2> /dev/null
   end_strip_date=$(date +"%s")
@@ -437,7 +546,7 @@ if [ $SHARED -eq 1 ] ; then echo "Skipping find SHARED libs." ; else
   start_shared_date=$(date +"%s")
   echo "Find ELF files and extract needed shared libs"
   trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
-  cd $PKGDIR
+  cd $PKGDIR || exit 1
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; | grep -E "^./|NEEDED" |\
     # change ': file format elf64-x86-64' to :
     sed -e 's/:.*$/:/' |\

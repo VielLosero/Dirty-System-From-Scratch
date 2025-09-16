@@ -149,7 +149,8 @@ wc -l /pkg/installed/*/index | grep " 0 "
 
 # config kernel 
 bash-5.2# for line in $(diff -u /pkg/tools/config /pkg/tools/kernel.config.dirty1 | grep +C | cut -c 2- ) ; do echo $line ; bash /pkg/tools/scripts/kernel.config.sh --file /pkg/tools/config  --set-val ${line/=*} ${line/*=} ; done
-
+https://docs.kernel.org/admin-guide/quickly-build-trimmed-linux.html
+If you want to use localmodconfig to build a kernel for another machine, run lsmod > lsmod_foo-machine on it and transfer that file to your build host. Now point the build scripts to the file like this: yes "" | make LSMOD=~/lsmod_foo-machine localmodconfig. Note, in this case you likely want to copy a base kernel configuration from the other machine over as well and place it as .config in your build directory.
 
 
 # find libs needed 

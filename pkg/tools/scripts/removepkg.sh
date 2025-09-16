@@ -27,9 +27,10 @@
 #:Version:0.0.1
 
 usage(){
-echo "USAGE: removepkg.sh { pkg_name }"
-echo "              	  { name-ver-arch-rel }"
-echo "              	  { pkg-example-0.0.1-x86_64-1_extra_info }"
+echo "USAGE: DRY_RUN=1 removepkg.sh { ... }"
+echo "                 removepkg.sh { pkg_name }"
+echo "              	              { name-ver-arch-rel }"
+echo "              	              { pkg-example-0.0.1-x86_64-1_extra_info }"
 exit 1
 }
 
