@@ -80,7 +80,7 @@ else echo "Needed wget or curl to download files or check for new versions." && 
 version_url="https://sourceforge.net/projects/expect/files/Expect"
 sum="md5sum"
 file1_url="$version_url/$ver"
-file1=$name$ver.tar.gz
+FILE1=$NAME$VER.TAR.GZ
 file1_sum=00fce8de158422f5ccd2666512329bd2
 file2_url="$file1_url"
 file2=${file1}.SHA256
@@ -93,7 +93,8 @@ file2_sum=0ca4d6bb8d572fbcdb13cb36cd34833e
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_sub_ver=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep "href=\".*Expect/[0-9].*/\"$"  | cut -d'"' -f2 | sed 's%/$%%' | sed 's,.*/,,' | sort -Vr | head -1 )
+  last_version=$(echo "$($GETVER $version_url/$last_sub_ver)" | tr ' ' '\n' | grep href.*${name}[0-9].*tar.*z | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 | sed 's,.*/expect,,' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -102,7 +103,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-1_${rel_tag}.sh}
-        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url/$ver/$last_sub_ver}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 4
           else
@@ -575,7 +576,8 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
     echo "Decoding b64 package files."
       # --keep-directory-symlink Don't replace existing symlinks to directories when extracting.
       # tested tar (GNU tar) 1.35 || exit
-      if [ -e TAR_EXCLUDE_FROM ] ; then
+      if [ -e $TAR_EXCLUDE_FROM ] ; then
+        echo "Excluding files in $TAR_EXCLUDE_FROM"
         echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
       else
         echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink

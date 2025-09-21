@@ -1,8 +1,9 @@
-usr/local/bin/example.file.that.will.be.excluded
+make.buildpkg.log
+rsync-exclude-from-file.txt
+tar-exclude-from-file.txt
+var/log/make.buildpkg.log
+pkg/config/rsync-exclude-from-file.txt
+pkg/config/tar-exclude-from-file.txt
 etc/passwd
 etc/shadow
 etc/group
-var/log/wtmp
-var/log/btmp
-var/log/lastlog
-var/log/faillog

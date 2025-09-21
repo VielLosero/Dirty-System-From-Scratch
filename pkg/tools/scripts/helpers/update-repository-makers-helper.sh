@@ -20,13 +20,13 @@ if [ $# -eq 2 ] ; then
 		file=${2##*/}
 		if [ -h $UPDATEDIR_REPO_MAKERS_UP_TO_DATE/$file ] ; then
       echo "Up to date: $file"
-      sed -i "${line_num}s/ C /   /" $RUN_REPO_LIST || exit 1
+      sed -i "${line_num}s/# . /#   /" $RUN_REPO_LIST || exit 1
 		elif [ -h $UPDATEDIR_REPO_MAKERS_WITH_NEW_VER/$file ] ; then
       echo "Need upgrade: $file"
-      sed -i "${line_num}s/ C / N /" $RUN_REPO_LIST || exit 1
+      sed -i "${line_num}s/# . /# N /" $RUN_REPO_LIST || exit 1
 		elif [ -h $BLACKLIST/$file ] ; then
       echo "Blacklisted: $file"
-      sed -i "${line_num}s/ C / S /" $RUN_REPO_LIST || exit 1
+      sed -i "${line_num}s/# . /# S /" $RUN_REPO_LIST || exit 1
     else
 		#CHECK_RELEASE=1 bash $1
     last=$(CHECK_RELEASE=1 bash $2 )
@@ -41,7 +41,7 @@ if [ $# -eq 2 ] ; then
 				if [ -h $UPDATEDIR_REPO_MAKERS_FAILED/$file ] ; then
 					rm $UPDATEDIR_REPO_MAKERS_FAILED/$file
 				fi
-        sed -i "${line_num}s/ C /   /" $RUN_REPO_LIST || exit 1
+        sed -i "${line_num}s/# . /#   /" $RUN_REPO_LIST || exit 1
 				;;
 			1)
 				echo "Failed: $file"
@@ -50,7 +50,7 @@ if [ $# -eq 2 ] ; then
 						ln -s $2 $UPDATEDIR_REPO_MAKERS_FAILED/$file
 					fi
 				fi
-        sed -i "${line_num}s/ C / F /" $RUN_REPO_LIST || exit 1
+        sed -i "${line_num}s/# . /# F /" $RUN_REPO_LIST || exit 1
 				;;
 			2)
 				echo "Need upgrade: $file --> $(echo "$last" | grep "Version check" | cut -d' ' -f4)"
@@ -61,7 +61,7 @@ if [ $# -eq 2 ] ; then
 				if [ -h $UPDATEDIR_REPO_MAKERS_FAILED/$file ] ; then
 					rm $UPDATEDIR_REPO_MAKERS_FAILED/$file
 				fi
-        sed -i "${line_num}s/ C / N /" $RUN_REPO_LIST || exit 1
+        sed -i "${line_num}s/# . /# N /" $RUN_REPO_LIST || exit 1
 				;;
 			*)	echo "Error"
 				;;

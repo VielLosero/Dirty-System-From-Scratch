@@ -1,0 +1,11 @@
+--- /pkg/repository/dirty-0.0/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1_MLFS_current_Viel.sh	2025-09-01 09:53:53.719854821 +0200
++++ /pkg/repository/dirty-0.0/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1_MLFS_current_Viel.sh.new	2025-09-17 19:18:47.903056929 +0200
+@@ -580,7 +580,7 @@
+     echo "Decoding b64 package files."
+       # --keep-directory-symlink Don't replace existing symlinks to directories when extracting.
+       # tested tar (GNU tar) 1.35 || exit
+-      if [ -e TAR_EXCLUDE_FROM ] ; then
++      if [ -e $TAR_EXCLUDE_FROM ] ; then
+         echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
+       else
+         echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink

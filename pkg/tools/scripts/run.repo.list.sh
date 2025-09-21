@@ -25,7 +25,7 @@
 # Example to make a list:
 # cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  ; done | grep " V " | sed 's/#/# C/g' > /tmp/run.repo.list
 # # D/C M B P I     V L glibc-2.41-x86_64-1_MLFS_current_Viel.0.0.3
-# when taks wass successfull will edit /tmp/run.repo.list and remove successfull task.
+# when task wass successfull will edit /tmp/run.repo.list and remove successfull task.
 
 cd $(dirname $0) && CWD=$(pwd) || exit 1
 
@@ -64,9 +64,13 @@ if [ "${current_line:10:1}" == "I" ] ; then RUN_PACKAGE=1 PACKAGE_ARG=install ; 
 SOURCE_DATE_EPOCH="1746190997"
 
 # make the list
-# cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  ; done | grep " V " | sed 's/#/# C/g' > /tmp/run.repo.list
+# check updates
+# cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  ; done | grep " V " | sed 's/#/# C/g ; s/ M /   /g ; s/ B /   /g ; s/ P /   /g ; s/ I /   /g' > /tmp/run.repo.list
+# make new makers from updates
 # cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  ; done | grep " V " | sed 's/#/# N/g' > /tmp/run.repo.list
+# run new makers
 # cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  ; done | grep "# M           V " | sed 's/#/#  /g' > /tmp/run.repo.list
+# run maker and builder
 # cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  ; done | grep "# M B         V " | sed 's/#/#  /g' | sed 's/M B    /  B   I/g' > /tmp/run.repo.list
 
 
@@ -84,13 +88,17 @@ builder_full_path="$REPODIR/builders/$first_pkg_char/$name/$builder"
 package_full_path="$REPODIR/packages/$first_pkg_char/$name/$package"
 
 # Check correct vars for cut -c 21-.
-if [ -e $maker_full_path ] || [ -e $builder_full_path ] || [ -e $package_full_path ] ; then
+if [ -e "$maker_full_path" ] || [ -e "$builder_full_path" ] || [ -e "$package_full_path" ] ; then
   true
 else
-  exit 1
+  if [ "${current_line:0:19}" == "###################" ] ; then
+    true
+  else
+    exit 1
+  fi
 fi
 
-if [ -h $BLACKLIST/*$builder ] ; then
+if [ -h "$BLACKLIST/*$builder" ] ; then
   echo "Blacklisted: $BLACKLIST/*$builder"
   sed -i "${line_num}s/ C / s /" $RUN_REPO_LIST || exit 1
   sed -i "${line_num}s/ N / s /" $RUN_REPO_LIST || exit 1
@@ -102,10 +110,10 @@ if [ -h $BLACKLIST/*$builder ] ; then
   RUN_BUILDER=0
   RUN_PACKAGE=0
 fi
-if [ -h $BLACKLIST/*$package ] ; then
+if [ -h "$BLACKLIST/*$package" ] ; then
   echo "Blacklisted: $BLACKLIST/*$package"
   sed -i "${line_num}s/ C / S /" $RUN_REPO_LIST || exit 1
-  sed -i "${line_num}s/ M / S /" $RUN_REPO_LIST || exit 1
+  sed -i "${line_num}s/ N / S /" $RUN_REPO_LIST || exit 1
   sed -i "${line_num}s/ I / S /" $RUN_REPO_LIST || exit 1
   CHECK_REL=0
   DECODE_SOURCES=0
@@ -115,16 +123,24 @@ if [ -h $BLACKLIST/*$package ] ; then
 fi
 
 if [ $CHECK_REL -eq 1 ] ; then
-  # pass the most current versions makers to check updates.sh 
-  $CWD/helpers/update-repository-makers-helper.sh ${line_num} $maker_full_path &
+  if [ -e $maker_full_path ] ; then
+    # pass the most current versions makers to check updates 
+    $CWD/helpers/update-repository-makers-helper.sh ${line_num} $maker_full_path &
+  else
+    echo "Maker not found: $maker_full_path"
+  fi
 fi
 if [ $CHECK_REL -eq 2 ] ; then
-  CHECK_RELEASE=1 NEW=0 bash $maker_full_path 
-  EXIT=$?
-  if [ $EXIT -eq 3 ] || [ $EXIT -eq 4 ] ; then 
-    sed -i "${line_num}s/ N /   /" $RUN_REPO_LIST || exit 1
+  if [ -e $maker_full_path ] ; then
+    CHECK_RELEASE=1 NEW=0 bash $maker_full_path 
+    EXIT=$?
+    if [ $EXIT -eq 3 ] || [ $EXIT -eq 4 ] ; then 
+      sed -i "${line_num}s/ N /   /" $RUN_REPO_LIST || exit 1
+    else
+      echo "${pkg_name} NEW maker failed."
+    fi
   else
-    echo "${pkg_name} NEW maker failed."
+    echo "Maker not found: $maker_full_path"
   fi
 fi
 if [ $DECODE_SOURCES -eq 1 ] ; then
@@ -171,13 +187,20 @@ if [ $RUN_PACKAGE -eq 1 ] ; then
   else exit 1 ; fi
 
   # remove old pkg
-  if ls -1d /pkg/installed/$name-[0-9]* >/dev/null ; then 
-    echo "Packages installed!"
-    ls -1d /pkg/installed/$name-[0-9]*
-    for p in $(ls -1d /pkg/installed/$name-[0-9]*-$arch-${rel}* | grep -v "$name-$ver" ) ; do
-      remove_pkg=${p##/}
-      echo " --> Removing old package $p"
-      echo "bash  /pkg/tools/scripts/removepkg.sh $p || exit 1"
+  echo "Removing old versions of $name"
+  if ls -1d /pkg/installed/$name-[0-9]* 2>/dev/null | grep -v "$name-$ver" >/dev/null  ; then 
+    echo "Found old versions installed!"
+    ls -1d /pkg/installed/$name-[0-9]* | grep -v "$name-$ver"
+    #for p in $(ls -1d /pkg/installed/$name-[0-9]*-$arch-${rel}* | grep -v "$name-$ver" ) ; do
+    for p in $(ls -1d /pkg/installed/$name-[0-9]* | grep -v "$name-$ver" ) ; do
+      remove_pkg=${p##*/}
+      if ls -1 /pkg/blacklist/${remove_pkg}.sh 2>/dev/null; then
+        echo " Skip remove blacklisted package $remove_pkg"
+      else
+        echo " --> Removing old package $p"
+        #DRY_RUN=1 bash  /pkg/tools/scripts/removepkg.sh $remove_pkg || exit 1
+        bash  /pkg/tools/scripts/removepkg.sh $remove_pkg || exit 1
+      fi
     done
   fi
   
@@ -189,7 +212,8 @@ if [ $RUN_PACKAGE -eq 1 ] ; then
   comm -13 /tmp/installed /tmp/needed > /tmp/needed.libs.not.found.${pkg_name}.after
 
   if diff /tmp/needed.libs.not.found.${pkg_name}.before /tmp/needed.libs.not.found.${pkg_name}.after | grep "^>" ; then
-    echo "New lost needed_libs found. Exiting."
+    echo "lost needed_libs found."
+    echo "Exiting."
     exit 1
   fi
 
@@ -202,7 +226,7 @@ fi
 echo "++++++++++++++++++++++++++++++"                  
 done < $RUN_REPO_LIST
 
-
+# wait for jobs to end.
 while [[ $(jobs -pr | wc -l) -gt 0 ]] ; do wait ; done
 
 

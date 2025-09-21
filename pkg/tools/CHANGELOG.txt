@@ -51,36 +51,147 @@ ln -s /pkg/repository/dirty-0.0/makers/s/shadow/make.buildpkg.shadow-4.18.0-x86_
 
 BUGS AKA:TODO
 -------------
-Beauty the exit of scripts.
-Remove LFS License part from my packages.
-add some check for rsync if not installed.
-first boot and machine-id --> dbus-uuidgen --ensure
-skip install kernel packages or remove old when run repo list.
-the ffmpeg can be shiped with non-free libs be care like --> fdk-aac
-keyboard F10-F12 dont work Xmodmap dumpkeys showkey xinput xev udev hwdb ...
-
-When update glibc the etc/profile are overwrited ... need reinstall bash-shell-startup-files to get pathappend pathremove ...
-bash-5.3# grep -rwn /pkg/installed/* -e "etc/profile$"
-/pkg/installed/bash-shell-startup-files-0.0.1-all-1_GLFS_CONFIG_Viel/index:2:etc/profile
-/pkg/installed/glibc-2.41-x86_64-1_MLFS_current_Viel/index:6:etc/profile
-/pkg/installed/glibc-2.42-x86_64-1_MLFS_current_Viel/index:6:etc/profile
-need a think
-
+* Beauty the exit of scripts.
+* Remove LFS License part from my packages.
+* Add some check for rsync if not installed.
+* First boot and machine-id --> dbus-uuidgen --ensure
+* Skip install kernel packages or remove old when run repo list.
+* The ffmpeg can be shiped with non-free libs be care like --> fdk-aac
+  Need an alert.
+* keyboard F10-F12 dont work Xmodmap dumpkeys showkey xinput xev udev hwdb ...
+* When update glibc the etc/profile are overwrited ... 
+  need reinstall bash-shell-startup-files to get pathappend pathremove ...
+  bash-5.3# grep -rwn /pkg/installed/* -e "etc/profile$"
+  /pkg/installed/bash-shell-startup-files-0.0.1-all-1_GLFS_CONFIG_Viel/index:2:etc/profile
+  /pkg/installed/glibc-2.41-x86_64-1_MLFS_current_Viel/index:6:etc/profile
+  /pkg/installed/glibc-2.42-x86_64-1_MLFS_current_Viel/index:6:etc/profile
+  need a think
+* Leave glibc with default locales 
+  and config locales from a separated package.
+* Update .bashrc from a package config, not mannually.
+* if this appens with critical files will break the system,
+  (it appened, that's why DRY_RUN exist),
+  slackware have the aaa libs package (redundant critical libs),
+  to don't make a new package, like tar-exclude-from-file.txt 
+  maybe needed a critical_files_warning when removing critical core files.
+* Create make.buildpkg for firmware.
+* need to think about clean big buildpkg files with sources
+  for old release 1 2 3 ... maybe separe sources and build ...
+* Need rotate more files comented inside pkg.
+* Add a var for gpg --keyserver
+  patch and rewrite files witout --keyserver or hardcoded.
+* To deal with the packages that need rebuild after an update?
+  Check needed libs presence are not sufficient see:
+    OpenSSL version mismatch. Built against 30500000, you have 3050003f
+  Need to check bin files after upgrades?
+  Need to rebuild all packages that have dependent libraries?
+* Need to solve the circular dep with harfbuzz and freetype
+  for now added manual instalation of package release 2 after
+  the 2ond build that make harfbuzz-11.5.0-x86_64-2_GLFS_BasicX11Software
+* Upgraded libxml2-2.15.0-x86_64-1_GLFS_Security
+  added --with-python to build with python bindings
+  need to see what *LFS do. BLFS ticket #22172 
 
 CHANGELOG
 ---------
+[2025-09-21]
+* Upgraded libXScrnSaver-1.2.5-x86_64-1_GLFS_BasicX11Software_XorgLibraries
+* Upgraded libXfixes-6.0.2-x86_64-1_GLFS_BasicX11Software_XorgLibraries
+* Upgraded libXres-1.2.3-x86_64-1_GLFS_BasicX11Software_XorgLibraries
+* Upgraded libXpresent-1.0.2-x86_64-1_GLFS_BasicX11Software_XorgLibraries
+* Upgraded cmake-4.1.1-x86_64-1_GLFS_BasicX11Software
+* Blacklisted llvm-21.1.1-x86_64-1_GLFS_Dirty01_Viel
+  reverted:
+  Upgraded llvm-21.1.1-x86_64-1_GLFS_Dirty01_Viel
+  Rebuild rustc-1.89.0-x86_64-1_GLFS_GraphicsDrivers
+  > libLLVM.so.20.1
+  lost needed_libs found.
+  Upgraded rust-bindgen-0.72.1-x86_64-1_GLFS_GraphicsDrivers
+  Blacklisted SPIRV-LLVM-Translator-21.1.0-x86_64-1_GLFS_GraphicsDrivers
+    --> fail CapabilitySpecConditionalINTEL 
+    It seems a new SPIRV-Headers release is needed 
+    for things like OpSpecConstantArchitectureINTEL. 
+    BLFS ticket #21922
+  Rebuild SPIRV-LLVM-Translator-20.1.5-x86_64-1_GLFS_GraphicsDrivers
+  > libLLVM.so.20.1
+  lost needed_libs found.
+  CMake Error at CMakeLists.txt:82 (find_package):
+    Could not find a configuration file for package "LLVM" that is compatible
+    with requested version "20.1.0".
+  
+    The following configuration files were considered but not accepted:
+  
+      /usr/lib/cmake/llvm/LLVMConfig.cmake, version: 21.1.1
+      /lib/cmake/llvm/LLVMConfig.cmake, version: 21.1.1
+* Upgraded libclc-21.1.1-x86_64-1_GLFS_GraphicsDrivers
+* Upgraded mesa-25.2.3-x86_64-1_GLFS_GraphicsDrivers_i915
+* Upgraded libaom-3.13.1-x86_64-1_GLFS_current_Viel
+* Upgraded x264-2025.09.10.0480cb05-x86_64-1_GLFS_current_Viel
+* Blacklisted ffmpeg-8.0-x86_64-1_GLFS_current_Viel
+  some *LFS reported 
+  1. Unable to watch live streams.
+  2. Unable to watch several videos and movies.
+  3. Unable to access healthcare portals.
+  4. Epic hangs.
+  5. Packages fail to build against FFmpeg-8.0 like MLT.
+* Upgraded gnupg-2.5.12-x86_64-1_BLFS_sysV_r12.2
+* Upgraded docutils-0.22.1-x86_64-1_BLFS_PythonModules
+* Upgraded pango-1.57.0-x86_64-1_BLFS_12.3
+* Upgraded libjpeg-turbo-3.1.2-x86_64-1_BLFS_12.3
+* Upgraded gdk-pixbuf-2.44.1-x86_64-1_BLFS_12.3
+* Upgraded glibmm-2.85.0-x86_64-1_BLFS_12.3
+* Upgraded LVM2-2.03.35-x86_64-1_BLFS_12.3
+* Upgraded cryptsetup-2.8.1-x86_64-1_BLFS_12.3
+* Upgraded nftables-1.1.5-x86_64-1_DIRTY_current_Viel
+* Upgraded feh-3.11.2-x86_64-1_BLFS_current_Viel
+[2025-09-20]
+* Patched /pkg/tools/scripts/run.repo.list.sh
+  to skip remove packages if blacklisted. 
+* Upgraded iana-etc-20250826-x86_64-1_MLFS_current_Viel
+* Upgraded expat-2.7.2-x86_64-1_MLFS_current_Viel
+* Upgraded openssl-3.5.3-x86_64-1_MLFS_current_Viel
+* Rebuild  openssh-10.0p1-x86_64-1_BLFS_sysV_r12.2
+  When runung ssh get:
+  OpenSSL version mismatch. Built against 30500000, you have 3050003f   
+* Upgraded Python-3.13.7-x86_64-1_MLFS_current_Viel
+* Upgraded meson-1.9.0-x86_64-1_MLFS_current_Viel
+* Upgraded kbd-2.9.0-x86_64-1_MLFS_current_Viel
+* Upgraded lfs-bootscripts-20250827-x86_64-1_MLFS_current_Viel
+* Upgraded linux-headers-6.16.7-x86_64-1_MLFS_current_Viel
+* Upgraded linux-6.16.7-x86_64-1_MLFS_current_Viel
+* Upgraded p11-kit-0.25.9-x86_64-1_GLFS_Networking
+* Upgraded curl-8.16.0-x86_64-1_GLFS_Networking
+* Upgraded git-manpages-2.51.0-x86_64-1_GLFS_Networking_Dirty01
+* Upgraded git-2.51.0-x86_64-1_GLFS_Networking_Dirty01
+* Upgraded glib-2.86.0-x86_64-1_GLFS_Security
+* Upgraded gobject-introspection-1.86.0-x86_64-1_GLFS_Security
+* Upgraded glib-2.86.0-x86_64-1_GLFS_Security
+* Upgraded libxml2-2.15.0-x86_64-1_GLFS_Security
+  added --with-python to build with python bindings
+  need to see what *LFS do. BLFS ticket #22172 
+* Upgraded freetype-2.14.1-x86_64-1_GLFS_BasicX11Software
+* Upgraded harfbuzz-11.5.0-x86_64-1_GLFS_BasicX11Software
+* Upgraded freetype-2.14.1-x86_64-1_GLFS_BasicX11Software
+[2025-09-19]
+* New script to update /pkg/tools/scripts/update.sh
+* Moved Todo: from CHANGELOG to BUGS
+* Fixed some typos on failed updates in
+  expat, libplacebo, libass, acpid, ...
+* Fix list process from update-repository-makers-helper.sh
+  fail if F present and not C
+  -sed -i "${line_num}s/ C /   /" $RUN_REPO_LIST
+  +sed -i "${line_num}s/# . /#   /" $RUN_REPO_LIST
+[2025-09-17]
+* Patched makers version 6 with patch.TAR_EXCLUDE_FROM.typo 
+* Rebuild dirty-repository-manager-0.0.1-all-1_DIRTY_current_Viel
+  added self contained tar-exclude-from-file.txt, rsync-exclude-from-file.txt
+  and make.buildpkg.log to not overwrite when update. XD
 [2025-09-08]
 * Added jq-1.8.1-x86_64-1_DIRTY_current_Viel
-* Updated tcl-8.6.17-x86_64-1_MLFS_current_Viel 
+* Upgraded tcl-8.6.17-x86_64-1_MLFS_current_Viel 
   when removed 8.6.16 from the package itself with old remove version,
   it removes new files installed by 8.6.17, use DRY_RUN omg.
   reinstalled .16 reinstalled .17 removed with removepkg.sh do the work.
-  Todo:4:5:
-  if this appens with critical files will break the system,
-  (it appened, that's why DRY_RUN exist),
-  slackware have the aaa libs package (redundant critical libs),
-  to don't make a new package, like tar-exclude-from-file.txt
-  maybe needed a critical_files_warning when removing critical core files.
 [2025-09-06]
 * Added nss-3.115.1-x86_64-1_GLFS_Networking
   needed by icecat or firefox
@@ -94,17 +205,12 @@ CHANGELOG
   needed to load intel-microcode
 [2025-09-02]
 * Tested mannually firmware load.
-  Todo:1:1:
-  Create make.buildpkg for firmware.
 [2025-09-01]
 * Added udev-lfs-dirtycfg-0.0.1-x86_64-1_MLFS_current_Viel
   for persistent net rules.
 * Rebuild eudev-3.2.14-x86_64-2_MLFS_current_Viel
   added needed link for init scripts bin/udevadm -> /usr/sbin/udevadm
   rebuild with release 2
-  Todo:3:2:
-  need to think about clean big buildpkg files with sources
-  for old release 1 2 3 ... maybe separe sources and build ...
 * Patched makers release tags and NEWMAKE release to 1.
 [2025-08-30]
 * Rebuild mpv-0.40.0-x86_64-1_BLFS_current_Viel
@@ -115,9 +221,7 @@ CHANGELOG
 [2025-08-29]
 * Added logrotate-3.22.0-x86_64-1_BLFS_current_Viel
 * Added logrotate-dirtycfg-0.0.1-all-1_DIRTY_current_Viel
-  Todo:1:1:
-  Need rotate more files comented inside pkg.
-* Updated filesystem_hierarchy-3.0-all-1_DIRTY_current_Viel
+* Upgraded filesystem_hierarchy-3.0-all-1_DIRTY_current_Viel
   var/run --> run liks will be var/run --> /run
   updated all the links to correct path.
   Now acpid daemon start well.
@@ -170,7 +274,7 @@ CHANGELOG
   Changed PM_UTILS_RUNDIR="/run/pm-utils"
   in file /usr/lib/pm-utils/pm-functions
   becasue fail with to may links.
-* Updated filesystem_hierarchy-3.0-all-1_DIRTY_current_Viel
+* Upgraded filesystem_hierarchy-3.0-all-1_DIRTY_current_Viel
   Removed old lfschroot-0.0.1-all-1_LFSCHROOT_r12.2_multilib package. 
   Added needed files made by old lfschroot in MLFSCHROOT, like etc/passwd
   Note: Others needed files are created by runing the lfs-user script.
@@ -188,8 +292,6 @@ CHANGELOG
   GPG_TTY=$(tty) 
   export GPG_TTY
   because mutt pinentry-tty fail with tmux, wrong tty.
-  Todo:4:1: # grep -B 4 -A 2 lines
-  Update .bashrc from packages, not mannually.
 * Switched from virtual machine to real disk.
   change etc/fstab from sda1 to sda4.
   edited grub mannually.
@@ -201,8 +303,8 @@ CHANGELOG
   #  dd if=/dev/zero of=$VIRTUAL_MBR count=2048
   pkg/tools/scripts/qemu-device-mapper.sh
 * Added installpkg v0.0.1
-  Check needed libs --> external libs and pkg libs.
-  Updated: Now run.repo.list search needed libs.
+  check needed libs --> external libs and pkg libs.
+  now run.repo.list search needed libs.
 * Added TAGS in a more standard way.
   pkgname-ver-arch-build_repository_Tag2_Tag3
   Tag2 and Tag3 to help find GLFS packages.
@@ -223,6 +325,3 @@ CHANGELOG
   modprobe psmouse 
   # done set up udev udev-retry start scripts.
 * Configured locales from glibc
-  Todo:1:2: # grep -B 1 -A 2 lines ;)
-  Leave glibc with default locales and
-  config locales from a separated package.

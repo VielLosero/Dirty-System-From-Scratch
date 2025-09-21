@@ -164,7 +164,24 @@ comm -13 /tmp/installed /tmp/needed
 
 # show todo from CHANGELOG
 # sure with awk can be done easy.
-grep -B $(grep "Todo:" /pkg/tools/CHANGELOG.txt | cut -d: -f2) -A $(grep "Todo:" /pkg/tools/CHANGELOG.txt | cut -d: -f3) Todo: /pkg/tools/CHANGELOG.txt
+#grep -B $(grep "Todo:" /pkg/tools/CHANGELOG.txt | cut -d: -f2) -A $(grep "Todo:" /pkg/tools/CHANGELOG.txt | cut -d: -f3) Todo: /pkg/tools/CHANGELOG.txt
+#grep -n "Todo:" /pkg/tools/CHANGELOG.txt | while read line ; do L=${line%%:*}; B=$(echo $line | cut -d: -f3) ; A=$(echo $line | cut -d: -f4) ; echo "$L $B $A /pkg/tools/CHANGELOG.txt" ; done
+grep -n "Todo:" /pkg/tools/CHANGELOG.txt | while read line ; do L=${line%%:*}; B=$(echo $line | cut -d: -f3) ; A=$(echo $line | cut -d: -f4) ; sed -n "$((${L} -$B)),$((${L} + $A))p" /pkg/tools/CHANGELOG.txt ; done
+
+
+# find bin files that don0t work after a upgrade.
+# When run ssh  get: OpenSSL version mismatch. Built against 30500000, you have 3050003f 
+grep libcrypto.so.3 /pkg/installed/*/needed-libs
+for i in $(grep lib32/libcrypto.so.3 /pkg/installed/*/needed-libs | grep "/bin/" | cut -d: -f2) ; do echo ${i#.}  ; done
+[root@dirty v]# for i in $(grep libcrypto.so.3 /pkg/installed/*/needed-libs | grep "/bin/" | cut -d: -f2) ; do ${i#.} --help 2>/dev/null >/dev/null || echo $i ; done
+./usr/bin/ssh-add
+./usr/bin/ssh-agent
+./usr/bin/ssh-keygen
+./usr/bin/ssh-keyscan
+./usr/bin/ssh
+[root@dirty v]#
+
+
 
 
 

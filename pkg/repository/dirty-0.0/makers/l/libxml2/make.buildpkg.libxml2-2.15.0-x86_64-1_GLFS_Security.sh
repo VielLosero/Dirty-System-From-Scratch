@@ -47,11 +47,15 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="The logrotate package allows automatic rotation, compression, removal, and mailing of log files."
-url="https://github.com/logrotate/logrotate"
+short_desc="Libxml2 is a XML C parser and toolkit."
+url="https://gitlab.gnome.org/GNOME/libxml2/-/wikis/home"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
+# sub_ver to download link
+sub_ver="${ver%.*}"
+#NOTE: Important
+#Updating this package is known to break ABI. 
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
@@ -77,22 +81,21 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://github.com/logrotate/logrotate/releases/latest
+version_url=https://gitlab.gnome.org/GNOME/libxml2/-/releases.atom
 sum="sha256sum"
-file1_url=https://github.com/logrotate/logrotate/releases/download/$ver
+file1_url=https://download.gnome.org/sources/libxml2/$sub_ver
 file1=$name-$ver.tar.xz
-file1_sum=42b4080ee99c9fb6a7d12d8e787637d057a635194e25971997eebbe8d5e57618
+file1_sum=5abc766497c5b1d6d99231f662e30c99402a90d03b06c67b62d6c1179dedd561
 file2_url=$file1_url
-file2=${file1}.asc
-file2_sum=ebf2e09dd3873264fd05cdfd38d7d2d6baf38a7422210d94e01ee44ccf089c12
-dhcpcd_gpgkey=8ECCDF12100AD84DA2EE7EBFC78CE737A3C3E28E
+file2=${name}-${ver}.sha256sum
+file2_sum=036f3ffc3db4dd37741313195867c69f77e6819a09e2c6aa595c2f2abfaec752
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  # Final URL after the redirect.
-  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/%%' )
+  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep "href=\"https://gitlab.gnome.org/GNOME/libxml2/-/releases/v[0-9]" | sort -Vr | head -1 | cut -d'"' -f2 | sed 's%.*/%%g' | sed 's/^v//' )
+  last_sub_ver="${last_version%.*}"
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -101,7 +104,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-1_${rel_tag}.sh}
-        if $SPIDER ${file1_url/$ver/$last_version}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url/$sub_ver/$last_sub_ver}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 4
           else
@@ -135,8 +138,6 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $dhcpcd_gpgkey
-gpg --verify $file2 $file1 ||  exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
@@ -290,8 +291,16 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
+            #--with-icu              \
   # --- LFS_CMD_CONFIG ---
-  ./configure --prefix=/usr || exit 1
+  ./configure --prefix=/usr           \
+            --sysconfdir=/etc       \
+            --disable-static        \
+            --with-history          \
+            --with-icu              \
+            --with-python           \
+            PYTHON=/usr/bin/python3 \
+            --docdir=/usr/share/doc/$name-$ver || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -336,7 +345,15 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_POST ---
+  # Finally, prevent some packages from unnecessarily linking to ICU
+  rm -vf $PKGDIR/usr/lib/libxml2.la 
+  sed '/libs=/s/xml2.*/xml2"/' -i $PKGDIR/usr/bin/xml2-config 
+  #
+  make distclean
   # --- END_LFS_CMD_POST ---
+  # add missed link for usr/lib/libxml2.so.2 -> libxml2.so.16.0.1
+  cd $PKGDIR/usr/lib || exit 1
+  ln -s libxml2.so.16.0.1 libxml2.so.2
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
   echo "Post compilation tasks time: $post_time" >> $TMP_PKG_TIMINGS_FILE
@@ -350,6 +367,16 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG32 ---
+  CC="gcc -m32" CXX="g++ -m32"         \
+  PKG_CONFIG_PATH=/usr/lib32/pkgconfig \
+  ./configure --prefix=/usr            \
+            --libdir=/usr/lib32      \
+            --host=i686-pc-linux-gnu \
+            --sysconfdir=/etc        \
+            --disable-static         \
+            --with-history           \
+            --with-icu               \
+            --without-python || exit 1
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
   config32_time=$(($end_config32_date - $start_config32_date))
@@ -363,6 +390,8 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD32 ---
+  NUMJOBS="-j $(nproc)"
+  make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD32 ---
   end_build32_date=$(date +"%s")
   build32_time=$(($end_build32_date - $start_build32_date))
@@ -377,6 +406,11 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL32 ---
+  mkdir -vp $PKGDIR/usr/lib32
+  make DESTDIR=$PWD/DESTDIR install
+  rm -vf DESTDIR/usr/lib32/libxml2.la
+  cp -Rv DESTDIR/usr/lib32/* $PKGDIR/usr/lib32
+  rm -rf DESTDIR   
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
   install32_time=$(($end_install32_date - $start_install32_date))
@@ -565,7 +599,8 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
     echo "Decoding b64 package files."
       # --keep-directory-symlink Don't replace existing symlinks to directories when extracting.
       # tested tar (GNU tar) 1.35 || exit
-      if [ -e TAR_EXCLUDE_FROM ] ; then
+      if [ -e $TAR_EXCLUDE_FROM ] ; then
+        echo "Excluding files in $TAR_EXCLUDE_FROM"
         echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
       else
         echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink

@@ -409,7 +409,7 @@
 .libaio-[0-9]*_BLFS_*
 .LVM2-[0-9]*_BLFS_*
 .cryptsetup-[0-9]*_BLFS_*
-.cryptsetup-dirtycfg-[0-9]*_BLFS_*
+.cryptsetup-dirtycfg-[0-9]*_DIRTY_*
 #for mail
 .openldap-LMDB-[0-9]*_BLFS_*
 .cyrus-sasl-[0-9]*_BLFS_*
@@ -432,7 +432,7 @@
 .sshfs-[0-9]*_BLFS_*
 # 
 .logrotate-[0-9]*_BLFS_*
-.logrotate-dirtycfg-[0-9]*_BLFS_*
+.logrotate-dirtycfg-[0-9]*_DIRTY_*
 #
 .ntp-[0-9]*_BLFS_*
 .opendoas-[0-9]*_DIRTY_*

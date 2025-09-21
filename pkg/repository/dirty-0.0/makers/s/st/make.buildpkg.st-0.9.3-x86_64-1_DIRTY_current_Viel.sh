@@ -469,7 +469,7 @@ EOF
 +unsigned int defaultbg = 234; /* 234->grey */
 +unsigned int defaultcs = 239;
 +static unsigned int defaultrcs = 220;
- 
+
  /*
   * Default shape of cursor
 @@ -153,7 +151,7 @@
@@ -482,10 +482,230 @@ EOF
  static unsigned int mousebg = 0;
 EOF
 
+  # make with https://terminal.sexy
+  cat << 'EOF' > patch_colors.green.txt
+--- /tmp/st/config.def.h	2025-09-18 11:35:33.951156902 +0200
++++ /tmp/st/config.def.h.new	2025-09-18 13:07:53.843280829 +0200
+@@ -5,7 +5,7 @@
+  *
+  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
+  */
+-static char *font = "Liberation Mono:pixelsize=12:antialias=true:autohint=true";
++static char *font = "Liberation Mono:size=12";
+ static int borderpx = 2;
+ 
+ /*
+@@ -95,46 +95,50 @@
+ 
+ /* Terminal colors (16 first used in escape sequence) */
+ static const char *colorname[] = {
+-	/* 8 normal colors */
+-	"black",
+-	"red3",
+-	"green3",
+-	"yellow3",
+-	"blue2",
+-	"magenta3",
+-	"cyan3",
+-	"gray90",
+-
+-	/* 8 bright colors */
+-	"gray50",
+-	"red",
+-	"green",
+-	"yellow",
+-	"#5c5cff",
+-	"magenta",
+-	"cyan",
+-	"white",
+-
+-	[255] = 0,
+-
+-	/* more colors can be added after 255 to use with DefaultXX */
+-	"#cccccc",
+-	"#555555",
+-	"gray90", /* default foreground colour */
+-	"black", /* default background colour */
+-};
+ 
++  /* 8 normal colors */
++  [0] = "#282a2e", /* black   */
++  [1] = "#ce3333", /* red     */
++  [2] = "#259e1b", /* green   */
++  [3] = "#de935f", /* yellow  */
++  [4] = "#565dcb", /* blue    */
++  [5] = "#835f8f", /* magenta */
++  [6] = "#1fc3bb", /* cyan    */
++  [7] = "#707880", /* white   */
++
++  /* 8 bright colors */
++  [8]  = "#373b41", /* black   */
++  [9]  = "#e24242", /* red     */
++  [10] = "#67d342", /* green   */
++  [11] = "#f0c674", /* yellow  */
++  [12] = "#687bd9", /* blue    */
++  [13] = "#af86bb", /* magenta */
++  [14] = "#58d6cb", /* cyan    */
++  [15] = "#c5c8c6", /* white   */
++
++  /* special colors */
++  [256] = "#09311e", /* background */
++  [257] = "#c1d96d", /* foreground */
++};
+ 
+ /*
+  * Default colors (colorname index)
+- * foreground, background, cursor, reverse cursor
++ * foreground, background, cursor
+  */
+-unsigned int defaultfg = 258;
+-unsigned int defaultbg = 259;
+-unsigned int defaultcs = 256;
++unsigned int defaultfg = 257;
++unsigned int defaultbg = 256;
++unsigned int defaultcs = 257;
+ static unsigned int defaultrcs = 257;
+ 
+ /*
++ * Colors used, when the specific fg == defaultfg. So in reverse mode this
++ * will reverse too. Another logic would only make the simple feature too
++ * complex.
++ */
++static unsigned int defaultitalic = 7;
++static unsigned int defaultunderline = 7;
++
++/*
+  * Default shape of cursor
+  * 2: Block ("█")
+  * 4: Underline ("_")
+EOF
+  cat << 'EOF' > patch_colors.yelow.txt
+--- /tmp/st/config.def.h	2025-09-18 11:35:33.951156902 +0200
++++ /tmp/st/config.def.h.new	2025-09-18 17:00:51.429132149 +0200
+@@ -5,7 +5,7 @@
+  *
+  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
+  */
+-static char *font = "Liberation Mono:pixelsize=12:antialias=true:autohint=true";
++static char *font = "Liberation Mono:size=12";
+ static int borderpx = 2;
+ 
+ /*
+@@ -92,49 +92,52 @@
+  *	stty tabs
+  */
+ unsigned int tabspaces = 8;
+-
+ /* Terminal colors (16 first used in escape sequence) */
+ static const char *colorname[] = {
+-	/* 8 normal colors */
+-	"black",
+-	"red3",
+-	"green3",
+-	"yellow3",
+-	"blue2",
+-	"magenta3",
+-	"cyan3",
+-	"gray90",
+-
+-	/* 8 bright colors */
+-	"gray50",
+-	"red",
+-	"green",
+-	"yellow",
+-	"#5c5cff",
+-	"magenta",
+-	"cyan",
+-	"white",
+-
+-	[255] = 0,
+-
+-	/* more colors can be added after 255 to use with DefaultXX */
+-	"#cccccc",
+-	"#555555",
+-	"gray90", /* default foreground colour */
+-	"black", /* default background colour */
+-};
+ 
++  /* 8 normal colors */
++  [0] = "#282a2e", /* black   */
++  [1] = "#a10808", /* red     */
++  [2] = "#22a018", /* green   */
++  [3] = "#bc780f", /* yellow  */
++  [4] = "#2c36bd", /* blue    */
++  [5] = "#7d4d8d", /* magenta */
++  [6] = "#0cb5ae", /* cyan    */
++  [7] = "#707880", /* white   */
++
++  /* 8 bright colors */
++  [8]  = "#373b41", /* black   */
++  [9]  = "#cd1111", /* red     */
++  [10] = "#308414", /* green   */
++  [11] = "#dc9b1b", /* yellow  */
++  [12] = "#2136ab", /* blue    */
++  [13] = "#a46fb2", /* magenta */
++  [14] = "#099689", /* cyan    */
++  [15] = "#5d646b", /* white   */
++
++  /* special colors */
++  [256] = "#d9de77", /* background */
++  [257] = "#000000", /* foreground */
++};
+ 
+ /*
+  * Default colors (colorname index)
+- * foreground, background, cursor, reverse cursor
++ * foreground, background, cursor
+  */
+-unsigned int defaultfg = 258;
+-unsigned int defaultbg = 259;
+-unsigned int defaultcs = 256;
++unsigned int defaultfg = 257;
++unsigned int defaultbg = 256;
++unsigned int defaultcs = 257;
+ static unsigned int defaultrcs = 257;
+ 
+ /*
++ * Colors used, when the specific fg == defaultfg. So in reverse mode this
++ * will reverse too. Another logic would only make the simple feature too
++ * complex.
++ */
++static unsigned int defaultitalic = 7;
++static unsigned int defaultunderline = 7;
++
++/*
+  * Default shape of cursor
+  * 2: Block ("█")
+  * 4: Underline ("_")
+EOF
+    # Patch now.
     cp config.def.h config.h || exit 1
-    patch config.h -i patch_colors.txt || exit 1
+    #patch config.h -i patch_colors.txt || exit 1
     #patch config.h -i patch_colors.dark.txt || exit 1
-   
+    #patch config.h -i patch_colors.green.txt || exit 1
+    patch config.h -i patch_colors.yelow.txt || exit 1
+    ## +  [256] = "#d9de77", /* background */
+
+
+## +  /* 8 normal colors */
+## +  [0] = "#282a2e", /* black   */
+## +  [1] = "#a10808", /* red     */
+## +  [2] = "#259e1b", /* green   */
+## +  [3] = "#c3560b", /* yellow  */
+## +  [4] = "#3b42a1", /* blue    */
+## +  [5] = "#7e528d", /* magenta */
+## +  [6] = "#0cbdb5", /* cyan    */
+## +  [7] = "#707880", /* white   */
+## +
+## +  /* 8 bright colors */
+## +  [8]  = "#373b41", /* black   */
+## +  [9]  = "#cd1111", /* red     */
+## +  [10] = "#347f1b", /* green   */
+## +  [11] = "#ecbe65", /* yellow  */
+## +  [12] = "#273893", /* blue    */
+## +  [13] = "#a576b2", /* magenta */
+## +  [14] = "#099b8d", /* cyan    */
+## +  [15] = "#5d646b", /* white   */
     # --- END_LFS_CMD_PATCH ---
     end_patch_date=$(date +"%s")
     patch_time=$(($end_patch_date - $start_patch_date))
@@ -773,7 +993,8 @@ cat << 'EOF_OUTPKG' >> $OUTPKG
     echo "Decoding b64 package files."
       # --keep-directory-symlink Don't replace existing symlinks to directories when extracting.
       # tested tar (GNU tar) 1.35 || exit
-      if [ -e TAR_EXCLUDE_FROM ] ; then
+      if [ -e $TAR_EXCLUDE_FROM ] ; then
+        echo "Excluding files in $TAR_EXCLUDE_FROM"
         echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink --exclude-from=$TAR_EXCLUDE_FROM
       else
         echo "$compresed_tar_xz_pkg_b64" | base64 -d | tar -Jxvf - --keep-directory-symlink
