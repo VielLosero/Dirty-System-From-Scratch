@@ -47,8 +47,8 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Commands for Manipulating POSIX Access Control Lists"
-url="https://savannah.nongnu.org/projects/acl"
+short_desc="The Rust programming language is designed to be a safe, concurrent, practical language."
+url="https://www.rust-lang.org/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
@@ -68,30 +68,40 @@ OUTPKG=${OUTPKG:-$REPODIR/packages/$first_pkg_char/${name}/${pkg_name}.sh}
 # Other need vars for example to change the default INSTALLDIR=$LFS.
 LFS=/mnt/lfs
 LFS_TGT=$(uname -m)-lfs-linux-gnu
+# As with previous releases of the X Window System, it may be desirable to install Xorg into an alternate prefix. This is no longer common practice among Linux distributions. The common installation prefix for Xorg on Linux is /usr. There is no standard alternate prefix, nor is there any exception in the current revision of the Filesystem Hierarchy Standard for Release 7 of the X Window System. Alan Coopersmith of Sun Microsystems, once stated "At Sun, we were using /usr/X11 and plan to stick with it." Only the /opt/* prefix or the /usr prefix adhere to the current FHS guidelines.
+# The BLFS editors recommend using the /usr prefix.
+# Choose your installation prefix, and set the XORG_PREFIX variable with the following command:
+# export XORG_PREFIX="<PREFIX>"
+XORG_PREFIX="/usr"
+docdir="--docdir=$XORG_PREFIX/share/doc/$name-$ver"
+#Xorg_environment https://www.linuxfromscratch.org/blfs/view/stable/x/xorg7.html#xorg-env
+XORG_CONFIG="--prefix=$XORG_PREFIX --sysconfdir=/etc --localstatedir=/var --disable-static"
+#export XORG_PREFIX XORG_CONFIG
 
 # --- END CAT SEED ---
-
+ 
 # Config get tool.
 if wget --help >/dev/null 2>&1 ; then GETVER="wget --output-document - --quiet" GETFILE="wget -c " SPIDER="wget -q --method=HEAD"
 elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --silent" GETFILE="curl -C - -O --silent" SPIDER="curl -L --head --fail --silent"
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
-# package vars.
-version_url="https://download.savannah.nongnu.org/releases/acl"
-sum="md5sum"
-file1_url="$version_url"
-file1=$name-$ver.tar.xz
-file1_sum=590765dee95907dbc3c856f7255bd669
-file2_url="$file1_url"
-file2=${file1}.sig
-file2_sum=cb1a8da8d801c2d430062add8e5949b7
-acl_gpgkey=B902B5271325F892AC251AD441633B9FE837F581
+# Package vars.
+version_url=https://github.com/rust-lang/rust/releases/latest
+sum="sha256sum"
+file1_url=https://static.rust-lang.org/dist
+file1=$name-$ver-src.tar.xz
+file1_sum=6bfeaddd90ffda2f063492b092bfed925c4b8c701579baf4b1316e021470daac
+file2_url=$file1_url
+file2=${file1}.asc
+file2_sum=cdf5c6daee7e87de40c9e9d5aa4653f55196bb450e0c02cd5920fbd972466ff8
+rustc_gpgkey=108F66205EAEB0AAA8DD5E1C85AB96E6FA1BE5FE
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  # Final URL after the redirect.
+  last_version=$( wget -O /dev/null  $version_url 2>&1 | grep -w 'Location' | cut -d' ' -f2 | sed 's%.*/%%' || curl --connect-timeout 20 -Ls -o /dev/null -w %{url_effective} $version_url | sed 's%.*/%%' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -134,7 +144,7 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $acl_gpgkey
+gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $rustc_gpgkey
 gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
@@ -242,6 +252,20 @@ if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
   start_checks_date=$(date +"%s")
   echo "Checking needs to build."
   # --- LFS_CMD_CHECKS ---
+  #Although GLFS usually installs in /usr, when you later upgrade to a newer version of Rustc, the old libraries in /usr/lib/rustlib will remain, with various hashes in their names, but will not be usable and will waste space. The editors recommend placing the files in the /opt directory. In particular, if you have reason to rebuild with a modified configuration (e.g. using the shipped LLVM after building with shared LLVM, perhaps to compile crates for architectures which the GLFS LLVM build does not support) it is possible for the install to leave a broken cargo program. In such a situation, either remove the existing installation first, or use a different prefix such as /opt/rustc-1.89.0-build2. 
+  # Check if the packages are installed.
+  if ls /pkg/installed/${name}-${ver}* >/dev/null 2>/dev/null ; then
+  	echo "  WARNING: removing $pkg_name before reinstall."
+    package=${pkg_name}.sh
+    package_full_path="$REPODIR/packages/$first_pkg_char/$name/$package"
+    if [ -e $package_full_path ] ; then
+      bash $package_full_path remove || exit 1
+    else
+      bash /pkg/tools/scripts/removepkg.sh $pkg_name || exit 1 
+    fi
+  else
+    echo "  No rust old install found."
+  fi
   # --- END_LFS_CMD_CHECKS ---
   end_checks_date=$(date +"%s")
   checks_time=$(($end_checks_date - $start_checks_date))
@@ -255,12 +279,12 @@ if [ $EXTRACT -eq 1 ] ; then echo "Skipping EXTRACT sources." ; else
   echo "Preparing sources."
   cd $BUILDDIR || exit 1
   # deleting source dirs if exist.
-  if [ -d $name-$ver ] ; then rm -rf $name-$ver ; fi
+  if [ -d $name-$ver-src ] ; then rm -rf $name-$ver-src ; fi
   if [ -d $PKGDIR ] ; then rm -rf $PKGDIR && mkdir $PKGDIR ; fi
 EOF_OUTBUILD
   echo '  tar xf $SOURCESDIR'/$file1 >> $OUTBUILD 
   cat << 'EOF_OUTBUILD' >> $OUTBUILD
-  cd $name-$ver || exit 1
+  cd $name-$ver-src || exit 1
   # --- LFS_CMD_EXTRACT ---
   # --- END_LFS_CMD_EXTRACT ---
   end_extract_date=$(date +"%s")
@@ -274,7 +298,7 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   start_patch_date=$(date +"%s")
   echo "Applying patches."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-src || exit 1
   # --- LFS_CMD_PATCH ---
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
@@ -288,11 +312,105 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-src || exit 1
   # --- LFS_CMD_CONFIG ---
-  ./configure --prefix=/usr         \
-              --disable-static      \
-              --docdir=/usr/share/doc/$name-$ver || exit 1
+  # To install into the /opt directory, remove any existing /opt/rustc symlink and create a new directory.
+  [[ -h /opt/rustc ]] && rm /opt/rustc 
+  rm -rf /opt/rustc-$ver && mkdir -v /opt/rustc-$ver || exit 1
+  ln -svfn rustc-$ver /opt/rustc || exit 1 
+  # Create a suitable config.toml file which will configure the build.
+cat > bootstrap.toml << "EOF" &&
+# See bootstrap.toml.example for more possible options,
+# and see src/bootstrap/defaults/bootstrap.dist.toml for a few options
+# automatically set when building from a release tarball.
+# We have to override a decent number of them.
+
+# Tell x.py the editors have reviewed the content of this file
+# and updated it to follow the major changes of the building system,
+# so x.py will not warn us to do such a review.
+change-id = 142379
+
+[llvm]
+# When using system llvm prefer shared libraries
+link-shared = true
+
+EOF
+if [ ! -f /usr/lib32/libc.so.6 ]; then
+cat >> bootstrap.toml << "EOF"
+# If building the shipped LLVM source, only enable the x86 target
+# instead of all the targets supported by LLVM.
+targets = "X86"
+
+EOF
+fi
+cat >> bootstrap.toml << "EOF"
+[build]
+description = "for DIRTY"
+EOF
+if [ -f /usr/lib32/libc.so.6 ]; then
+cat >> bootstrap.toml << "EOF"
+target = [
+"x86_64-unknown-linux-gnu",
+"i686-unknown-linux-gnu",
+]
+
+EOF
+fi &&
+cat >> bootstrap.toml << EOF &&
+# omit docs to save time and space (default is to build them)
+docs = false
+
+# Do not query new versions of dependencies online.
+locked-deps = true
+
+# Specify which extended tools (those from the default install).
+tools = ["cargo", "clippy", "rustdoc", "rustfmt"]
+
+[install]
+prefix = "/opt/rustc-$ver"
+docdir = "share/doc/rustc-$ver"
+
+[rust]
+channel = "stable"
+
+# Uncomment if FileCheck has been installed.
+#codegen-tests = false
+
+# Disable the need for lld.
+lld = false
+
+# If you didn't build in NVPTX support, you can uncomment this.
+# #llvm-bitcode-linker = false
+
+# Enable the same optimizations as the official upstream build.
+lto = "thin"
+codegen-units = 1
+
+EOF
+if [ -f /usr/lib32/libc.so.6 ]; then
+cat >> bootstrap.toml << "EOF"
+[target.x86_64-unknown-linux-gnu]
+cc = "/usr/bin/gcc"
+cxx = "/usr/bin/g++"
+ar = "/usr/bin/gcc-ar"
+ranlib = "/usr/bin/gcc-ranlib"
+llvm-config = "/usr/bin/llvm-config"
+
+[target.i686-unknown-linux-gnu]
+cc = "/usr/bin/gcc"
+cxx = "/usr/bin/g++"
+ar = "/usr/bin/gcc-ar"
+ranlib = "/usr/bin/gcc-ranlib"
+EOF
+else
+cat >> bootstrap.toml << "EOF"
+[target.x86_64-unknown-linux-gnu]
+llvm-config = "/usr/bin/llvm-config"
+
+[target.i686-unknown-linux-gnu]
+llvm-config = "/usr/bin/llvm-config"
+EOF
+fi
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -304,10 +422,9 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   start_build_date=$(date +"%s")
   echo "Compiling sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-src || exit 1
   # --- LFS_CMD_BUILD ---
-  NUMJOBS="-j $(nproc)"
-  make $NUMJOBS || exit 1
+  ./x.py build || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -320,9 +437,34 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   #Installing sources.
   echo "Installing sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-src || exit 1
   # --- LFS_CMD_INSTALL ---
-  make DESTDIR=$PKGDIR install || exit 1
+  DESTDIR=$PKGDIR ./x.py install || exit 1
+  # fix the /opt installation of the documentation and symlink a Zsh completion file into the correct location and move a Bash completion file into the location recommended
+  mkdir -vp $PKGDIR/opt/rustc-$ver/share/doc/rustc-$ver
+  rm -fv $PKGDIR/opt/rustc-$ver/share/doc/rustc-$ver/*.old
+  install -vm644 README.md                                \
+               $PKGDIR/opt/rustc-$ver/share/doc/rustc-$ver
+
+  install -vdm755 $PKGDIR/usr/share/zsh/site-functions
+  ln -sfv /opt/rustc/share/zsh/site-functions/_cargo \
+        $PKGDIR/usr/share/zsh/site-functions
+
+  mkdir -vp $PKGDIR/usr/share/bash-completion/completions
+  mv -v $PKGDIR/etc/bash_completion.d/cargo \
+      $PKGDIR/usr/share/bash-completion/completions
+
+  # Create the /etc/profile.d/rustc.sh startup file as the root user.
+  mkdir -vp $PKGDIR/etc/profile.d
+  cat > $PKGDIR/etc/profile.d/rustc.sh << "EOF"
+# Begin /etc/profile.d/rustc.sh
+
+pathprepend /opt/rustc/bin           PATH
+
+# End /etc/profile.d/rustc.sh
+EOF
+  # Immediately after installation, update the current PATH for your current shell.
+  # source /etc/profile.d/rustc.sh
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -335,9 +477,8 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   start_post_date=$(date +"%s")
   echo "Post compilation tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-src || exit 1
   # --- LFS_CMD_POST ---
-  make distclean
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
@@ -350,14 +491,8 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   start_config32_date=$(date +"%s")
   echo "Configuring 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-src || exit 1
   # --- LFS_CMD_CONFIG32 ---
-  CC="gcc -m32" ./configure \
-      --prefix=/usr         \
-      --disable-static      \
-      --libdir=/usr/lib32   \
-      --libexecdir=/usr/lib32   \
-      --host=i686-pc-linux-gnu || exit 1
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
   config32_time=$(($end_config32_date - $start_config32_date))
@@ -369,10 +504,8 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   start_build32_date=$(date +"%s")
   echo "Compiling 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-src || exit 1
   # --- LFS_CMD_BUILD32 ---
-  NUMJOBS="-j $(nproc)"
-  make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD32 ---
   end_build32_date=$(date +"%s")
   build32_time=$(($end_build32_date - $start_build32_date))
@@ -385,12 +518,8 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   start_install32_date=$(date +"%s")
   echo "Installing 32bits sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-src || exit 1
   # --- LFS_CMD_INSTALL32 ---
-  mkdir -vp $PKGDIR/usr/lib32
-  make DESTDIR=$PWD/DESTDIR install
-  cp -Rv DESTDIR/usr/lib32/* $PKGDIR/usr/lib32
-  rm -rf DESTDIR
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
   install32_time=$(($end_install32_date - $start_install32_date))
@@ -403,7 +532,7 @@ if [ $POST32 -eq 1 ] ; then echo "Skipping POST32 bits compilation tasks." ; els
   start_post32_date=$(date +"%s")
   echo "Post compilation 32bits tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $name-$ver-src || exit 1
   # --- LFS_CMD_POST32 ---
   # --- END_LFS_CMD_POST32 ---
   end_post32_date=$(date +"%s")
@@ -415,7 +544,6 @@ fi
 if [ $STRIP -eq 1 ] ; then echo "Skipping STRIP elf." ; else 
   # strip ELF
   start_strip_date=$(date +"%s")
-  echo "Stripping ELF files."
   find $PKGDIR | xargs file | grep "ELF.*executable" | cut -f 1 -d : \
                | xargs strip --strip-unneeded 2> /dev/null
   end_strip_date=$(date +"%s")
@@ -429,7 +557,7 @@ if [ $SHARED -eq 1 ] ; then echo "Skipping find SHARED libs." ; else
   start_shared_date=$(date +"%s")
   echo "Find ELF files and extract needed shared libs"
   trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
-  cd $PKGDIR || exit 1
+  cd $PKGDIR
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; | grep -E "^./|NEEDED" |\
     # change ': file format elf64-x86-64' to :
     sed -e 's/:.*$/:/' |\

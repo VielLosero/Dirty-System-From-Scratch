@@ -81,11 +81,8 @@ version_url=https://sourceforge.net/projects/opencore-amr/files/fdk-aac/
 sum="md5sum"
 file1_url=$version_url
 file1=$name-$ver.tar.gz
-file1_sum=51e4e369c41f66d2f8f1ed83e2206908
+file1_sum=f43e593991caefdce509ad837d3301bd
 file2_url=$version_url
-file2=${file1}.asc
-file2_sum=067c95bd9919fa685e2e2d793237695f
-file2_gpgkey=B002F08B74A148DAA01F7123A48E86DB0B830498
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -130,12 +127,8 @@ fi
 cd $SOURCESDIR || exit 1
 [ ! -e $file1 ] && $GETFILE ${file1_url}/${file1}
 [ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
-[ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
-[ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $file2_gpgkey
-gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."

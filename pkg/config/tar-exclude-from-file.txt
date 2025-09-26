@@ -7,3 +7,5 @@ pkg/config/tar-exclude-from-file.txt
 etc/passwd
 etc/shadow
 etc/group
+etc/sysconfig/rc.site
+etc/rc.d/init.d/mountfs

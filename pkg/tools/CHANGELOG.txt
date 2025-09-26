@@ -95,6 +95,8 @@ BUGS AKA:TODO
 CHANGELOG
 ---------
 [2025-09-21]
+* Fixed initial dot in repo-status.sh when exist only package.
+[2025-09-21]
 * Upgraded libXScrnSaver-1.2.5-x86_64-1_GLFS_BasicX11Software_XorgLibraries
 * Upgraded libXfixes-6.0.2-x86_64-1_GLFS_BasicX11Software_XorgLibraries
 * Upgraded libXres-1.2.3-x86_64-1_GLFS_BasicX11Software_XorgLibraries
@@ -157,6 +159,12 @@ CHANGELOG
 * Upgraded meson-1.9.0-x86_64-1_MLFS_current_Viel
 * Upgraded kbd-2.9.0-x86_64-1_MLFS_current_Viel
 * Upgraded lfs-bootscripts-20250827-x86_64-1_MLFS_current_Viel
+* Reinstalled lfs-sysconfig-0.0.1-all-1_DIRTY_current_Viel
+  lfs-bootscript reset keymap in etc/sysconfig/rc.site
+  added etc/sysconfig/rc.site to /pkg/config/tar-exclude-from-file.txt
+* Reinstalled cryptsetup-dirtycfg-0.0.1-all-1_DIRTY_current_Viel
+  lfs-bootscript overwrite etc/rc.d/init.d/mountfs
+  added etc/rc.d/init.d/mountfs to /pkg/config/tar-exclude-from-file.txt
 * Upgraded linux-headers-6.16.7-x86_64-1_MLFS_current_Viel
 * Upgraded linux-6.16.7-x86_64-1_MLFS_current_Viel
 * Upgraded p11-kit-0.25.9-x86_64-1_GLFS_Networking

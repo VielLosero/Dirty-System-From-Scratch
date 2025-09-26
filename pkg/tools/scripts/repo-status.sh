@@ -39,13 +39,23 @@ UPDATEDIR_REPO_BUILDERS=/tmp/updates/repository/builders
 if [ "$REPO" == "*" ] ; then
   if [[ -z "$@" ]] ; then comls="$REPODIR/*/*/*/* $PKG_DB/*" ; fi
   while [[ ! -z "$@" ]] ; do
-    comls=("${comls[@]}" "$REPODIR/*/*/*/*$1* $PKG_DB/*$1*") ; shift
+    # to select between bc glibc --> .bc
+    # and between maker. builder. or package without dot.
+    if [ "${1:0:1}" == "." ] ; then
+      comls=("${comls[@]}" "$REPODIR/*/*/*/*$1* $REPODIR/*/*/*/${1/./}* $PKG_DB/${1/./}*") ; shift
+    else
+      comls=("${comls[@]}" "$REPODIR/*/*/*/*$1* $PKG_DB/*$1*") ; shift
+    fi
   done
 else
   # exclude installed and work only with REPO
   if [[ -z "$@" ]] ; then comls="$REPODIR/*/*/*/*" ; fi
   while [[ ! -z "$@" ]] ; do
-	  comls=("${comls[@]}" "$REPODIR/*/*/*/*$1*") ; shift
+    if [ "${1:0:1}" == "." ] ; then
+      comls=("${comls[@]}" "$REPODIR/*/*/*/*$1* $REPODIR/*/*/*/${1/./}*") ; shift
+    else
+      comls=("${comls[@]}" "$REPODIR/*/*/*/*$1*") ; shift
+    fi
   done
 fi
 #echo "${comls[@]}"

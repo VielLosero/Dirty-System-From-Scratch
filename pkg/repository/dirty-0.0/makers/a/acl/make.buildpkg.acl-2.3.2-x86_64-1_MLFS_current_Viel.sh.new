@@ -48,7 +48,7 @@ echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
 short_desc="Commands for Manipulating POSIX Access Control Lists"
-url="https://www.gnu.org/software/tar/"
+url="https://savannah.nongnu.org/projects/acl"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi

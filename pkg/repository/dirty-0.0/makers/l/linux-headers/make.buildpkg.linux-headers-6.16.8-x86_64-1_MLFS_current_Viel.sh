@@ -47,11 +47,13 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Commands for Manipulating POSIX Access Control Lists"
-url="https://savannah.nongnu.org/projects/acl"
+short_desc="The Linux API Headers (in $name-$ver.tar.xz) expose the kernel's API for use by Glibc. "
+url="https://www.kernel.org/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
+# put before sources to make sources sub-name and dont extract 2 times. 
+sub_name=${name/-*/}
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
@@ -70,28 +72,27 @@ LFS=/mnt/lfs
 LFS_TGT=$(uname -m)-lfs-linux-gnu
 
 # --- END CAT SEED ---
-
+ 
 # Config get tool.
 if wget --help >/dev/null 2>&1 ; then GETVER="wget --output-document - --quiet" GETFILE="wget -c " SPIDER="wget -q --method=HEAD"
 elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --silent" GETFILE="curl -C - -O --silent" SPIDER="curl -L --head --fail --silent"
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
-# package vars.
-version_url="https://download.savannah.nongnu.org/releases/acl"
+# Package vars.
+version_url=https://www.kernel.org/
 sum="md5sum"
-file1_url="$version_url"
-file1=$name-$ver.tar.xz
-file1_sum=590765dee95907dbc3c856f7255bd669
-file2_url="$file1_url"
-file2=${file1}.sig
-file2_sum=cb1a8da8d801c2d430062add8e5949b7
-acl_gpgkey=B902B5271325F892AC251AD441633B9FE837F581
+file1_url=https://www.kernel.org/pub/linux/kernel/v6.x
+file1=$sub_name-$ver.tar.xz
+file1_sum=bb1109f7e91a503e2a0a334489820ecb
+file2_url=$file1_url
+file2=$sub_name-$ver.tar.sign
+file2_sum=24cb02d1ed359f4b77a5b9a2bc0fb5aa
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=$(wget --output-document - --quiet https://www.kernel.org/ | grep -A 1 "latest_link" | tail -1 | cut -d'>' -f2 | cut -d'<' -f1 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -134,13 +135,12 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $acl_gpgkey
-gpg --verify $file2 $file1 || exit 1
+gpg --locate-keys torvalds@kernel.org gregkh@kernel.org
+xz -k -d -c $file1 |  gpg --verify $file2 - || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
 cd $SOURCESPPDIR || exit 1
-# Do something if needed.
 
 # Making Buildpkg.sh $OUTBUILD (The builder)
 echo "Making buildpkg."
@@ -243,6 +243,7 @@ if [ $CHECK -eq 1 ] ; then echo "Skipping CHECK tasks." ; else
   echo "Checking needs to build."
   # --- LFS_CMD_CHECKS ---
   # --- END_LFS_CMD_CHECKS ---
+  # Check if needed packages are installed.
   end_checks_date=$(date +"%s")
   checks_time=$(($end_checks_date - $start_checks_date))
   echo "Checks time: $checks_time" >> $TMP_PKG_TIMINGS_FILE
@@ -252,29 +253,27 @@ fi
 if [ $EXTRACT -eq 1 ] ; then echo "Skipping EXTRACT sources." ; else
   # Extracting sources.
   start_extract_date=$(date +"%s")
-  echo "Preparing sources."
   cd $BUILDDIR || exit 1
+  echo "Preparing sources."
   # deleting source dirs if exist.
-  if [ -d $name-$ver ] ; then rm -rf $name-$ver ; fi
+  if [ -d $sub_name-$ver ] ; then rm -rf $sub_name-$ver ; fi
   if [ -d $PKGDIR ] ; then rm -rf $PKGDIR && mkdir $PKGDIR ; fi
 EOF_OUTBUILD
   echo '  tar xf $SOURCESDIR'/$file1 >> $OUTBUILD 
   cat << 'EOF_OUTBUILD' >> $OUTBUILD
-  cd $name-$ver || exit 1
-  # --- LFS_CMD_EXTRACT ---
-  # --- END_LFS_CMD_EXTRACT ---
+  cd $sub_name-$ver || exit 1
   end_extract_date=$(date +"%s")
   extract_time=$(($end_extract_date - $start_extract_date))
   echo "Extract time: $extract_time" >> $TMP_PKG_TIMINGS_FILE
   echo "Extract time: $extract_time seconds" 
 fi
-  
+
 if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else 
   # Apply patches here.
   start_patch_date=$(date +"%s")
-  echo "Applying patches."
+  #echo "Applying patches."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $sub_name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
@@ -282,17 +281,16 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   echo "Patch time: $patch_time" >> $TMP_PKG_TIMINGS_FILE
   echo "Patch time: $patch_time seconds" 
 fi
-  
+
 if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else 
   # ./configure here.
   start_config_date=$(date +"%s")
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $sub_name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  ./configure --prefix=/usr         \
-              --disable-static      \
-              --docdir=/usr/share/doc/$name-$ver || exit 1
+  #  Make sure there are no stale files embedded in the package.
+  make mrproper
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -304,10 +302,10 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   start_build_date=$(date +"%s")
   echo "Compiling sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $sub_name-$ver || exit 1
   # --- LFS_CMD_BUILD ---
-  NUMJOBS="-j $(nproc)"
-  make $NUMJOBS || exit 1
+  NUMJOBS=${NUMJOBS:-" -j$(nproc) "}
+  make headers $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -320,9 +318,12 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   #Installing sources.
   echo "Installing sources."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $sub_name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
-  make DESTDIR=$PKGDIR install || exit 1
+  #Now extract the user-visible kernel headers from the source. The recommended make target “headers_install” cannot be used, because it requires rsync, which may not be available. The headers are first placed in ./usr, then copied to the needed location
+  find usr/include -type f ! -name '*.h' -delete
+  mkdir -vp $PKGDIR/usr
+  cp -rv usr/include $PKGDIR/usr
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -335,81 +336,13 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   start_post_date=$(date +"%s")
   echo "Post compilation tasks."
   cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
+  cd $sub_name-$ver || exit 1
   # --- LFS_CMD_POST ---
-  make distclean
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
   echo "Post compilation tasks time: $post_time" >> $TMP_PKG_TIMINGS_FILE
   echo "Post compilation tasks time: $post_time seconds"
-fi
-  
-if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else 
-  # ./configure here.
-  start_config32_date=$(date +"%s")
-  echo "Configuring 32bits sources."
-  cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
-  # --- LFS_CMD_CONFIG32 ---
-  CC="gcc -m32" ./configure \
-      --prefix=/usr         \
-      --disable-static      \
-      --libdir=/usr/lib32   \
-      --libexecdir=/usr/lib32   \
-      --host=i686-pc-linux-gnu || exit 1
-  # --- END_LFS_CMD_CONFIG32 ---
-  end_config32_date=$(date +"%s")
-  config32_time=$(($end_config32_date - $start_config32_date))
-  echo "Sources config32 time: $config32_time" >> $TMP_PKG_TIMINGS_FILE
-  echo "Sources config32 time: $config32_time seconds"
-fi
-
-if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else 
-  start_build32_date=$(date +"%s")
-  echo "Compiling 32bits sources."
-  cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
-  # --- LFS_CMD_BUILD32 ---
-  NUMJOBS="-j $(nproc)"
-  make $NUMJOBS || exit 1
-  # --- END_LFS_CMD_BUILD32 ---
-  end_build32_date=$(date +"%s")
-  build32_time=$(($end_build32_date - $start_build32_date))
-  echo "Sources build32 time: $build32_time" >> $TMP_PKG_TIMINGS_FILE
-  echo "Sources build32 time: $build32_time seconds"
-fi
-
-if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else 
-  #Installing sources.
-  start_install32_date=$(date +"%s")
-  echo "Installing 32bits sources."
-  cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
-  # --- LFS_CMD_INSTALL32 ---
-  mkdir -vp $PKGDIR/usr/lib32
-  make DESTDIR=$PWD/DESTDIR install
-  cp -Rv DESTDIR/usr/lib32/* $PKGDIR/usr/lib32
-  rm -rf DESTDIR
-  # --- END_LFS_CMD_INSTALL32 ---
-  end_install32_date=$(date +"%s")
-  install32_time=$(($end_install32_date - $start_install32_date))
-  echo "Sources install32 time: $install32_time" >> $TMP_PKG_TIMINGS_FILE
-  echo "Sources install32 time: $install32_time seconds"
-fi
-
-if [ $POST32 -eq 1 ] ; then echo "Skipping POST32 bits compilation tasks." ; else 
-  # Post compilation 32bits
-  start_post32_date=$(date +"%s")
-  echo "Post compilation 32bits tasks."
-  cd $BUILDDIR || exit 1
-  cd $name-$ver || exit 1
-  # --- LFS_CMD_POST32 ---
-  # --- END_LFS_CMD_POST32 ---
-  end_post32_date=$(date +"%s")
-  post32_time=$(($end_post32_date - $start_post32_date))
-  echo "Post compilation 32bits tasks time: $post32_time" >> $TMP_PKG_TIMINGS_FILE
-  echo "Post compilation 32bits tasks time: $post32_time seconds"
 fi
 
 if [ $STRIP -eq 1 ] ; then echo "Skipping STRIP elf." ; else 
@@ -427,8 +360,7 @@ fi
 if [ $SHARED -eq 1 ] ; then echo "Skipping find SHARED libs." ; else 
   # extract /pkg shared-libs dir to temp file, to cat in base64 when contruct the pkg script.
   start_shared_date=$(date +"%s")
-  echo "Find ELF files and extract needed shared libs"
-  trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
+  echo "Finding ELF files and extracting needed shared libs."
   cd $PKGDIR || exit 1
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; | grep -E "^./|NEEDED" |\
     # change ': file format elf64-x86-64' to :
@@ -526,7 +458,7 @@ if [ $PACKAGE -eq 1 ] ; then echo "Skipping PACKAGE." ; else
   
 EOF_OUTPKG
   
-  cd $PKGDIR
+  cd $PKGDIR || exit 1
   # Tar and compress files in current dir and copy it in b64 to package script.
   # Thanks to https://reproducible-builds.org/docs/archives/ 
   # and https://www.gnu.org/software/tar/manual/html_node/Reproducibility.html

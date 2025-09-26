@@ -47,11 +47,17 @@ echo "  Version: $ver"
 echo "  Arch: $arch"
 echo "  Release: $rel"
 # Additional info.
-short_desc="Commands for Manipulating POSIX Access Control Lists"
-url="https://savannah.nongnu.org/projects/acl"
+short_desc="The GLibmm package is a set of C++ bindings for GLib. This version is part of a new API for supporting gtkmm-4."
+url="https://gnome.pages.gitlab.gnome.org/glibmm/"
 license=""
 # prevent empty var.
 if [ -z $pkg_name ] ; then exit 1 ; fi
+# sub ver for download
+if [[ "$(echo "$ver" | grep -o "\." | wc -l)" -eq "1" ]] ; then
+  sub_ver="${ver}"
+else
+  sub_ver="${ver%.*}"
+fi
 
 # Master vars.
 ROOT=${ROOT:-} ; TMP="$ROOT/tmp"
@@ -77,21 +83,21 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # package vars.
-version_url="https://download.savannah.nongnu.org/releases/acl"
-sum="md5sum"
-file1_url="$version_url"
+version_url=https://download.gnome.org/sources/glibmm
+sum="sha256sum"
+file1_url="$version_url/$sub_ver"
 file1=$name-$ver.tar.xz
-file1_sum=590765dee95907dbc3c856f7255bd669
+file1_sum=39c0e9f6da046d679390774efdb9ad564436236736dc2f7825e614b2d4087826
 file2_url="$file1_url"
-file2=${file1}.sig
-file2_sum=cb1a8da8d801c2d430062add8e5949b7
-acl_gpgkey=B902B5271325F892AC251AD441633B9FE837F581
+file2=$name-$ver.sha256sum
+file2_sum=2a1f9c7502566ce1ffae28820bf7fc7703200bc57bdc9fee1460c9f94807cdfb
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_sub_ver=$(echo "$($GETVER $version_url)" | tr ' ' '\n' | grep "href=\"[0-9]" | sort -Vr | head -1 | cut -d'"' -f2 | sed 's%/%%' )
+  last_version=$(echo "$($GETVER $version_url/$last_sub_ver)" | tr ' ' '\n' | grep href.*${name}-[0-9].*tar.*z\" | cut -d'"' -f2 | sort -V | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else
@@ -100,7 +106,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
     else
       if [ $NEW = 0 ] ; then
         NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-1_${rel_tag}.sh}
-        if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+        if $SPIDER ${file1_url/$sub_ver/$last_sub_ver}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 4
           else
@@ -134,8 +140,6 @@ cd $SOURCESDIR || exit 1
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
 
 # Check signaure if needed
-gpg --keyserver hkps://keyserver.ubuntu.com --receive-keys $acl_gpgkey
-gpg --verify $file2 $file1 || exit 1
 
 # Prepare sources or patches.
 echo "Preparing sources."
@@ -290,9 +294,8 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  ./configure --prefix=/usr         \
-              --disable-static      \
-              --docdir=/usr/share/doc/$name-$ver || exit 1
+  mkdir build ; cd build || exit 1
+  meson setup --prefix=/usr --buildtype=release .. || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))
@@ -306,8 +309,8 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD ---
-  NUMJOBS="-j $(nproc)"
-  make $NUMJOBS || exit 1
+  cd build || exit 1
+  ninja || exit 1
   # --- END_LFS_CMD_BUILD ---
   end_build_date=$(date +"%s")
   build_time=$(($end_build_date - $start_build_date))
@@ -322,7 +325,8 @@ if [ $INSTALL -eq 1 ] ; then echo "Skipping INSTALL sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL ---
-  make DESTDIR=$PKGDIR install || exit 1
+  cd build || exit 1
+  DESTDIR=$PKGDIR ninja install || exit 1
   # --- END_LFS_CMD_INSTALL ---
   end_install_date=$(date +"%s")
   install_time=$(($end_install_date - $start_install_date))
@@ -337,7 +341,6 @@ if [ $POST -eq 1 ] ; then echo "Skipping POST compilation tasks." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_POST ---
-  make distclean
   # --- END_LFS_CMD_POST ---
   end_post_date=$(date +"%s")
   post_time=$(($end_post_date - $start_post_date))
@@ -352,12 +355,6 @@ if [ $CONFIG32 -eq 1 ] ; then echo "Skipping CONFIG32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG32 ---
-  CC="gcc -m32" ./configure \
-      --prefix=/usr         \
-      --disable-static      \
-      --libdir=/usr/lib32   \
-      --libexecdir=/usr/lib32   \
-      --host=i686-pc-linux-gnu || exit 1
   # --- END_LFS_CMD_CONFIG32 ---
   end_config32_date=$(date +"%s")
   config32_time=$(($end_config32_date - $start_config32_date))
@@ -371,8 +368,6 @@ if [ $BUILD32 -eq 1 ] ; then echo "Skipping BUILD32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD32 ---
-  NUMJOBS="-j $(nproc)"
-  make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD32 ---
   end_build32_date=$(date +"%s")
   build32_time=$(($end_build32_date - $start_build32_date))
@@ -387,10 +382,6 @@ if [ $INSTALL32 -eq 1 ] ; then echo "Skipping INSTALL32 bits sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_INSTALL32 ---
-  mkdir -vp $PKGDIR/usr/lib32
-  make DESTDIR=$PWD/DESTDIR install
-  cp -Rv DESTDIR/usr/lib32/* $PKGDIR/usr/lib32
-  rm -rf DESTDIR
   # --- END_LFS_CMD_INSTALL32 ---
   end_install32_date=$(date +"%s")
   install32_time=$(($end_install32_date - $start_install32_date))
@@ -415,7 +406,6 @@ fi
 if [ $STRIP -eq 1 ] ; then echo "Skipping STRIP elf." ; else 
   # strip ELF
   start_strip_date=$(date +"%s")
-  echo "Stripping ELF files."
   find $PKGDIR | xargs file | grep "ELF.*executable" | cut -f 1 -d : \
                | xargs strip --strip-unneeded 2> /dev/null
   end_strip_date=$(date +"%s")
@@ -429,7 +419,7 @@ if [ $SHARED -eq 1 ] ; then echo "Skipping find SHARED libs." ; else
   start_shared_date=$(date +"%s")
   echo "Find ELF files and extract needed shared libs"
   trap "rm -f $TMP_PKG_SHAREDLIBS_FILE" EXIT
-  cd $PKGDIR || exit 1
+  cd $PKGDIR
   find . -type f -executable -exec objdump -p "{}" 2>/dev/null \; | grep -E "^./|NEEDED" |\
     # change ': file format elf64-x86-64' to :
     sed -e 's/:.*$/:/' |\
