@@ -91,11 +91,372 @@ BUGS AKA:TODO
 * Upgraded libxml2-2.15.0-x86_64-1_GLFS_Security
   added --with-python to build with python bindings
   need to see what *LFS do. BLFS ticket #22172 
+* Need to make a pkg with the tools in the repo like repo-status.sh
+  and lists
 
 CHANGELOG
 ---------
+[2025-09-25]
+*Rebuild all packages with new release numeration.
+* Rebuild dirty-repository-manager-0.0.1-all-1.1.1_DIRTY_current_Viel
+* Rebuild filesystem_hierarchy-3.0-all-1.1.1_DIRTY_current_Viel
+* Rebuild man-pages-6.15-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild iana-etc-20250826-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild glibc-2.42-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild tzdata-2025b-all-1.1.1_MLFS_current_Viel
+* Rebuild zlib-1.3.1-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild bzip2-1.0.8-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild xz-5.8.1-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild lz4-1.10.0-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild zstd-1.5.7-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild file-5.46-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild readline-8.3-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild m4-1.4.20-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild bc-1.08.2-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild flex-2.6.4-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild tcl-8.6.17-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild expect-5.45.4-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild pkgconf-2.5.1-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild binutils-2.45-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild gmp-6.3.0-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild mpfr-4.2.2-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild mpc-1.3.1-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild isl-0.27-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild attr-2.5.2-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild acl-2.3.2-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild libcap-2.76-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild libxcrypt-4.4.38-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild shadow-4.18.0-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild gcc-15.2.0-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild ncurses-6.5.20250920-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild sed-4.9-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild psmisc-23.7-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild gettext-0.26-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild bison-3.8.2-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild grep-3.12-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild bash-5.3-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild libtool-2.5.4-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild gdbm-1.26-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild gperf-3.3-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild expat-2.7.2-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild inetutils-2.6-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild less-679-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild perl-5.42.0-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild XML-Parser-2.47-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild autoconf-2.72-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild automake-1.18.1-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild openssl-3.5.3-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild elfutils-0.193-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild libffi-3.5.2-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild Python-3.13.7-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild flit_core-3.12.0-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild packaging-25.0-x86_64-1.1.1_MLFS_current_Viel
+    Needed reinstall flit_core
+* Rebuild wheel-0.46.1-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild setuptools-80.9.0-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild ninja-1.13.1-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild meson-1.9.0-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild kmod-34.2-x86_64-1.1.1_MLFS_current_Viel
+    Needed reinstall meson
+* Rebuild coreutils-9.7-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild diffutils-3.12-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild gawk-5.3.2-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild findutils-4.10.0-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild groff-1.23.0-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild grub-2.12-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild gzip-1.14-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild iproute2-6.16.0-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild kbd-2.9.0-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild libpipeline-1.5.8-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild make-4.4.1-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild patch-2.8-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild tar-1.35-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild texinfo-7.2-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild vim-9.1.1623-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild markupsafe-3.0.2-x86_64-1.1.1_MLFS_multilib
+* Rebuild eudev-3.2.14-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild udev-lfs-20230818-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild udev-lfs-dirtycfg-0.0.1-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild man-db-2.13.1-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild procps-ng-4.0.5-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild util-linux-2.41.1-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild e2fsprogs-1.47.3-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild sysklogd-2.7.2-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild sysvinit-3.14-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild lfs-bootscripts-20250827-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild linux-headers-6.16.8-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild linux-6.16.8-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild bash-shell-startup-files-0.0.1-all-1.1.1_GLFS_CONFIG_Viel
+* Rebuild pkgconf-personalties-config-0.0.1-all-1.1.1_GLFS_CONFIG_Viel
+* Rebuild meson-toolchain-config-0.0.1-all-1.1.1_GLFS_CONFIG_Viel
+* Rebuild libtasn1-4.20.0-x86_64-1.1.1_GLFS_Networking
+* Rebuild nspr-4.37-x86_64-1.1.1_GLFS_Networking
+* Rebuild p11-kit-0.25.9-x86_64-1.1.1_GLFS_Networking
+* Rebuild make-ca-1.16.1-x86_64-1.1.1_GLFS_Networking
+* Rebuild libunistring-1.3-x86_64-1.1.1_GLFS_Networking
+* Rebuild curl-8.16.0-x86_64-1.1.1_GLFS_Networking
+* Rebuild wget-1.25.0-x86_64-1.1.1_GLFS_Networking
+* Rebuild git-manpages-2.51.0-x86_64-1.1.1_GLFS_Networking_Dirty01
+* Rebuild git-2.51.0-x86_64-1.1.1_GLFS_Networking_Dirty01
+* Rebuild linux-pam-1.7.1-x86_64-1.1.1_GLFS_Security
+* Rebuild shadow-4.18.0-x86_64-1.1.1_GLFS_Security
+* Rebuild glib-2.86.0-x86_64-1.1.1_GLFS_Security
+* Rebuild gobject-introspection-1.86.0-x86_64-1.1.1_GLFS_Security
+* Rebuild glib-2.86.0-x86_64-1.1.1_GLFS_Security
+* Rebuild libxml2-2.15.0-x86_64-1.1.1_GLFS_Security
+* Rebuild shared-mime-info-2.4-x86_64-1.1.1_GLFS_Security
+* Rebuild alsa-lib-1.2.14-x86_64-1.1.1_GLFS_Audio
+* Rebuild alsa-plugins-1.2.12-x86_64-1.1.1_GLFS_Audio
+* Rebuild alsa-utils-1.2.14-x86_64-1.1.1_GLFS_Audio
+* Rebuild libogg-1.3.6-x86_64-1.1.1_GLFS_current_Viel
+* Rebuild libvorbis-1.3.7-x86_64-1.1.1_GLFS_current_Viel
+* Rebuild opus-1.5.2-x86_64-1.1.1_GLFS_current_Viel
+* Rebuild libsndfile-1.2.2-x86_64-1.1.1_GLFS_Audio
+* Rebuild pulseaudio-17.0-x86_64-1.1.1_GLFS_Audio
+    Need reinstall XML-Parser-2.47-x86_64-1.1.1_MLFS_current_Viel
+    new release num rebuild package have perl 5.42, old have 5.40
+    sure I don't rebuild XML-Parser after upgrade perl.
+    NOTE: recomended to install new pkg speex, we use alsa for now, anyway.
+* Added speex-1.2.1-x86_64-1.1.1_GLFS_Audio
+* Added speexdsp-1.2.1-x86_64-1.1.1_GLFS_Audio
+* Rebuild util-macros-1.20.2-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild xorgproto-2024.1-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild libXau-1.0.12-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild libXdmcp-1.1.5-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild xcb-proto-1.17.0-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild libxcb-1.17.0-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild libpng-1.6.50-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild freetype-2.14.1-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild harfbuzz-11.5.0-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild freetype-2.14.1-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild fontconfig-2.17.1-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild xtrans-1.6.0-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libX11-1.8.12-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXext-1.3.6-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libFS-1.0.10-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libICE-1.1.2-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libSM-1.2.6-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXScrnSaver-1.2.5-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXt-1.3.1-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXmu-1.2.1-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXpm-3.5.17-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXaw-1.0.16-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXfixes-6.0.2-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXcomposite-0.4.6-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXrender-0.9.12-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXcursor-1.2.3-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXdamage-1.1.6-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libfontenc-1.1.8-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXfont2-2.0.7-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXft-2.3.9-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXi-1.8.2-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXinerama-1.1.5-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXrandr-1.5.4-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXres-1.2.3-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXtst-1.2.5-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXv-1.0.13-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXvMC-1.0.14-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXxf86dga-1.1.6-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXxf86vm-1.1.6-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libpciaccess-0.18.1-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libxkbfile-1.1.3-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libxshmfence-1.3.3-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libXpresent-1.0.2-x86_64-1.1.1_GLFS_BasicX11Software_XorgLibraries
+* Rebuild libxcvt-0.1.3-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild cmake-4.1.1-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild dbus-1.16.2-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild nettle-3.10.2-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild gnutls-3.8.10-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild pixman-0.46.4-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild wayland-1.24.0-x86_64-1.1.1_GLFS_Wayland
+* Rebuild wayland-protocols-1.45-x86_64-1.1.1_GLFS_Wayland
+* Rebuild pciutils-3.14.0-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Rebuild mako-1.3.10-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Rebuild libdrm-2.4.125-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Rebuild SPIRV-Headers-vulkan-sdk-1.4.321.0-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Rebuild SPIRV-Tools-vulkan-sdk-1.4.321.0-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Rebuild glslang-15.4.0-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Rebuild llvm-21.1.1-x86_64-1.1.1_GLFS_Dirty01_Viel
+* Rebuild rustc-1.90.0-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Rebuild cbindgen-0.29.0-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Rebuild rust-bindgen-0.72.1-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Skipped SPIRV-LLVM-Translator-21.1.0-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Rebuild libclc-21.1.1-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Rebuild libyaml-0.2.5-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Rebuild pyyaml-6.0.2-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Rebuild mesa-25.2.3-x86_64-1.1.1_GLFS_GraphicsDrivers_i915
+    Need reinstall mako, pyyaml and markupsafe because python upgrade.
+* Rebuild xcb-util-0.4.1-x86_64-1.1.1_GLFS_X11_XcbUtils
+* Rebuild xcb-util-image-0.4.1-x86_64-1.1.1_GLFS_X11_XcbUtils
+* Rebuild xcb-util-keysyms-0.4.1-x86_64-1.1.1_GLFS_X11_XcbUtils
+* Rebuild xcb-util-renderutil-0.3.10-x86_64-1.1.1_GLFS_X11_XcbUtils
+* Rebuild xcb-util-wm-0.4.2-x86_64-1.1.1_GLFS_X11_XcbUtils
+* Rebuild xcb-util-cursor-0.1.5-x86_64-1.1.1_GLFS_X11_XcbUtils
+* Rebuild xcb-util-errors-1.0.1-x86_64-1.1.1_GLFS_X11_XcbUtils
+* Rebuild xbitmaps-1.1.3-x86_64-1.1.1_GLFS_X11
+* Rebuild iceauth-1.0.10-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild mkfontscale-1.2.3-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild sessreg-1.1.4-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild setxkbmap-1.3.4-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild smproxy-1.0.8-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xauth-1.1.4-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xcmsdb-1.0.7-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xcursorgen-1.0.9-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xdpyinfo-1.4.0-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xdriinfo-1.0.8-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xev-1.2.6-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xgamma-1.0.8-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xhost-1.0.10-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xinput-1.6.4-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xkbcomp-1.4.7-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xkbevd-1.1.6-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xkbutils-1.0.6-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xkill-1.0.6-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xlsatoms-1.1.4-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xlsclients-1.1.5-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xmessage-1.0.7-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xmodmap-1.0.11-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xpr-1.2.0-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xprop-1.2.8-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xrandr-1.5.3-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xrdb-1.2.2-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xrefresh-1.1.0-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xset-1.2.5-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xsetroot-1.1.3-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xvinfo-1.1.5-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xwd-1.0.9-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xwininfo-1.1.6-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild xwud-1.0.7-x86_64-1.1.1_GLFS_X11_XorgApplications
+* Rebuild font-util-1.4.1-x86_64-1.1.1_GLFS_X11
+* Rebuild xkeyboard-config-2.45-x86_64-1.1.1_GLFS_X11
+* Rebuild libepoxy-1.5.10-x86_64-1.1.1_GLFS_X11
+* Rebuild xorg-server-21.1.18-x86_64-1.1.1_GLFS_X11
+* Rebuild mtdev-1.1.7-x86_64-1.1.1_GLFS_X11
+* Rebuild libevdev-1.13.4-x86_64-1.1.1_GLFS_X11_XorgInputDrivers
+* Rebuild xf86-input-evdev-2.11.0-x86_64-1.1.1_GLFS_X11_XorgInputDrivers
+* Rebuild libinput-1.29.1-x86_64-1.1.1_GLFS_X11_XorgInputDrivers
+* Rebuild xf86-input-libinput-1.5.0-x86_64-1.1.1_GLFS_X11_XorgInputDrivers
+* Rebuild xf86-input-synaptics-1.10.0-x86_64-1.1.1_GLFS_X11_XorgInputDrivers
+* Rebuild xf86-input-wacom-1.2.3-x86_64-1.1.1_GLFS_X11_XorgInputDrivers
+* Rebuild xinit-1.4.4-x86_64-1.1.1_GLFS_X11
+* Rebuild libgpg-error-1.55-x86_64-1.1.1_GLFS_Steam
+* Rebuild xkbcommon-1.11.0-x86_64-1.1.1_GLFS_Wine
+* Rebuild nasm-2.16.03-x86_64-1.1.1_GLFS_current_Viel
+* Rebuild libaom-3.13.1-x86_64-1.1.1_GLFS_current_Viel
+* Added fdk-aac-2.0.3-x86_64-1.1.1_GLFS_current_Viel
+    removed from blacklist.
+    failed to make new output dir.
+    * Patched all makers with patch.to.fix.OUTPKG.dir.before.var
+* Rebuild lame-3.100-x86_64-1.1.1_GLFS_current_Viel
+* Rebuild libvpx-1.15.2-x86_64-1.1.1_GLFS_current_Viel
+* Rebuild x264-2025.09.10.0480cb05-x86_64-1.1.1_GLFS_current_Viel
+* Rebuild x265-4.1-x86_64-1.1.1_GLFS_current_Viel
+* Skipped ffmpeg-8.0-x86_64-1.1.1_GLFS_current_Viel
+* Rebuild blfs-bootscripts-20250225-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild popt-1.19-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild efivar-39-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild efibootmgr-18-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild grub-efi-2.12-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild dhcpcd-10.2.4-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild npth-1.8-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild libksba-1.6.7-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild libgcrypt-1.11.2-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild libassuan-3.0.2-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild gnupg-2.5.12-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild openssh-10.0p1-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild rsync-3.4.1-x86_64-1.1.1_BLFS_r12.2_multilib
+* Rebuild net-tools-2.10-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild libpcap-1.10.5-x86_64-1.1.1_BLFS_r12.2_multilib
+* Rebuild tcpdump-4.99.5-x86_64-1.1.1_BLFS_r12.2_multilib
+* Rebuild iptables-1.8.11-x86_64-1.1.1_BLFS_r12.2_multilib
+* Rebuild libevent-2.1.12-x86_64-1.1.1_BLFS_r12.2_multilib
+* Rebuild lynx-2.9.2-x86_64-1.1.1_BLFS_r12.2_multilib
+* Rebuild docutils-0.22.2-x86_64-1.1.1_BLFS_PythonModules
+* Rebuild cairo-1.18.4-x86_64-1.1.1_BLFS_12.3
+* Rebuild fribidi-1.0.16-x86_64-1.1.1_BLFS_12.3
+* Rebuild pango-1.57.0-x86_64-1.1.1_BLFS_12.3
+* Rebuild libxslt-1.1.43-x86_64-1.1.1_BLFS_12.3
+* Rebuild libjpeg-turbo-3.1.2-x86_64-1.1.1_BLFS_12.3
+* Rebuild gdk-pixbuf-2.44.1-x86_64-1.1.1_BLFS_12.3
+    Needed reinstal docutils-0.22.2-x86_64-1.1.1_BLFS_PythonModules
+    gdk-pixbuf MANPAGES require rst2man to build
+* Rebuild doxygen-1.14.0-x86_64-1.1.1_BLFS_12.3
+* Rebuild libsigc++-3.6.0-x86_64-1.1.1_BLFS_12.3
+* Rebuild glibmm-2.86.0-x86_64-1.1.1_BLFS_12.3
+* Rebuild atkmm-2.36.3-x86_64-1.1.1_BLFS_12.3
+* Rebuild gtk-3.24.50-x86_64-1.1.1_BLFS_12.3
+* Rebuild tmux-3.5a-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild dwm-6.6-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild dmenu-5.4-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild st-0.9.3-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild unix-tree-2.2.1-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild password-store-1.7.4-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild pinentry-1.3.2-x86_64-1.1.1_BLFS_sysV_r12.2
+* Rebuild oath-toolkit-2.6.13-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild pass-otp-1.2.0-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild json-c-0.18-x86_64-1.1.1_BLFS_12.3
+* Rebuild libaio-0.3.113-x86_64-1.1.1_BLFS_12.3
+* Rebuild LVM2-2.03.35-x86_64-1.1.1_BLFS_12.3
+* Rebuild cryptsetup-2.8.1-x86_64-1.1.1_BLFS_12.3
+* Rebuild cryptsetup-dirtycfg-0.0.1-all-1.1.1_DIRTY_current_Viel
+* Rebuild openldap-LMDB-0.9.33-x86_64-1.1.1_BLFS_current.Viel
+* Rebuild cyrus-sasl-2.1.28-x86_64-1.1.1_BLFS_current_Viel
+* Rebuild mutt-2.2.14-x86_64-1.1.1_BLFS_current_Viel
+* Rebuild libmnl-1.0.5-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild libnftnl-1.3.0-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild nftables-1.1.5-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild nftables-dirtycfg-0.0.1-all-1.1.1_DIRTY_current_Viel
+* Rebuild acpid-2.0.34-x86_64-1.1.1_BLFS_current_Viel
+* Rebuild acpid-dirtycfg-0.0.1-all-1.1.1_DIRTY_current_Viel
+* Rebuild pm-utils-1.4.1-all-1.1.1_BLFS_current_Viel
+* Rebuild imlib2-1.12.5-x86_64-1.1.1_BLFS_current_Viel
+* Rebuild feh-3.11.2-x86_64-1.1.1_BLFS_current_Viel
+* Rebuild fuse-3.17.4-x86_64-1.1.1_BLFS_current_Viel
+* Rebuild sshfs-3.7.3-x86_64-1.1.1_BLFS_current_Viel
+* Rebuild logrotate-3.22.0-x86_64-1.1.1_BLFS_current_Viel
+* Rebuild logrotate-dirtycfg-0.0.1-all-1.1.1_DIRTY_current_Viel
+* Rebuild ntp-4.2.8p18-x86_64-1.1.1_BLFS_current_Viel
+* Rebuild opendoas-6.8.2-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild opendoas-dirtycfg-0.0.1-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild scrot-1.12.1-x86_64-1.1.1_DIRTY_current_Viel
+* Rebuild jinja2-3.1.6-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild glad-2.0.8-x86_64-1.1.1_BLFS_current_Viel
+* Rebuild libplacebo-7.351.0-x86_64-1.1.1_BLFS_current_Viel
+    Need reinstall glad-2.0.8-x86_64-1.1.1_BLFS_current_Viel
+    Need reinstall jinja2-3.1.6-x86_64-1.1.1_MLFS_current_Viel
+* Rebuild libass-0.17.4-x86_64-1.1.1_BLFS_current_Viel
+* Rebuild mpv-0.40.0-x86_64-1.1.1_BLFS_current_Viel
+* Rebuild cpio-2.15-x86_64-1.1.1_BLFS_current_Viel
+* Rebuild jq-1.8.1-x86_64-1.1.1_DIRTY_current_Viel
+[2025-09-24]
+* Fixed OUTBUILD dir now found after makers version 0.0.7
+  patch.to.fix.OUTBUILD.dir.before.var
+* Added packaging-25.0-x86_64-1.1.1_MLFS_current_Viel
+* Remaked all builders from new release numeration makers
+  DECODED builders sources and remaked builders with
+  /pkg/tools/patches/remake.builders.new.version.release.sh 
+* Blacklisted new makers, builders and packages release numeration
+  from old release numeration.
+* Fixed some packages without gpg --keyserver
+* Updated ncurses from 5.6 to 5.6.20250920
+[2025-09-23]
+* New version 0.0.3 for /pkg/tools/scripts/repo-status.sh
+* Patched makers to Version 0.0.7
+  with patch patch.add.release.auto.increase
+  moved makers from release -1_tag to -1.1.1_tag
+  need remake builders and move packages to new release numeration.
+* Fixed variable last_version in expat-2.7.2-x86_64-1_MLFS_current_Viel
+  to work with patch patch.add.release.auto.increase for NEWMAKE 
+* Rebuild libxml2-2.15.0-x86_64-1_GLFS_Security
+  -            PYTHON=/usr/bin/python3 \
+  next release of *LFS, no needed.
+  need to remove old python bindigs rebuild old pkg then remove
+  need to add pkg release for freetype circular dep too.
 [2025-09-21]
 * Fixed initial dot in repo-status.sh when exist only package.
+* Rebuild libxml2-2.15.0-x86_64-1_GLFS_Security
+  whitout --with-python
+  the next release of libxml2 will remove python bindings, no needed
 [2025-09-21]
 * Upgraded libXScrnSaver-1.2.5-x86_64-1_GLFS_BasicX11Software_XorgLibraries
 * Upgraded libXfixes-6.0.2-x86_64-1_GLFS_BasicX11Software_XorgLibraries

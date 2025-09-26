@@ -1,0 +1,19 @@
+--- /pkg/repository/dirty-0.0/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1.1.1_MLFS_current_Viel.sh	2025-09-23 15:46:50.705889576 +0200
++++ /pkg/repository/dirty-0.0/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1.1.1_MLFS_current_Viel.sh.new	2025-09-24 18:10:16.527154398 +0200
+@@ -127,7 +127,6 @@
+ [ -d $SOURCESDIR ] || mkdir -p $SOURCESDIR
+ [ -d $SOURCESPPDIR ] && rm -rfv $SOURCESPPDIR # To prevent fail hard link to sources because files not checked can exist.
+ [ -d $SOURCESPPDIR ] || mkdir -p $SOURCESPPDIR
+-[ -d ${OUTBUILD%/*} ] || mkdir -p ${OUTBUILD%/*}
+ [ -d "$METADATADIR" ] || mkdir -p $METADATADIR
+ 
+ # Get sources and check.
+@@ -166,6 +165,8 @@
+ fi
+ # OUTBUILD file.
+ OUTBUILD=${OUTBUILD:-$REPODIR/builders/$first_pkg_char/${name}/buildpkg.${name}-${ver}-${arch}-${rel_m}.${last_rel_b}.1_${tag}.sh}
++# make needed dir if not exist.
++[ -d ${OUTBUILD%/*} ] || mkdir -p ${OUTBUILD%/*}
+ # sanity check
+ if [ -e $OUTBUILD ] ; then exit 1 ; fi
+ # echo first line to builder.

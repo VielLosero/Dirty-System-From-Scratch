@@ -29,23 +29,27 @@
 #:Maintainer: Viel Losero <viel.losero@gmail.com>
 #:Contributor: -
 
-#:Version:0.0.6
+#:Version:0.0.7
 
-# Get Application init data from filename.
+# Get Script init data from filename.
 cd $(dirname $0) ; SWD=$(pwd) # script work directory
 full_file_name="$0" ; file_name_no_path=${0##*/} 
 make_pkg_name="${file_name_no_path%.*}" ; build_pkg_name="${make_pkg_name/make./}" 
 pkg_name=${build_pkg_name/buildpkg./} ; name="${pkg_name%-*-*-*}" 
 pkg_ver="${pkg_name%-*-*}" ; ver="${pkg_ver/$name-/}"
 pkg_arch="${pkg_name%-*}" ; arch=${pkg_arch/$name-$ver-/}
-rel=${pkg_name/$name-$ver-$arch-/}
+rel_and_tag=${pkg_name/$name-$ver-$arch-/}
 first_pkg_char=$(printf %.1s ${name,})
-rel_build=${rel%%_*}
-rel_tag=${rel/${rel_build}_}
+rel=${rel_and_tag%%_*}
+tag=${rel_and_tag/${rel}_}
+rel_m=${rel%%.*}
+rel_p=${rel##*.}
+rel_b=${rel/${rel_m}.} ; rel_b=${rel_b/.${rel_p}}
 echo "  Package name: $name"
 echo "  Version: $ver"
 echo "  Arch: $arch"
-echo "  Release: $rel"
+echo "  Release: ${rel_m}.${rel_b}.${rel_p}"
+echo "  Tag: $tag"
 # Additional info.
 short_desc="Linux Capabilities -- an alternative to the superuser model of privilege under Linux."
 url="https://sites.google.com/site/fullycapable/"
@@ -62,8 +66,8 @@ SOURCESDIR=${SOURCESDIR:-$TMP/sources-all}
 SOURCESPPDIR=${SOURCESPPDIR:-$TMP/$REPO/sources-per-package/$name-$ver}
 BUILDDIR=${BUILDDIR:-$TMP/$REPO/build/$pkg_name}
 PKGDIR=${PKGDIR:-$TMP/$REPO/pkgfiles/$pkg_name}
-OUTBUILD=${OUTBUILD:-$REPODIR/builders/$first_pkg_char/${name}/${build_pkg_name}.sh}
-OUTPKG=${OUTPKG:-$REPODIR/packages/$first_pkg_char/${name}/${pkg_name}.sh}
+#OUTBUILD set on the maker, below.
+#OUTPKG set on the OUTBUILD
 
 # Other need vars for example to change the default INSTALLDIR=$LFS.
 LFS=/mnt/lfs
@@ -99,7 +103,7 @@ if [ $CHECK_RELEASE = 1 ] ; then
       echo "Version check: No new versions found." ; exit 0
     else
       if [ $NEW = 0 ] ; then
-        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-1_${rel_tag}.sh}
+        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-1.1.1_${tag}.sh}
         if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
           if [ -e "$NEWMAKE" ] ; then
             echo "Exist: $NEWMAKE" ; exit 4
@@ -123,7 +127,6 @@ fi
 [ -d $SOURCESDIR ] || mkdir -p $SOURCESDIR
 [ -d $SOURCESPPDIR ] && rm -rfv $SOURCESPPDIR # To prevent fail hard link to sources because files not checked can exist.
 [ -d $SOURCESPPDIR ] || mkdir -p $SOURCESPPDIR
-[ -d ${OUTBUILD%/*} ] || mkdir -p ${OUTBUILD%/*}
 [ -d "$METADATADIR" ] || mkdir -p $METADATADIR
 
 # Get sources and check.
@@ -144,6 +147,28 @@ cd $SOURCESPPDIR || exit 1
 
 # Making Buildpkg.sh $OUTBUILD (The builder)
 echo "Making buildpkg."
+# Get last OUTBUILD to increase release +1
+last_outbuild=$( ls -1 $REPODIR/builders/$first_pkg_char/${name}/buildpkg.${name}-${ver}-${arch}-${rel_m}.*_${tag}.sh 2>/dev/null | sort -Vr | head -1)
+last_outbuild_no_path=${last_outbuild##*/} 
+last_outbuild_pkg_name="${last_outbuild_no_path%.*}"
+last_pkg_name="${last_outbuild_pkg_name/buildpkg./}" 
+last_rel_and_tag=${last_pkg_name/$name-$ver-$arch-/}
+last_rel=${last_rel_and_tag%%_*}
+last_rel_m=${last_rel%%.*}
+last_rel_p=${last_rel##*.}
+last_rel_b=${last_rel/${last_rel_m}.} ; last_rel_b=${last_rel_b/.${last_rel_p}}
+# Check empty last release or +1
+if [ -z $last_rel_b ] ; then
+  last_rel_b=1
+else
+  last_rel_b=$(( $last_rel_b +1 ))
+fi
+# OUTBUILD file.
+OUTBUILD=${OUTBUILD:-$REPODIR/builders/$first_pkg_char/${name}/buildpkg.${name}-${ver}-${arch}-${rel_m}.${last_rel_b}.1_${tag}.sh}
+# make needed dir if not exist.
+[ -d ${OUTBUILD%/*} ] || mkdir -p ${OUTBUILD%/*}
+# sanity check
+if [ -e $OUTBUILD ] ; then exit 1 ; fi
 # echo first line to builder.
 echo "#!/bin/bash" > $OUTBUILD
 # copy header to builder
@@ -162,7 +187,6 @@ SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(date +%s)}"
 [ -d $SOURCESDIR ] || mkdir -p $SOURCESDIR
 [ -d $BUILDDIR ] || mkdir -p $BUILDDIR
 [ -d $PKGDIR ] || mkdir -p $PKGDIR
-[ -d ${OUTPKG%/*} ] || mkdir -p ${OUTPKG%/*}
 [ -d "$METADATADIR" ] || mkdir -p $METADATADIR
 
 # Create temp dir for package metadata.
@@ -473,6 +497,27 @@ if [ $PACKAGE -eq 1 ] ; then echo "Skipping PACKAGE." ; else
   #Packaging.
   start_package_date=$(date +"%s")
   echo "Packaging"
+# Get last OUTPKG to increase release +1
+last_outpkg=$( ls -1 $REPODIR/packages/$first_pkg_char/${name}/${name}-${ver}-${arch}-${rel_m}.${rel_b}.*_${tag}.sh 2>/dev/null | sort -Vr | head -1)
+last_outpkg_no_path=${last_outpkg##*/} 
+last_outpkg_pkg_name="${last_outpkg_no_path%.*}"
+last_rel_and_tag=${last_outpkg_pkg_name/$name-$ver-$arch-/}
+last_rel=${last_rel_and_tag%%_*}
+last_rel_m=${last_rel%%.*}
+last_rel_p=${last_rel##*.}
+last_rel_b=${last_rel/${last_rel_m}.} ; last_rel_b=${last_rel_b/.${last_rel_p}}
+# Check empty last release or +1
+if [ -z $last_rel_p ] ; then
+  last_rel_p=1
+else
+  last_rel_p=$(( $last_rel_p +1 ))
+fi
+# OUTPKG file.
+OUTPKG=${OUTPKG:-$REPODIR/packages/$first_pkg_char/${name}/${name}-${ver}-${arch}-${rel_m}.${rel_b}.${last_rel_p}_${tag}.sh}
+# make needed dir if not exist.
+[ -d ${OUTPKG%/*} ] || mkdir -p ${OUTPKG%/*}
+# sanity check
+if [ -e $OUTPKG ] ; then exit 1 ; fi
   # Start build pkg_name.sh
   echo "#!/bin/bash" > $OUTPKG
   # Copy script header to pkg.

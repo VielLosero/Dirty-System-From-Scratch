@@ -56,8 +56,13 @@ find /pkg/repository/dirty-0.1/makers/ -type f -exec patch --fuzz=20 --dry-run {
 # version 6
 bash-5.2# find /pkg/repository/dirty-0.0/makers/ -type f -exec sh -c 'grep "#:Version:0.0.6" {} &&  patch --fuzz=20 --dry-run {} -i /tmp/patch5 | grep -B3 FAILED'  \; | grep checking
 bash-5.2# find /pkg/repository/dirty-0.0/makers/ -type f -name "*.sh" -exec sh -c 'grep "#:Version:0.0.6" {} &&  patch --fuzz=20 --dry-run {} -i /tmp/patch5 && echo +++++++++++++ && patch --fuzz=20  {} -i /tmp/patch5 ' \;
+[root@dirty tmp]# find /pkg/repository/dirty-0.0/makers/ -type f -name "*.sh" -exec sh -c 'grep "#:Version:0.0.6" {} &&  patch --fuzz=20 --dry-run {} -i /tmp/patch.add.release.auto.increase && echo +++++++++++++ && patch --fuzz=20 --dry-run {} -i /tmp/patch.add.release.auto.increase ' \; | grep -B3 FAILED
+
+# see new release numeration packages
+[root@dirty v]# cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#" | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh $pkg | grep "\-.\..\.._" ; done
+
 # version 6 last
-bash-5.2# cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do ls -1 /pkg/repository/dirty-0.0/makers/*/*/*$(bash /pkg/tools/scripts/repo-status.sh ${pkg} | grep " V " | cut -c19-)* ; done
+[root@dirty tmp]# cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#"  | while read pkg ; do bash /pkg/tools/scripts/repo-status.sh ${pkg}  | grep " V " | cut -c19- ; done | while read line ; do  grep "#:Version:0.0.7" /pkg/repository/dirty-0.0/makers/*/*/*${line}* || echo "----> $line" ; done
 
 
 # see sha256sum and files inside buildpkg files
@@ -169,7 +174,7 @@ comm -13 /tmp/installed /tmp/needed
 grep -n "Todo:" /pkg/tools/CHANGELOG.txt | while read line ; do L=${line%%:*}; B=$(echo $line | cut -d: -f3) ; A=$(echo $line | cut -d: -f4) ; sed -n "$((${L} -$B)),$((${L} + $A))p" /pkg/tools/CHANGELOG.txt ; done
 
 
-# find bin files that don0t work after a upgrade.
+# find bin files that don't work after a upgrade.
 # When run ssh  get: OpenSSL version mismatch. Built against 30500000, you have 3050003f 
 grep libcrypto.so.3 /pkg/installed/*/needed-libs
 for i in $(grep lib32/libcrypto.so.3 /pkg/installed/*/needed-libs | grep "/bin/" | cut -d: -f2) ; do echo ${i#.}  ; done
@@ -180,6 +185,9 @@ for i in $(grep lib32/libcrypto.so.3 /pkg/installed/*/needed-libs | grep "/bin/"
 ./usr/bin/ssh-keyscan
 ./usr/bin/ssh
 [root@dirty v]#
+
+# find packages that have 0 lines
+[root@dirty v]# cat /tmp/run.repo.list | cut -c 21- | while read pkg ; do if [ "$(bash  /pkg/repository/dirty-0.0/packages/*/*/${pkg}.sh list | wc -l)" -eq 0 ] ; then echo $pkg ; fi ; done
 
 
 

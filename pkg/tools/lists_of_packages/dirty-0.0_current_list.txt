@@ -146,6 +146,8 @@
 .libvorbis-[0-9]*_GLFS_*
 .flac-[0-9]*_GLFS_*
 .opus-[0-9]*_GLFS_*
+.speex-[0-9]*_GLFS_*
+.speexdsp-[0-9]*_GLFS_*
 .libsndfile-[0-9]*_GLFS_*
 .pulseaudio-[0-9]*_GLFS_*
 #

@@ -1,0 +1,19 @@
+--- /pkg/repository/dirty-0.0/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1.1.1_MLFS_current_Viel.sh	2025-09-25 18:37:24.624300940 +0200
++++ /pkg/repository/dirty-0.0/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1.1.1_MLFS_current_Viel.sh.new	2025-09-25 19:01:45.348821787 +0200
+@@ -187,7 +187,6 @@
+ [ -d $SOURCESDIR ] || mkdir -p $SOURCESDIR
+ [ -d $BUILDDIR ] || mkdir -p $BUILDDIR
+ [ -d $PKGDIR ] || mkdir -p $PKGDIR
+-[ -d ${OUTPKG%/*} ] || mkdir -p ${OUTPKG%/*}
+ [ -d "$METADATADIR" ] || mkdir -p $METADATADIR
+ 
+ # Create temp dir for package metadata.
+@@ -521,6 +520,8 @@
+ fi
+ # OUTPKG file.
+ OUTPKG=${OUTPKG:-$REPODIR/packages/$first_pkg_char/${name}/${name}-${ver}-${arch}-${rel_m}.${rel_b}.${last_rel_p}_${tag}.sh}
++# make needed dir if not exist.
++[ -d ${OUTPKG%/*} ] || mkdir -p ${OUTPKG%/*}
+ # sanity check
+ if [ -e $OUTPKG ] ; then exit 1 ; fi
+   # Start build pkg_name.sh
