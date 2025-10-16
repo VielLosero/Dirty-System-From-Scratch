@@ -1,45 +1,38 @@
 ################### BUILD_INSTALL_LIST
-#               V - iana-etc-20250826-x86_64-1_MLFS_current_Viel
-#               V - expat-2.7.2-x86_64-1_MLFS_current_Viel
-#               V - openssl-3.5.3-x86_64-1_MLFS_current_Viel
-#               V - openssh-10.0p1-x86_64-1_BLFS_sysV_r12.2
-#               V - Python-3.13.7-x86_64-1_MLFS_current_Viel
-#               V - meson-1.9.0-x86_64-1_MLFS_current_Viel
-#               V - kbd-2.9.0-x86_64-1_MLFS_current_Viel
-#               V - lfs-bootscripts-20250827-x86_64-1_MLFS_current_Viel
-#               V - linux-headers-6.16.7-x86_64-1_MLFS_current_Viel
-#               V - linux-6.16.7-x86_64-1_MLFS_current_Viel
-#               V - p11-kit-0.25.9-x86_64-1_GLFS_Networking
-#               V - curl-8.16.0-x86_64-1_GLFS_Networking
-#               V - git-manpages-2.51.0-x86_64-1_GLFS_Networking_Dirty01
-#               V - git-2.51.0-x86_64-1_GLFS_Networking_Dirty01
-#     B   I     V - glib-2.86.0-x86_64-1_GLFS_Security
-#     B   I     V - gobject-introspection-1.86.0-x86_64-1_GLFS_Security
-#     B   I     V - glib-2.86.0-x86_64-1_GLFS_Security
-#     B   I     V - libxml2-2.15.0-x86_64-1_GLFS_Security
-#     B   I     V - freetype-2.14.1-x86_64-1_GLFS_BasicX11Software
-#     B   I     V - harfbuzz-11.5.0-x86_64-1_GLFS_BasicX11Software
-#     B   I     V - freetype-2.14.1-x86_64-1_GLFS_BasicX11Software
-#     B   I     V - libXScrnSaver-1.2.5-x86_64-1_GLFS_BasicX11Software_XorgLibraries
-#     B   I     V - libXfixes-6.0.2-x86_64-1_GLFS_BasicX11Software_XorgLibraries
-#     B   I     V - libXres-1.2.3-x86_64-1_GLFS_BasicX11Software_XorgLibraries
-#     B   I     V - libXpresent-1.0.2-x86_64-1_GLFS_BasicX11Software_XorgLibraries
-#     B   I     V - cmake-4.1.1-x86_64-1_GLFS_BasicX11Software
-#     B   I     V - llvm-21.1.1-x86_64-1_GLFS_Dirty01_Viel
-#     B   I     V - rust-bindgen-0.72.1-x86_64-1_GLFS_GraphicsDrivers
-#     B   I     V - libclc-21.1.1-x86_64-1_GLFS_GraphicsDrivers
-#     B   I     V - mesa-25.2.3-x86_64-1_GLFS_GraphicsDrivers_i915
-#     B   I     V - libinput-1.29.1-x86_64-1_GLFS_X11_XorgInputDrivers
-#     B   I     V - libaom-3.13.1-x86_64-1_GLFS_current_Viel
-#     B   I     V - x264-2025.09.10.0480cb05-x86_64-1_GLFS_current_Viel
-#     B   I     V - ffmpeg-8.0-x86_64-1_GLFS_current_Viel
-#     B   I     V - gnupg-2.5.12-x86_64-1_BLFS_sysV_r12.2
-#     B   I     V - docutils-0.22.1-x86_64-1_BLFS_PythonModules
-#     B   I     V - pango-1.57.0-x86_64-1_BLFS_12.3
-#     B   I     V - libjpeg-turbo-3.1.2-x86_64-1_BLFS_12.3
-#     B   I     V - gdk-pixbuf-2.44.1-x86_64-1_BLFS_12.3
-#     B   I     V - glibmm-2.85.0-x86_64-1_BLFS_12.3
-#     B   I     V - LVM2-2.03.35-x86_64-1_BLFS_12.3
-#     B   I     V - cryptsetup-2.8.1-x86_64-1_BLFS_12.3
-#     B   I     V - nftables-1.1.5-x86_64-1_DIRTY_current_Viel
-#     B   I     V - feh-3.11.2-x86_64-1_BLFS_current_Viel
+#               V - iana-etc-20250929-x86_64-1.1.1_MLFS_current_Viel
+#               V - ncurses-6.5.20251010-x86_64-1.1.1_MLFS_current_Viel
+#               V - expat-2.7.3-x86_64-1.1.1_MLFS_current_Viel
+#               V - openssl-3.6.0-x86_64-1.1.1_MLFS_current_Viel
+#               V - openssh-10.2p1-x86_64-1.1.1_BLFS_sysV_r12.2
+#               V - meson-1.9.1-x86_64-1.1.1_MLFS_current_Viel
+#               V - coreutils-9.8-x86_64-1.1.1_MLFS_current_Viel
+#               V - iproute2-6.17.0-x86_64-1.1.1_MLFS_current_Viel
+#               V - vim-9.1.1846-x86_64-1.1.1_MLFS_current_Viel
+#               V - markupsafe-3.0.3-x86_64-1.1.1_MLFS_multilib
+#               V - util-linux-2.41.2-x86_64-1.1.1_MLFS_current_Viel
+#               V - linux-headers-6.17.1-x86_64-1.1.1_MLFS_current_Viel
+#               V - linux-6.17.1-x86_64-1.1.1_MLFS_current_Viel
+#               V - p11-kit-0.25.10-x86_64-1.1.1_GLFS_Networking
+#               V - libunistring-1.4.1-x86_64-1.1.1_GLFS_Networking
+#               V - harfbuzz-12.1.0-x86_64-1.1.1_GLFS_BasicX11Software
+#               V - freetype-2.14.1-x86_64-1.1.3_GLFS_BasicX11Software
+#               V - cmake-4.1.2-x86_64-1.1.1_GLFS_BasicX11Software
+#               V - libdrm-2.4.126-x86_64-1.1.1_GLFS_GraphicsDrivers
+#               V - SPIRV-Headers-vulkan-sdk-1.4.328.1-x86_64-1.1.1_GLFS_GraphicsDrivers
+#               V - SPIRV-Tools-vulkan-sdk-1.4.328.1-x86_64-1.1.1_GLFS_GraphicsDrivers
+#               V - glslang-16.0.0-x86_64-1.1.1_GLFS_GraphicsDrivers
+#               V - libplacebo-7.351.0-x86_64-1.1.2_BLFS_current_Viel
+#     B   I     V - llvm-21.1.3-x86_64-1.1.1_GLFS_Dirty01_Viel
+#     B   I     V - SPIRV-LLVM-Translator-21.1.1-x86_64-1.1.1_GLFS_GraphicsDrivers
+#     B   I     V - libclc-21.1.3-x86_64-1.1.1_GLFS_GraphicsDrivers
+#     B   I     V - pyyaml-6.0.3-x86_64-1.1.1_GLFS_GraphicsDrivers
+#     B   I     V - mesa-25.2.4-x86_64-1.1.1_GLFS_GraphicsDrivers_i915
+#     B   I     V - xkeyboard-config-2.46-x86_64-1.1.1_GLFS_X11
+#     B   I     V - libgpg-error-1.56-x86_64-1.1.1_GLFS_Steam
+#     B   I     V - xkbcommon-1.12.0-x86_64-1.1.1_GLFS_Wine
+#     B   I     V - nasm-3.01-x86_64-1.1.1_GLFS_current_Viel
+#           s   V - ffmpeg-8.0-x86_64-1.1.1_GLFS_current_Viel
+#     B   I     V - gdk-pixbuf-2.44.3-x86_64-1.1.1_BLFS_12.3
+#     B   I     V - gtk-3.24.51-x86_64-1.1.1_BLFS_12.3
+#     B   I     V - mutt-2.2.15-x86_64-1.1.1_BLFS_current_Viel
+#     B   I     V - LuaJIT-871db2c84ecefd70a850e03a6c340214a81739f0-x86_64-1.1.1_BLFS_current_Viel

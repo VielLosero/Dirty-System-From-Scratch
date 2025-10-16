@@ -301,6 +301,9 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
+  # The arpd program included in this package will not be built since it depends on Berkeley DB, which is not installed in LFS. However, a directory and a man page for arpd will still be installed. Prevent this by running the commands shown below.
+  sed -i /ARPD/d Makefile
+  rm -fv man/man8/arpd.8
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -315,8 +318,6 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  sed -i /ARPD/d Makefile
-  rm -fv man/man8/arpd.8
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")
   config_time=$(($end_config_date - $start_config_date))

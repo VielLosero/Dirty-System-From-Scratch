@@ -93,6 +93,9 @@ file1_sum=5abc766497c5b1d6d99231f662e30c99402a90d03b06c67b62d6c1179dedd561
 file2_url=$file1_url
 file2=${name}-${ver}.sha256sum
 file2_sum=036f3ffc3db4dd37741313195867c69f77e6819a09e2c6aa595c2f2abfaec752
+file3_url=https://glfs-book.github.io/glfs/download/libxml2
+file3=${name}-${ver}-upstream_fix-1.patch
+file3_sum=26a5909984d9c013bc71e778af3886217cdec815ca8b11c8d1f6477d365a698b
 
 # Check for new releases.
 CHECK_RELEASE=${CHECK_RELEASE:-0}
@@ -139,6 +142,8 @@ cd $SOURCESDIR || exit 1
 [ -e $file1 ] && if echo "$file1_sum $file1" | $sum -c ; then ln -v $SOURCESDIR/$file1 $SOURCESPPDIR/ ; else $sum $file1 ; exit 1 ; fi
 [ ! -e $file2 ] && $GETFILE ${file2_url}/${file2}
 [ -e $file2 ] && if echo "$file2_sum $file2" | $sum -c ; then ln -v $SOURCESDIR/$file2 $SOURCESPPDIR/ ; else $sum $file2 ; exit 1 ; fi
+[ ! -e $file3 ] && $GETFILE ${file3_url}/${file3}
+[ -e $file3 ] && if echo "$file3_sum $file3" | $sum -c ; then ln -v $SOURCESDIR/$file3 $SOURCESPPDIR/ ; else $sum $file3 ; exit 1 ; fi
 
 # Check signaure if needed
 
@@ -302,6 +307,7 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
+  patch -Np1 -i $SOURCESDIR/libxml2-2.15.0-upstream_fix-1.patch
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -315,13 +321,14 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   echo "Configuring sources."
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
-            #--with-icu              \
   # --- LFS_CMD_CONFIG ---
   ./configure --prefix=/usr           \
             --sysconfdir=/etc       \
             --disable-static        \
             --with-history          \
             --with-icu              \
+            --with-http              \
+            PYTHON=/usr/bin/python3 \
             --docdir=/usr/share/doc/$name-$ver || exit 1
   # --- END_LFS_CMD_CONFIG ---
   end_config_date=$(date +"%s")

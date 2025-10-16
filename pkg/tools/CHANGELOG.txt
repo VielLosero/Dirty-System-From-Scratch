@@ -93,9 +93,87 @@ BUGS AKA:TODO
   need to see what *LFS do. BLFS ticket #22172 
 * Need to make a pkg with the tools in the repo like repo-status.sh
   and lists
+* Add || exit 1 to [ ! -e $file1 ] && $GETFILE ${file1_url}/${file1} 
+  [root@dirty v]# grep "\[ ! -e \$file1 ] && \$GETFILE \${file1_url}/\${file1}$" /pkg/repository/dirty-0.0/makers/*/*/* | wc -l
+  [root@dirty v]# grep "\[ ! -e \$file1 ] && \$GETFILE \${file1_url}/\${file1} ||" /pkg/repository/dirty-0.0/makers/*/*/*
 
 CHANGELOG
 ---------
+[2025-10-16]
+* Upgraded llvm-21.1.3-x86_64-1.1.1_GLFS_Dirty01_Viel
+  > libLLVM.so.20.1
+  lost needed_libs found.
+  [root@dirty v]# grep -rwn /pkg/installed/ -e libLLVM.so.20.1 | cut -d ':' -f1 | cut -d '/' -f4 | sort -u
+  mesa-25.2.3-x86_64-1_GLFS_GraphicsDrivers_i915
+  rustc-1.90.0-x86_64-1.1.1_GLFS_GraphicsDrivers
+  SPIRV-LLVM-Translator-20.1.1-x86_64-1_GLFS_GraphicsDrivers
+  SPIRV-LLVM-Translator-20.1.3-x86_64-1_GLFS_GraphicsDrivers
+  SPIRV-LLVM-Translator-20.1.5-x86_64-1_GLFS_GraphicsDrivers
+  need rebuild rustc, others mesa and SPIRV-LLVM are on the list to upgrade.
+* Rebuild rustc-1.90.0-x86_64-1.1.2_GLFS_GraphicsDrivers
+* Upgraded SPIRV-LLVM-Translator-21.1.1-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Upgraded libclc-21.1.3-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Upgraded pyyaml-6.0.3-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Upgraded mesa-25.2.4-x86_64-1.1.1_GLFS_GraphicsDrivers_i915
+* Upgraded xkeyboard-config-2.46-x86_64-1.1.1_GLFS_X11
+* Upgraded libgpg-error-1.56-x86_64-1.1.1_GLFS_Steam
+* Upgraded xkbcommon-1.12.0-x86_64-1.1.1_GLFS_Wine
+* Upgraded nasm-3.01-x86_64-1.1.1_GLFS_current_Viel
+* Upgraded gdk-pixbuf-2.44.3-x86_64-1.1.1_BLFS_12.3
+* Upgraded gtk-3.24.51-x86_64-1.1.1_BLFS_12.3
+* Upgraded mutt-2.2.15-x86_64-1.1.1_BLFS_current_Viel
+* Upgraded LuaJIT-871db2c84ecefd70a850e03a6c340214a81739f0-x86_64-1.1.1_BLFS_current_Viel
+[2025-10-14]
+* Upgraded iana-etc-20250929-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded ncurses-6.5.20251010-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded expat-2.7.3-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded openssl-3.6.0-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded openssh-10.2p1-x86_64-1.1.1_BLFS_sysV_r12.2
+* Upgraded meson-1.9.1-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded coreutils-9.8-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded iproute2-6.17.0-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded vim-9.1.1846-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded markupsafe-3.0.3-x86_64-1.1.1_MLFS_multilib
+* Upgraded util-linux-2.41.2-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded linux-headers-6.17.1-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded linux-6.17.1-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded p11-kit-0.25.10-x86_64-1.1.1_GLFS_Networking
+* Upgraded libunistring-1.4.1-x86_64-1.1.1_GLFS_Networking
+* Upgraded harfbuzz-12.1.0-x86_64-1.1.1_GLFS_BasicX11Software
+* Rebuild freetype-2.14.1-x86_64-1.1.3_GLFS_BasicX11Software
+* Upgraded cmake-4.1.2-x86_64-1.1.1_GLFS_BasicX11Software
+* Upgraded libdrm-2.4.126-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Upgraded SPIRV-Headers-vulkan-sdk-1.4.328.1-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Upgraded SPIRV-Tools-vulkan-sdk-1.4.328.1-x86_64-1.1.1_GLFS_GraphicsDrivers
+* Upgraded glslang-16.0.0-x86_64-1.1.1_GLFS_GraphicsDrivers
+  > libglslang-default-resource-limits.so.15
+  > libglslang.so.15
+  lost needed_libs found.
+* Rebuild libplacebo-7.351.0-x86_64-1.1.2_BLFS_current_Viel
+[2025-10-07]
+* Renamed sqlite-autoconf-3.50.4-x86_64-1_GLFS_Networking
+  to sqlite-autoconf-3.50.4-x86_64-1.1.1_MLFS_current_Viel
+  fixed dirty-0.0 list SQLite to sqlite-autoconf and moved.
+[2025-10-07]
+* Added docbook-xsl-1.79.2-x86_64-1.1.1_BLFS_current_Viel
+* Added docbook-xsl-nons-1.79.2-x86_64-1.1.1_BLFS_current_Viel
+  to render LFS XML books.
+[2025-10-06]
+* Added pcre2-10.46-x86_64-1.1.1_MLFS_current_Viel 
+  needed for libarchive
+* Added lzo-2.10-x86_64-1.1.1_BLFS_current_Viel
+  needed for libarchive
+* Added libarchive-3.8.1-x86_64-1.1.1_BLFS_current_Viel
+  for zip files docbook sources.
+* Added docbook-xml-4.5-x86_64-1.1.1_BLFS_current_Viel
+  with nextCatalog for docbook-xsl and docbook-xsl-nons
+[2025-10-05]
+* Added sgml-common-0.6.3-x86_64-1.1.1_BLFS_current_Viel
+[2025-09-27]
+* Upgraded linux-headers-6.16.9-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded linux-6.16.9-x86_64-1.1.1_MLFS_current_Viel
+* Temporary fix /pkg/tools/scripts/update.sh to match only new release numeration.
+    | grep "\-[0-9]\.[0-9]\.[0-9]_")
 [2025-09-25]
 *Rebuild all packages with new release numeration.
 * Rebuild dirty-repository-manager-0.0.1-all-1.1.1_DIRTY_current_Viel

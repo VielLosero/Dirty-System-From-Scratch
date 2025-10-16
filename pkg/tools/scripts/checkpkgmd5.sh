@@ -29,7 +29,7 @@
 usage(){
 echo "USAGE: checkpkgmd5.sh { pkg_name }"
 echo "              	    { name-ver-arch-rel }"
-echo "              	    { pkg-example-0.0.1-x86_64-1_extra_info }"
+echo "              	    { pkg-example-0.0.1-x86_64-1.1.1_extra_tags }"
 exit 1
 }
 
@@ -37,14 +37,14 @@ if [ $# -ne 1 ] ; then usage ; fi
 
 pkg=$1
 package_path=""
-if [[ "$(ls -1 /pkg/repository/dirty-0.1/packages/*/$pkg/* 2>/dev/null | wc -l)" -eq 1 ]] ; then 
-	package_path="$(ls -1 /pkg/repository/dirty-0.1/packages/*/$pkg/*)"
+if [[ "$(ls -1 /pkg/repository/dirty-0.0/packages/*/$pkg/* 2>/dev/null | wc -l)" -eq 1 ]] ; then 
+	package_path="$(ls -1 /pkg/repository/dirty-0.0/packages/*/$pkg/*)"
 else
-	if [[ "$(ls -1 /pkg/repository/dirty-0.1/packages/*/*/$pkg 2>/dev/null | wc -l)" -eq 1 ]] ; then 
-		package_path="$(ls -1 /pkg/repository/dirty-0.1/packages/*/*/$pkg)"
+	if [[ "$(ls -1 /pkg/repository/dirty-0.0/packages/*/*/$pkg 2>/dev/null | wc -l)" -eq 1 ]] ; then 
+		package_path="$(ls -1 /pkg/repository/dirty-0.0/packages/*/*/$pkg)"
 	else
 		echo "  Select one pkg as argument:"
-		ls -1 /pkg/repository/dirty-0.1/packages/*/*/*$pkg* | sed 's%.*/%%g' | sort -Vr
+		ls -1 /pkg/repository/dirty-0.0/packages/*/*/*$pkg* | sed 's%.*/%%g' | sort -Vr
 	fi
 fi
 

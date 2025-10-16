@@ -88,7 +88,7 @@ elif curl --help >/dev/null 2>&1 ; then GETVER="curl --connect-timeout 20 --sile
 else echo "Needed wget or curl to download files or check for new versions." && exit 1 ; fi
 
 # Package vars.
-version_url=https://www.cpan.org/src/README.html
+version_url=https://cpan.metacpan.org/src/README.html
 sum="md5sum"
 file1_url=https://www.cpan.org/src/5.0
 file1=$name-$ver.tar.xz
@@ -304,6 +304,9 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
+  # This version of Perl builds the Compress::Raw::Zlib and Compress::Raw::BZip2 modules. By default Perl will use an internal copy of the sources for the build. Issue the following command so that Perl will use the libraries installed on the system.
+  export BUILD_ZLIB=False
+  export BUILD_BZIP2=0
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -318,9 +321,6 @@ if [ $CONFIG -eq 1 ] ; then echo "Skipping CONFIG sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_CONFIG ---
-  # This version of Perl builds the Compress::Raw::Zlib and Compress::Raw::BZip2 modules. By default Perl will use an internal copy of the sources for the build. Issue the following command so that Perl will use the libraries installed on the system.
-  export BUILD_ZLIB=False
-  export BUILD_BZIP2=0
   sh Configure -des                                          \
                -D prefix=/usr                                \
                -D vendorprefix=/usr                          \

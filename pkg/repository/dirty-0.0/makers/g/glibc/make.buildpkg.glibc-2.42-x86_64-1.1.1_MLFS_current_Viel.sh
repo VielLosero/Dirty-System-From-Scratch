@@ -308,6 +308,13 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
   patch -Np1 -i $SOURCESDIR/glibc-$ver-fhs-1.patch || exit 1
+
+  # Now fix an issue which may break Valgrind in BLFS.
+  sed -e '/unistd.h/i #include <string.h>' \
+    -e '/libc_rwlock_init/c\
+  __libc_rwlock_define_initialized (, reset_lock);\
+  memcpy (&lock, &reset_lock, sizeof (lock));' \
+    -i stdlib/abort.c || exit 1
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))

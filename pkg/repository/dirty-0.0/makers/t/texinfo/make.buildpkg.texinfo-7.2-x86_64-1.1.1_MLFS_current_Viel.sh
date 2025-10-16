@@ -301,6 +301,8 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_PATCH ---
+  # Fix a code pattern that causes Perl-5.42 or later to display a warning
+  sed 's/! $output_file eq/$output_file ne/' -i tp/Texinfo/Convert/*.pm
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))

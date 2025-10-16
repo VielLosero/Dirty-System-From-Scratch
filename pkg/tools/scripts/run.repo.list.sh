@@ -81,14 +81,29 @@ package=${pkg_name}.sh
 name="${pkg_name%-*-*-*}" 
 pkg_ver="${pkg_name%-*-*}" ; ver="${pkg_ver/$name-/}"
 pkg_arch="${pkg_name%-*}" ; arch=${pkg_arch/$name-$ver-/}
-rel=${pkg_name/$name-$ver-$arch-/}
+rel_and_tag=${pkg_name/$name-$ver-$arch-/}
 first_pkg_char=$(printf %.1s ${name,})
-rel_build=${rel%%_*}
-rel_tag=${rel/${rel_build}_}
+rel=${rel_and_tag%%_*}
+tag=${rel_and_tag/${rel}_}
+rel_m=${rel%%.*}
+rel_p=${rel##*.}
+rel_b=${rel/${rel_m}.} ; rel_b=${rel_b/.${rel_p}}
+tag1=${tag/_*}
+tag2=${tag/${tag1}_} ; tag2=${tag2/_*}
+tag3=${tag/${tag1}_${tag2}_}
 maker_full_path="$REPODIR/makers/$first_pkg_char/$name/$maker"
 builder_full_path="$REPODIR/builders/$first_pkg_char/$name/$builder"
 package_full_path="$REPODIR/packages/$first_pkg_char/$name/$package"
 
+# if makers or builders not exist try to run the the closest with same rel tnumeration.
+if [ ! -e $maker_full_path ] ; then
+  maker_full_path="$(ls -1 ${maker_full_path/$rel/${rel_m}.*.*} 2>/dev/null )"
+fi
+  echo $maker_full_path
+if [ ! -e $builder_full_path ] ; then
+  builder_full_path="$(ls -1 ${builder_full_path/$rel/${rel_m}.${rel_b}.*} 2>/dev/null )"
+  echo $builder_full_path
+fi
 
 # Check correct vars for cut -c 21-.
 if [ -e "$maker_full_path" ] || [ -e "$builder_full_path" ] || [ -e "$package_full_path" ] ; then
@@ -101,6 +116,7 @@ else
   fi
 fi
 
+# This match the maker.builder too.
 if [ -h "$BLACKLIST/*$builder" ] ; then
   echo "Blacklisted: $BLACKLIST/*$builder"
   sed -i "${line_num}s/ C / s /" $RUN_REPO_LIST || exit 1
@@ -195,7 +211,8 @@ if [ $RUN_PACKAGE -eq 1 ] ; then
     echo "Found old versions installed!"
     ls -1d /pkg/installed/$name-[0-9]* | grep -v "$name-$ver"
     #for p in $(ls -1d /pkg/installed/$name-[0-9]*-$arch-${rel}* | grep -v "$name-$ver" ) ; do
-    for p in $(ls -1d /pkg/installed/$name-[0-9]* | grep -v "$name-$ver" ) ; do
+    #for p in $(ls -1d /pkg/installed/$name-[0-9]* | grep -v "$name-$ver" ) ; do
+    for p in $(ls -1d /pkg/installed/$name-[0-9]* | grep -v "$name-$ver-$arch-$rel" ) ; do
       remove_pkg=${p##*/}
       if ls -1 /pkg/blacklist/${remove_pkg}.sh 2>/dev/null; then
         echo " Skip remove blacklisted package $remove_pkg"

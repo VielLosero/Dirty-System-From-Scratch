@@ -92,7 +92,7 @@ file2_url=$version_url
 CHECK_RELEASE=${CHECK_RELEASE:-0}
 NEW=${NEW:-1}
 if [ $CHECK_RELEASE = 1 ] ; then 
-  last_version=$(echo "$($GETVER $version_url)" | sed 's/<Key>/\n/g' | cut -d"<" -f1 | sort -V | grep "${name}-[0-9].*[0-9].tar.*z$" | tail -1 | sed 's/.tar.*//' | cut -d'-' -f2 )
+  last_version=$(echo "$($GETVER $version_url)" | sed 's/<Key>/\n/g' | grep "href=\"http.*fdk-aac-[0-9].*[0-9].tar.*z" | sort -Vr | head -1 | cut -d'"' -f6 | sed 's,/download,,' | sed 's,.*/,,' | cut -d'-' -f3 | sed 's/.tar.*z//' )
   if [ -z "$last_version" ] ; then
     echo "Version check: Failed." ; exit 1
   else

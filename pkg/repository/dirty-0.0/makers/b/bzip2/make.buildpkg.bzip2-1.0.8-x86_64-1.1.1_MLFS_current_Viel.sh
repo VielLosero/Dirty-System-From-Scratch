@@ -313,9 +313,6 @@ if [ $PATCH -eq 1 ] ; then echo "Skipping PATCH sources." ; else
   sed -i 's@\(ln -s -f \)$(PREFIX)/bin/@\1@' Makefile
   # Ensure the man pages are installed into the correct location
   sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
-  # Prepare Bzip2 for compilation.
-  make -f Makefile-libbz2_so
-  make clean
   # --- END_LFS_CMD_PATCH ---
   end_patch_date=$(date +"%s")
   patch_time=$(($end_patch_date - $start_patch_date))
@@ -343,6 +340,9 @@ if [ $BUILD -eq 1 ] ; then echo "Skipping BUILD sources." ; else
   cd $BUILDDIR || exit 1
   cd $name-$ver || exit 1
   # --- LFS_CMD_BUILD ---
+  # Prepare Bzip2 for compilation.
+  make -f Makefile-libbz2_so
+  make clean
   NUMJOBS="-j $(nproc)"
   make $NUMJOBS || exit 1
   # --- END_LFS_CMD_BUILD ---

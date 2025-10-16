@@ -105,23 +105,20 @@ if [ -e $PKG_DB/$pkg_name ] ; then i=I ; fi
 if [ -e $BLACKLIST/make.buildpkg.$pkg_name* ] ; then s=s ; fi
 if [ -e $BLACKLIST/buildpkg.$pkg_name* ] ; then s=s ; fi
 if [ -e $BLACKLIST/$pkg_name* ] ; then s=S ; fi
-# check version from existent files.
-if [ "$m" == "M" ] ; then 
-	last_version="$(ls -1 $REPODIR/*/*/*/make.buildpkg.${name}-[0-9]*_${tag1}_*.sh | sort -Vr | head -1)"
-	last_version=${last_version##*/make.buildpkg.${name}-} 
-elif [ "$b" == "B" ] ; then 
-	last_version="$(ls -1 $REPODIR/*/*/*/buildpkg.${name}-[0-9]*_${tag1}_*.sh | sort -Vr | head -1)"
-	last_version=${last_version##*/buildpkg.${name}-} 
-elif [ "$p" == "P" ] ; then 
-	last_version="$(ls -1 $REPODIR/*/*/*/${name}-[0-9]*_${tag1}_*.sh | sort -Vr | head -1)"
-	last_version=${last_version##*/${name}-} 
-fi
+# get last version.
+#ls -1 $REPODIR/*/*/*/*${name}-[0-9]*-[0-9]*[0-9]_${tag1}_*.sh 2>/dev/null | sed 's,.*/,,' | sort -Vr -t- -k3 | head -1
+last_version="$(ls -1 $REPODIR/*/*/*/${name}-[0-9]*-[0-9]*[0-9]_${tag1}_*.sh \
+                ls -1 $REPODIR/*/*/*/*.${name}-[0-9]*-[0-9]*[0-9]_${tag1}_*.sh \
+                2>/dev/null | sed 's,.*/,,' | sort -Vr -t- -k2 | head -1)"
+#echo $last_version
+last_version=${last_version##*/} 
+last_version=${last_version/*${name}-} 
 # check if pkg_name are the last version.
 if [ "$ver-$arch-${rel_and_tag}.sh" == "$last_version" ] ; then v="V" ; fi
 # check if pkg_name is on logs.
 if [ -z "$(grep "Installed ${pkg_name}" $LOGFILE)" ] ; then l="-" ; else l=" " ; fi
 # check if package are the last installed in logs.
-if [ "Installed $pkg_name" == "$(grep "Installed ${name}-[0-9].*_${rel}_${tag1}_.*" $LOGFILE | tr -s ' ' | tail -1 | cut -d' ' -f7-8)" ] ; then l="L" ; fi
+if [ "Installed $pkg_name" == "$(grep "Installed ${name}-[0-9].*_${tag1}_.*" $LOGFILE | tr -s ' ' | tail -1 | cut -d' ' -f7-8)" ] ; then l="L" ; fi
 
 # From here start the update/upgrade/remove/skip conditions.
 # check if there is some package to upgrade. New or overwrited.

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# the dirty repository package manager. AKA: drpm
+#
+#
+
+# set list select list
+# search pkg
+# pkg info
+
+
+
+
+pkg=($(cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#" ))
+
+#echo ${pkg[@]}
+#echo ${#pkg[@]}
+
+if [ $# -eq 0 ] ; then
+for i in "${pkg[@]}"; do 
+  #echo "$i"
+  bash /pkg/tools/scripts/repo-status.sh "$i"
+done
+fi
+
+
+
+while [ ! -z "$1" ] ; do
+  pkg_req="$1" ; shift
+
+  array_index=
+
+for i in "${!pkg[@]}"; do if [[ "${pkg[$i]}" =~ ".${pkg_req}-[0-9]" ]]; then  echo "Found $pkg_req in "${pkg[$i]}" with index $i" ; array_index=$i ; fi; done
+
+if [ ! -z $array_index ] ; then
+  bash /pkg/tools/scripts/repo-status.sh "${pkg[$array_index]}"
+fi
+
+done
+
+#if [ "$1" == "stat" ] ; then
+#  bash /pkg/tools/scripts/repo-status.sh
+#fi
+
+

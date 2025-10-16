@@ -191,5 +191,22 @@ for i in $(grep lib32/libcrypto.so.3 /pkg/installed/*/needed-libs | grep "/bin/"
 
 
 
+# extract check CMD 
+sed -n '/  # --- LFS_CMD_CONFIG ---/,/  # --- END_LFS_CMD_CONFIG ---/p' /pkg/repository/dirty-0.0/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1.1.1_MLFS_current_Viel.sh
+
+
+# check make.buildpkg vs lfs books
+for pkg in man-pages iana-etc glibc zlib bzip2 xz lz4 zstd file readline pcre2 m4 bc flex tcl expect dejagnu pkgconf binutils gmp mpfr mpc isl attr acl libcap libxcrypt shadow gcc ncurses sed psmisc gettext bison grep bash libtool gdbm gperf expat inetutils less perl xml-parser intltool autoconf automake openssl libelf libffi sqlite Python flit-core packaging wheel setuptools ninja meson kmod coreutils diffutils gawk findutils groff grub gzip iproute2 kbd libpipeline make patch tar texinfo vim markupsafe jinja2 systemd dbus udev man-db procps util-linux e2fsprogs sysklogd sysvinit ; do echo "------------> $pkg " ; bash /home/data/scripts/bash/LFS/extract.from.books.sh mlfs $pkg patch ; echo ------------- ; sed -n '/  # --- LFS_CMD_PATCH ---/,/  # --- END_LFS_CMD_PATCH ---/p' $( ls -1 /pkg/repository/dirty-0.0/makers/*/$pkg/make.buildpkg.$pkg*) ; done
+#new for pkg in $(bash /home/data/scripts/bash/LFS/extract.list.packages.from.books.sh mlfs | tail -n +4 ); do echo "------------> $pkg " ; bash /home/data/scripts/bash/LFS/extract.from.books.sh mlfs $pkg patch ; echo ------------- ; sed -n '/  # --- LFS_CMD_PATCH ---/,/  # --- END_LFS_CMD_PATCH ---/p' $( ls -1 /pkg/repository/dirty-0.0/makers/*/$pkg/make.buildpkg.$pkg*) ; done
+
+
+
+# find packages with 0 
+find /pkg/installed/ -name index -exec wc -l {} \; | sort -nr
+
+# find repeated installed pkgs
+[root@dirty v]# for pkg in $(ls -d /pkg/repository/dirty-0.0/makers/*/* | sed 's,.*/,,') ; do echo $pkg ; find /pkg/installed/ -name "$pkg-[0-9]*"  ; done
+
+
 
 

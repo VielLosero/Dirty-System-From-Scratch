@@ -54,7 +54,8 @@ if [ $CREATE_CHECK_RELEASE_LIST -eq 1 ] ; then
   echo "################### CHECK_RELEASE_LIST" > $TMP_RUN_REPO_LIST
   cat $REPO_PKG_LIST | grep -v "^#"  | while read pkg ; do
     #
-    PKG=$(bash /pkg/tools/scripts/repo-status.sh ${pkg} | grep " V ") 
+    #PKG=$(bash /pkg/tools/scripts/repo-status.sh ${pkg} | grep " V " | grep "\-[0-9]\.[0-9]\.[0-9]_")
+    PKG=$(bash /pkg/tools/scripts/repo-status.sh ${pkg} | grep " V " )
     if [ -z "$PKG" ] ; then
       echo "[!] $pkg maker, builder, package not found."
     elif [ "$(echo $PKG | wc -l)" -gt 1 ] ; then
@@ -78,7 +79,7 @@ if [ $CREATE_NEW_MAKERS_LIST -eq 1 ] ; then
   echo "################### NEW_MAKERS_LIST" > $TMP_RUN_REPO_LIST
   cat $REPO_PKG_LIST | grep -v "^#"  | while read pkg ; do
     #
-    PKG=$(bash /pkg/tools/scripts/repo-status.sh ${pkg} | grep "# M       " | grep " V ")  
+    PKG=$(bash /pkg/tools/scripts/repo-status.sh ${pkg} | grep "# M       " | grep " V " | grep "\-[0-9]\.[0-9]\.[0-9]_") 
     if [ -z "$PKG" ] ; then
       echo "[-] $pkg maker, builder, package not found."
     elif [ "$(echo $PKG | wc -l)" -gt 1 ] ; then
@@ -101,7 +102,7 @@ if [ $CREATE_BUILD_INSTALL_LIST -eq 1 ] ; then
   echo "################### BUILD_INSTALL_LIST" > $TMP_RUN_REPO_LIST
   cat $REPO_PKG_LIST | grep -v "^#"  | while read pkg ; do
     #
-    PKG=$(bash /pkg/tools/scripts/repo-status.sh ${pkg} | grep "# M B     " | grep " V ") 
+    PKG=$(bash /pkg/tools/scripts/repo-status.sh ${pkg} | grep "# M B     " | grep " V " | grep "\-[0-9]\.[0-9]\.[0-9]_") 
     if [ -z "$PKG" ] ; then
       echo "[-] $pkg maker, builder, package not found."
     elif [ "$(echo $PKG | wc -l)" -gt 1 ] ; then
