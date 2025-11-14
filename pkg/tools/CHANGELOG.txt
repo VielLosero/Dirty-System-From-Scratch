@@ -91,14 +91,34 @@ BUGS AKA:TODO
 * Upgraded libxml2-2.15.0-x86_64-1_GLFS_Security
   added --with-python to build with python bindings
   need to see what *LFS do. BLFS ticket #22172 
-* Need to make a pkg with the tools in the repo like repo-status.sh
-  and lists
+* Need to make a pkg with my tools/scripts in the repo like repo-status.sh update.sh ...
 * Add || exit 1 to [ ! -e $file1 ] && $GETFILE ${file1_url}/${file1} 
   [root@dirty v]# grep "\[ ! -e \$file1 ] && \$GETFILE \${file1_url}/\${file1}$" /pkg/repository/dirty-0.0/makers/*/*/* | wc -l
   [root@dirty v]# grep "\[ ! -e \$file1 ] && \$GETFILE \${file1_url}/\${file1} ||" /pkg/repository/dirty-0.0/makers/*/*/*
+  WARNING: dont work need a check if not [.
 
 CHANGELOG
 ---------
+[2025-11-10]
+* Added libisofs-1.5.6-x86_64-BLFS_r12.4_228_1.1.1
+  needed for libisoburn
+  added on new repo BLFS need to change other packages
+  acording to the repo name.
+* Added libburn-1.5.6-x86_64-BLFS_r12.4_228_1.1.1
+  needed for libisoburn
+* Added libisoburn-1.5.6-x86_64-BLFS_r12.4_228_1.1.1 
+[2025-11-08]
+* Changed scripts release to the end of the tag. 
+* Rebuild gtk-3.24.51-x86_64-BLFS_12.3_1.2.1
+  needed gschemas.compiled to not fail when download files 
+  because of org.gtk.Settings.FileChooser.gschema.xml not found. 
+[2025-10-17]
+* Upgraded less-685-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded vim-9.1.1863-x86_64-1.1.1_MLFS_current_Viel
+* Upgraded git-manpages-2.51.1-x86_64-1.1.1_GLFS_Networking_Dirty01
+* Upgraded git-2.51.1-x86_64-1.1.1_GLFS_Networking_Dirty01
+* Upgraded libxml2-2.15.1-x86_64-1.1.1_GLFS_Security
+* Upgraded libdrm-2.4.127-x86_64-1.1.1_GLFS_GraphicsDrivers
 [2025-10-16]
 * Upgraded llvm-21.1.3-x86_64-1.1.1_GLFS_Dirty01_Viel
   > libLLVM.so.20.1

@@ -3,43 +3,176 @@
 # the dirty repository package manager. AKA: drpm
 #
 #
+#if [ $# -eq 0 ] ; then
+#  echo "USAGE: $0 [OPTION] [ARG] [FILE]"
+
+#fi
+
+# version
+VERSION=0.0.1
+
+CMD=""
+while [ -z "$CMD" ] ; do
+  case $1 in
+    list)
+      shift
+      case $1 in
+        search)
+          shift
+          CMD=search
+          ;;
+        *)
+          shift
+          CMD=list
+          ;;
+      esac
+      ;;
+    search)
+      shift
+      CMD=search
+      ;;
+    repo)
+      shift
+      case $1 in
+        s|status)
+          shift
+          CMD=repo_status
+          ;;
+        *)
+          #shift
+          CMD=repo
+          ;;
+      esac
+      ;;
+    update)
+      shift
+      CMD=update
+      case $1 in
+        makers)
+          shift
+          CMD=update_makers
+          ;;
+      esac
+      ;;
+    upgrade)
+      shift
+      case $1 in
+        packages)
+          shift
+          # update packages from wget rsync, not like upgrade a package.
+          CMD=upgrade_packages
+          ;;
+        *) echo "USAGE: upgrade {packages}"
+          ;;
+      esac
+      ;;
+    make) # make builder
+      ;;
+    remake) # remake builder
+      ;;
+    build) # build package
+      ;;
+    rebuild) # rebuild package
+      ;;
+    package)
+      shift
+      case $1 in
+        info)
+          shift
+          CMD=package_info
+          ;;
+        install)
+          shift
+          CMD=package_install
+          ;;
+        *) echo "USAGE: package {info,install}"
+          ;;
+      esac
+      ;;
+    *)
+      shift
+      CMD=usage
+      echo "  USAGE: $(basename $0) {list,repo,search,update,upgrade}"
+      echo "         $(basename $0) {make,build,package}"
+      echo "         $(basename $0) {remake,rebuild}"
+      ;;
+  esac
+done
 
 # set list select list
+# list status
 # search pkg
 # pkg info
+# repo status
+# repo pkg
+
+# make remake
+# build rebuild
+# install reinstall
+# 
+# update makers sources
+# upgrade package
 
 
 
 
-pkg=($(cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#" ))
+LIST_DIR=/pkg/tools/lists_of_packages
+LIST_FILE=dirty-0.0_current_list.txt
+
+pkg=($(cat ${LIST_DIR}/${LIST_FILE} | grep -v "^#" ))
+#pkg=($(cat /pkg/tools/lists_of_packages/dirty-0.0_current_list.txt | grep -v "^#" ))
 
 #echo ${pkg[@]}
 #echo ${#pkg[@]}
 
-if [ $# -eq 0 ] ; then
-for i in "${pkg[@]}"; do 
-  #echo "$i"
-  bash /pkg/tools/scripts/repo-status.sh "$i"
-done
+
+
+if [ "$CMD" == "search" ] ; then 
+  echo "The following packages match:"
+  while [ ! -z $1 ] ; do
+    for i in ${pkg[@]} ; do
+      if [[ "${i,,}" =~ "$1" ]]; then  
+        bash /pkg/tools/scripts/repo-status.sh "$i"
+        #i=${i/.}
+        #echo "  ${i%-\[0-9]*}"
+      fi
+    done
+    shift
+  done
 fi
 
 
 
-while [ ! -z "$1" ] ; do
-  pkg_req="$1" ; shift
 
-  array_index=
 
-for i in "${!pkg[@]}"; do if [[ "${pkg[$i]}" =~ ".${pkg_req}-[0-9]" ]]; then  echo "Found $pkg_req in "${pkg[$i]}" with index $i" ; array_index=$i ; fi; done
-
-if [ ! -z $array_index ] ; then
-  bash /pkg/tools/scripts/repo-status.sh "${pkg[$array_index]}"
+if [ "$CMD" == "repo_status" ] ; then
+  for i in "${pkg[@]}"; do 
+    #echo "$i"
+    bash /pkg/tools/scripts/repo-status.sh "$i"
+  done
 fi
 
-done
 
-#if [ "$1" == "stat" ] ; then
-#  bash /pkg/tools/scripts/repo-status.sh
-#fi
+if [ "$CMD" == "repo" ] ; then
+  while [ ! -z "$1" ] ; do
+    pkg_req="$1" ; shift
+    array_index=
+    for i in "${!pkg[@]}"; do 
+      if [[ "${pkg[$i]}" =~ ".${pkg_req}-[0-9]" ]]; then  
+        echo "Found $pkg_req in "${pkg[$i]}" with index $i" ; array_index=$i
+      fi
+    done
+    if [ ! -z $array_index ] ; then
+      bash /pkg/tools/scripts/repo-status.sh "${pkg[$array_index]}"
+    fi
+  done
+fi
+
+if [ "$CMD" == "update_makers" ] ; then
+  for i in "${pkg[@]}"; do 
+    bash /pkg/tools/scripts/repo-status.sh "$i" | grep " V "
+
+  done 
+fi
 
 

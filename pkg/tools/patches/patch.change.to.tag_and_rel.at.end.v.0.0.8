@@ -1,0 +1,62 @@
+--- /pkg/repository/dirty-0.0/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1.1.1_MLFS_current_Viel.sh	2025-10-12 05:22:55.960183520 +0200
++++ /pkg/repository/dirty-0.0/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-MLFS_current_Viel_1.1.1.sh.new	2025-10-22 11:31:50.882064827 +0200
+@@ -29,7 +29,7 @@
+ #:Maintainer: Viel Losero <viel.losero@gmail.com>
+ #:Contributor: -
+ 
+-#:Version:0.0.7
++#:Version:0.0.8
+ 
+ # Get Script init data from filename.
+ cd $(dirname $0) ; SWD=$(pwd) # script work directory
+@@ -38,18 +38,24 @@
+ pkg_name=${build_pkg_name/buildpkg./} ; name="${pkg_name%-*-*-*}" 
+ pkg_ver="${pkg_name%-*-*}" ; ver="${pkg_ver/$name-/}"
+ pkg_arch="${pkg_name%-*}" ; arch=${pkg_arch/$name-$ver-/}
+-rel_and_tag=${pkg_name/$name-$ver-$arch-/}
++tag_and_rel=${pkg_name/$name-$ver-$arch-/}
+ first_pkg_char=$(printf %.1s ${name,})
+-rel=${rel_and_tag%%_*}
+-tag=${rel_and_tag/${rel}_}
++rel=${tag_and_rel##*_}
++tag=${tag_and_rel/_${rel}}
+ rel_m=${rel%%.*}
+ rel_p=${rel##*.}
+ rel_b=${rel/${rel_m}.} ; rel_b=${rel_b/.${rel_p}}
+ echo "  Package name: $name"
+ echo "  Version: $ver"
+ echo "  Arch: $arch"
+-echo "  Release: ${rel_m}.${rel_b}.${rel_p}"
+ echo "  Tag: $tag"
++echo "  Release: ${rel_m}.${rel_b}.${rel_p}"
++# Sanity check.
++if [ "${arch}" == "x86_64" ] ; then true ; else exit 1 ; fi
++if [ "${0##*/}" == "make.buildpkg.${name}-${ver}-${arch}-${tag}_${rel_m}.${rel_b}.${rel_p}.sh" ] ; then true
++elif [ "${0##*/}" == "buildpkg.${name}-${ver}-${arch}-${tag}_${rel_m}.${rel_b}.${rel_p}.sh" ] ; then true
++elif [ "${0##*/}" == "${name}-${ver}-${arch}-${tag}_${rel_m}.${rel_b}.${rel_p}.sh" ] ; then true
++else exit 1 ; fi
+ # Additional info.
+ short_desc="Commands for Manipulating POSIX Access Control Lists"
+ url="https://savannah.nongnu.org/projects/acl"
+@@ -152,8 +158,8 @@
+ last_outbuild_no_path=${last_outbuild##*/} 
+ last_outbuild_pkg_name="${last_outbuild_no_path%.*}"
+ last_pkg_name="${last_outbuild_pkg_name/buildpkg./}" 
+-last_rel_and_tag=${last_pkg_name/$name-$ver-$arch-/}
+-last_rel=${last_rel_and_tag%%_*}
++last_tag_and_rel=${last_outbuild_pkg_name/$name-$ver-$arch-/}
++last_rel=${last_tag_and_rel##*_}
+ last_rel_m=${last_rel%%.*}
+ last_rel_p=${last_rel##*.}
+ last_rel_b=${last_rel/${last_rel_m}.} ; last_rel_b=${last_rel_b/.${last_rel_p}}
+@@ -507,8 +513,8 @@
+ last_outpkg=$( ls -1 $REPODIR/packages/$first_pkg_char/${name}/${name}-${ver}-${arch}-${rel_m}.${rel_b}.*_${tag}.sh 2>/dev/null | sort -Vr | head -1)
+ last_outpkg_no_path=${last_outpkg##*/} 
+ last_outpkg_pkg_name="${last_outpkg_no_path%.*}"
+-last_rel_and_tag=${last_outpkg_pkg_name/$name-$ver-$arch-/}
+-last_rel=${last_rel_and_tag%%_*}
++last_tag_and_rel=${last_outpkg_pkg_name/$name-$ver-$arch-/}
++last_rel=${last_tag_and_rel##*_}
+ last_rel_m=${last_rel%%.*}
+ last_rel_p=${last_rel##*.}
+ last_rel_b=${last_rel/${last_rel_m}.} ; last_rel_b=${last_rel_b/.${last_rel_p}}

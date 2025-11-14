@@ -84,10 +84,10 @@ pkg_name="$pkg_name"
 name="${pkg_name%-*-*-*}" 
 pkg_ver="${pkg_name%-*-*}" ; ver="${pkg_ver/$name-/}"
 pkg_arch="${pkg_name%-*}" ; arch=${pkg_arch/$name-$ver-/}
-rel_and_tag=${pkg_name/$name-$ver-$arch-/}
+tag_and_rel=${pkg_name/$name-$ver-$arch-/}
 first_pkg_char=$(printf %.1s ${name,})
-rel=${rel_and_tag%%_*}
-tag=${rel_and_tag/${rel}_}
+rel=${tag_and_rel##*_}
+tag=${tag_and_rel/_${rel}}
 rel_m=${rel%%.*}
 rel_p=${rel##*.}
 rel_b=${rel/${rel_m}.} ; rel_b=${rel_b/.${rel_p}}
@@ -102,23 +102,23 @@ if [ -e $REPODIR/*/*/*/$pkg_name.sh ] ; then p=P ; fi
 # check if pkg_name are installed.
 if [ -e $PKG_DB/$pkg_name ] ; then i=I ; fi
 # check if pkg_name are blacklisted.
-if [ -e $BLACKLIST/make.buildpkg.$pkg_name* ] ; then s=s ; fi
-if [ -e $BLACKLIST/buildpkg.$pkg_name* ] ; then s=s ; fi
-if [ -e $BLACKLIST/$pkg_name* ] ; then s=S ; fi
+if [ -h $BLACKLIST/make.buildpkg.$pkg_name* ] ; then s=s ; fi
+if [ -h $BLACKLIST/buildpkg.$pkg_name* ] ; then s=s ; fi
+if [ -h $BLACKLIST/$pkg_name* ] ; then s=S ; fi
 # get last version.
 #ls -1 $REPODIR/*/*/*/*${name}-[0-9]*-[0-9]*[0-9]_${tag1}_*.sh 2>/dev/null | sed 's,.*/,,' | sort -Vr -t- -k3 | head -1
-last_version="$(ls -1 $REPODIR/*/*/*/${name}-[0-9]*-[0-9]*[0-9]_${tag1}_*.sh \
-                ls -1 $REPODIR/*/*/*/*.${name}-[0-9]*-[0-9]*[0-9]_${tag1}_*.sh \
+last_version="$(ls -1 $REPODIR/*/*/*/${name}-[0-9]*-${tag}_[0-9]*[0-9].sh \
+                ls -1 $REPODIR/*/*/*/*.${name}-[0-9]*-${tag}_[0-9]*[0-9].sh \
                 2>/dev/null | sed 's,.*/,,' | sort -Vr -t- -k2 | head -1)"
 #echo $last_version
 last_version=${last_version##*/} 
 last_version=${last_version/*${name}-} 
 # check if pkg_name are the last version.
-if [ "$ver-$arch-${rel_and_tag}.sh" == "$last_version" ] ; then v="V" ; fi
+if [ "$ver-$arch-${tag_and_rel}.sh" == "$last_version" ] ; then v="V" ; fi
 # check if pkg_name is on logs.
 if [ -z "$(grep "Installed ${pkg_name}" $LOGFILE)" ] ; then l="-" ; else l=" " ; fi
 # check if package are the last installed in logs.
-if [ "Installed $pkg_name" == "$(grep "Installed ${name}-[0-9].*_${tag1}_.*" $LOGFILE | tr -s ' ' | tail -1 | cut -d' ' -f7-8)" ] ; then l="L" ; fi
+if [ "Installed $pkg_name" == "$(grep "Installed ${name}-[0-9].*-${tag}_.*" $LOGFILE | tr -s ' ' | tail -1 | cut -d' ' -f7-8)" ] ; then l="L" ; fi
 
 # From here start the update/upgrade/remove/skip conditions.
 # check if there is some package to upgrade. New or overwrited.

@@ -1,0 +1,11 @@
+--- /pkg/repository/dirty-0.0/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1.1.1_MLFS_current_Viel.sh	2025-10-22 11:33:48.825757646 +0200
++++ /pkg/repository/dirty-0.0/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-MLFS_current_Viel_1.1.1.sh.new	2025-10-22 11:38:02.375032087 +0200
+@@ -109,7 +109,7 @@
+       echo "Version check: No new versions found." ; exit 0
+     else
+       if [ $NEW = 0 ] ; then
+-        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-1.1.1_${tag}.sh}
++        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${tag}_1.1.1.sh}
+         if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+           if [ -e "$NEWMAKE" ] ; then
+             echo "Exist: $NEWMAKE" ; exit 4

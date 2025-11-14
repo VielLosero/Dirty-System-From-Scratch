@@ -63,12 +63,17 @@ m=" " ; b=" " ; p=" " ; i=" " ; s=" " ; u=" " ; v=" " ; l="-"
 name="${pkg_name%-*-*-*}" 
 pkg_ver="${pkg_name%-*-*}" ; ver="${pkg_ver/$name-/}"
 pkg_arch="${pkg_name%-*}" ; arch=${pkg_arch/$name-$ver-/}
-rel=${pkg_name/$name-$ver-$arch-/}
+rel_and_tag=${pkg_name/$name-$ver-$arch-/}
 first_pkg_char=$(printf %.1s ${name,})
-rel_build=${rel%%_*} ; rel_helper1=${rel/${rel_build}_}
-rel_tag1=${rel_helper1/_*} ; rel_helper2=${rel/${rel_build}_${rel_tag1}_}
-rel_tag2=${rel_helper2/_*} ; rel_helper3=${rel/${rel_build}_${rel_tag1}_${rel_tag2}_}
-rel_tag3=${rel_helper3/_*}
+rel=${rel_and_tag%%_*}
+tag=${rel_and_tag/${rel}_}
+rel_m=${rel%%.*}
+rel_p=${rel##*.}
+rel_b=${rel/${rel_m}.} ; rel_b=${rel_b/.${rel_p}}
+tag1=${tag/_*}
+tag2=${tag/${tag1}_} ; tag2=${tag2/_*}
+tag3=${tag/${tag1}_${tag2}_}
+
 # check if makers,builders and packages files exist for the pkg_name.
 if [ -e $REPODIR/*/*/*/make.buildpkg.$pkg_name.sh ] ; then m=M ; fi
 if [ -e $REPODIR/*/*/*/buildpkg.$pkg_name.sh ] ; then b=B ; fi
@@ -81,13 +86,13 @@ if [ -e /pkg/blacklist/buildpkg.$pkg_name* ] ; then s=s ; fi
 if [ -e /pkg/blacklist/$pkg_name* ] ; then s=S ; fi
 # check version from existent files.
 if [ "$m" == "M" ] ; then 
-	last_version="$(ls -1 $REPODIR/*/*/*/make.buildpkg.${name}-[0-9]*_${rel_tag1}_*.sh | sort -Vr | head -1)"
+	last_version="$(ls -1 $REPODIR/*/*/*/make.buildpkg.${name}-[0-9]*_${tag1}_*.sh | sort -Vr | head -1)"
 	last_version=${last_version##*/make.buildpkg.${name}-} 
 elif [ "$b" == "B" ] ; then 
-	last_version="$(ls -1 $REPODIR/*/*/*/buildpkg.${name}-[0-9]*_${rel_tag1}_*.sh | sort -Vr | head -1)"
+	last_version="$(ls -1 $REPODIR/*/*/*/buildpkg.${name}-[0-9]*_${tag1}_*.sh | sort -Vr | head -1)"
 	last_version=${last_version##*/buildpkg.${name}-} 
 elif [ "$p" == "P" ] ; then 
-	last_version="$(ls -1 $REPODIR/*/*/*/${name}-[0-9]*_${rel_tag1}_*.sh | sort -Vr | head -1)"
+	last_version="$(ls -1 $REPODIR/*/*/*/${name}-[0-9]*_${tag1}_*.sh | sort -Vr | head -1)"
 	last_version=${last_version##*/${name}-} 
 fi
 # check if pkg_name are the last version.
@@ -95,7 +100,7 @@ if [ "$ver-$arch-${rel}.sh" == "$last_version" ] ; then v="V" ; fi
 # check if pkg_name is on logs.
 if [ -z "$(grep "Installed ${pkg_name}" $LOGFILE)" ] ; then l="-" ; else l=" " ; fi
 # check if package are the last installed in logs.
-if [[ "Installed $pkg_name" == "$(grep "Installed ${name}-[0-9].*_${rel_tag1}_.*" $LOGFILE | tr -s ' ' | tail -1 | cut -d' ' -f7-8)" ]] ; then l="L" ; fi
+if [[ "Installed $pkg_name" == "$(grep "Installed ${name}-[0-9].*_${tag1}_.*" $LOGFILE | tr -s ' ' | tail -1 | cut -d' ' -f7-8)" ]] ; then l="L" ; fi
 
 # From here start the update/upgrade/remove/skip conditions.
 # check if there is some package to upgrade. New or overwrited.
@@ -114,25 +119,25 @@ if [ "$s" != " " ] ; then u=" " ; fi
 
 # check if pkg_name are on the last 2 pkg (last_version and backup) if not mark for DELETE.
 if [ "$m" == "M" ] ; then 
-  if ls -1 $REPODIR/*/*/*/make.buildpkg.${name}-[0-9]*_${rel_tag1}_*.sh | sort -Vr | tail -n +3 | grep "$ver-$arch-${rel}.sh" >/dev/null ; then u=D ; fi
+  if ls -1 $REPODIR/*/*/*/make.buildpkg.${name}-[0-9]*_${tag1}_*.sh | sort -Vr | tail -n +3 | grep "$ver-$arch-${rel_and_tag}.sh" >/dev/null ; then u=D ; fi
 elif [ "$b" == "B" ] ; then 
-  if ls -1 $REPODIR/*/*/*/buildpkg.${name}-[0-9]*_${rel_tag1}_*.sh | sort -Vr | tail -n +3 | grep "$ver-$arch-${rel}.sh" >/dev/null ; then u=D ; fi
+  if ls -1 $REPODIR/*/*/*/buildpkg.${name}-[0-9]*_${tag1}_*.sh | sort -Vr | tail -n +3 | grep "$ver-$arch-${rel_and_tag}.sh" >/dev/null ; then u=D ; fi
 elif [ "$p" == "P" ] ; then 
-  if ls -1 $REPODIR/*/*/*/${name}-[0-9]*_${rel_tag1}_*.sh | sort -Vr | tail -n +3 | grep "$ver-$arch-${rel}.sh" >/dev/null ; then u=D ; fi
+  if ls -1 $REPODIR/*/*/*/${name}-[0-9]*_${tag1}_*.sh | sort -Vr | tail -n +3 | grep "$ver-$arch-${rel_and_tag}.sh" >/dev/null ; then u=D ; fi
 fi
 
 #remove now
 if [ "$m" == "M" -a "$u" == "D" ] ; then
-  #echo "rm $REPODIR/*/*/*/make.buildpkg.${name}-$ver-$arch-${rel}.sh"
-  rm $REPODIR/*/*/*/make.buildpkg.${name}-$ver-$arch-${rel}.sh
+  echo "rm $REPODIR/*/*/*/make.buildpkg.${name}-$ver-$arch-${rel_and_tag}.sh"
+  #rm $REPODIR/*/*/*/make.buildpkg.${name}-$ver-$arch-${rel_and_tag}.sh
 fi
 if [ "$b" == "B" -a "$u" == "D" ] ; then
-  #echo "rm $REPODIR/*/*/*/buildpkg.${name}-$ver-$arch-${rel}.sh"
-  rm $REPODIR/*/*/*/buildpkg.${name}-$ver-$arch-${rel}.sh
+  echo "rm $REPODIR/*/*/*/buildpkg.${name}-$ver-$arch-${rel_and_tag}.sh"
+  #rm $REPODIR/*/*/*/buildpkg.${name}-$ver-$arch-${rel_and_tag}.sh
 fi
 if [ "$p" == "P" -a "$u" == "D" ] ; then
-  #echo "rm $REPODIR/*/*/*/${name}-$ver-$arch-${rel}.sh"
-  rm $REPODIR/*/*/*/${name}-$ver-$arch-${rel}.sh
+  echo "rm $REPODIR/*/*/*/${name}-$ver-$arch-${rel_and_tag}.sh"
+  #rm $REPODIR/*/*/*/${name}-$ver-$arch-${rel_and_tag}.sh
 fi
 
 # Show status.

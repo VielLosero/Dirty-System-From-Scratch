@@ -1,0 +1,47 @@
+--- /pkg/repository/dirty-0.0/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-1.1.1_MLFS_current_Viel.sh	2025-10-22 11:33:48.825757646 +0200
++++ /pkg/repository/dirty-0.0/makers/a/acl/make.buildpkg.acl-2.3.2-x86_64-MLFS_current_Viel_1.1.1.sh.new	2025-10-22 11:45:25.135041991 +0200
+@@ -109,7 +109,7 @@
+       echo "Version check: No new versions found." ; exit 0
+     else
+       if [ $NEW = 0 ] ; then
+-        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-1.1.1_${tag}.sh}
++        NEWMAKE=${NEWMAKE:-$REPODIR/makers/$first_pkg_char/${name}/make.buildpkg.${name}-${last_version}-${arch}-${tag}_1.1.1.sh}
+         if $SPIDER ${file1_url}/${file1/$ver/$last_version} >/dev/null 2>&1 ; then 
+           if [ -e "$NEWMAKE" ] ; then
+             echo "Exist: $NEWMAKE" ; exit 4
+@@ -154,7 +154,7 @@
+ # Making Buildpkg.sh $OUTBUILD (The builder)
+ echo "Making buildpkg."
+ # Get last OUTBUILD to increase release +1
+-last_outbuild=$( ls -1 $REPODIR/builders/$first_pkg_char/${name}/buildpkg.${name}-${ver}-${arch}-${rel_m}.*_${tag}.sh 2>/dev/null | sort -Vr | head -1)
++last_outbuild=$( ls -1 $REPODIR/builders/$first_pkg_char/${name}/buildpkg.${name}-${ver}-${arch}-${tag}_${rel_m}.*.sh 2>/dev/null | sort -Vr | head -1)
+ last_outbuild_no_path=${last_outbuild##*/} 
+ last_outbuild_pkg_name="${last_outbuild_no_path%.*}"
+ last_pkg_name="${last_outbuild_pkg_name/buildpkg./}" 
+@@ -170,7 +170,7 @@
+   last_rel_b=$(( $last_rel_b +1 ))
+ fi
+ # OUTBUILD file.
+-OUTBUILD=${OUTBUILD:-$REPODIR/builders/$first_pkg_char/${name}/buildpkg.${name}-${ver}-${arch}-${rel_m}.${last_rel_b}.1_${tag}.sh}
++OUTBUILD=${OUTBUILD:-$REPODIR/builders/$first_pkg_char/${name}/buildpkg.${name}-${ver}-${arch}-${tag}_${rel_m}.${last_rel_b}.1.sh}
+ # make needed dir if not exist.
+ [ -d ${OUTBUILD%/*} ] || mkdir -p ${OUTBUILD%/*}
+ # sanity check
+@@ -510,7 +510,7 @@
+   start_package_date=$(date +"%s")
+   echo "Packaging"
+ # Get last OUTPKG to increase release +1
+-last_outpkg=$( ls -1 $REPODIR/packages/$first_pkg_char/${name}/${name}-${ver}-${arch}-${rel_m}.${rel_b}.*_${tag}.sh 2>/dev/null | sort -Vr | head -1)
++last_outpkg=$( ls -1 $REPODIR/packages/$first_pkg_char/${name}/${name}-${ver}-${arch}-${tag}_${rel_m}.${rel_b}.*.sh 2>/dev/null | sort -Vr | head -1)
+ last_outpkg_no_path=${last_outpkg##*/} 
+ last_outpkg_pkg_name="${last_outpkg_no_path%.*}"
+ last_tag_and_rel=${last_outpkg_pkg_name/$name-$ver-$arch-/}
+@@ -525,7 +525,7 @@
+   last_rel_p=$(( $last_rel_p +1 ))
+ fi
+ # OUTPKG file.
+-OUTPKG=${OUTPKG:-$REPODIR/packages/$first_pkg_char/${name}/${name}-${ver}-${arch}-${rel_m}.${rel_b}.${last_rel_p}_${tag}.sh}
++OUTPKG=${OUTPKG:-$REPODIR/packages/$first_pkg_char/${name}/${name}-${ver}-${arch}-${tag}_${rel_m}.${rel_b}.${last_rel_p}.sh}
+ # make needed dir if not exist.
+ [ -d ${OUTPKG%/*} ] || mkdir -p ${OUTPKG%/*}
+ # sanity check

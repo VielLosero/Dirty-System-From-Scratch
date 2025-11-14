@@ -208,5 +208,12 @@ find /pkg/installed/ -name index -exec wc -l {} \; | sort -nr
 [root@dirty v]# for pkg in $(ls -d /pkg/repository/dirty-0.0/makers/*/* | sed 's,.*/,,') ; do echo $pkg ; find /pkg/installed/ -name "$pkg-[0-9]*"  ; done
 
 
+# mv rel to the end 
+[root@dirty sort.test]# find /pkg/repository/dirty-0.0/makers/ -type f -name "*-1.1.1_*" -exec sh -c 'file=$(ls {}) ; file_pre=${file%-*} ; file_suf=${file##*-}; f1=$(echo ${file_suf/.sh} | cut -d"_" -f1) ; f2=$(echo ${file_suf/.sh} | cut -d"_" -f2-) ; echo "mv {} ${file_pre}-${f2}_${f1}.sh" ' \;
+
+
+#
+time for i in $(ls -1d /pkg/repository/dirty-0.0/*/*/*/* | sed 's%.*/%%g' | sed 's/^make\.buildpkg\.//g' | sed 's/^buildpkg\.//g' | sed 's/\.sh$//g' | sed 's/-[0-9].*-x86_64/-[0-9]*-x86_64/' | sort -u) ; do  ls /pkg/repository/dirty-0.0/*/*/*/$i.sh 2>/dev/null || ls /pkg/repository/dirty-0.0/*/*/*/*.$i.sh 2>/dev/null ; done
+
 
 
